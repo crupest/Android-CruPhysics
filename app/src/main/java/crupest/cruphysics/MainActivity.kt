@@ -1,0 +1,89 @@
+package crupest.cruphysics
+
+import android.content.Intent
+import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
+import android.support.v7.app.AppCompatActivity
+import android.view.Menu
+import android.view.MenuItem
+import crupest.cruphysics.component.WorldCanvas
+import org.dyn4j.dynamics.Step
+import org.dyn4j.dynamics.StepAdapter
+import org.dyn4j.dynamics.World
+
+
+class MainActivity : AppCompatActivity() {
+
+    private var worldCanvas: WorldCanvas? = null
+
+    private var optionMenu: Int = R.menu.main_menu_pause
+        set(value) {
+            field = value
+            invalidateOptionsMenu()
+        }
+
+    private val worldStateChangeEventListener: (WorldStateChangeEventArgs) -> Unit = {
+        optionMenu = if (it.newState) R.menu.main_menu_play else R.menu.main_menu_pause
+    }
+
+    private val worldStepEventListener = object : StepAdapter() {
+        override fun end(step: Step?, world: World?) {
+            worldCanvas?.postInvalidate()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+
+        val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
+        floatingButton.setOnClickListener {
+            val intent = Intent(this, AddObjectActivity::class.java)
+            startActivity(intent)
+        }
+        worldCanvas = findViewById(R.id.world_canvas)
+
+        WorldManager.worldStateChangeEvent.addListener(worldStateChangeEventListener)
+        WorldManager.world.addListener(worldStepEventListener)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        worldCanvas!!.myMatrix.set(WorldManager.viewMatrix)
+        worldCanvas!!.invalidate()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        WorldManager.pauseWorld()
+        WorldManager.viewMatrix.set(worldCanvas!!.myMatrix)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        WorldManager.worldStateChangeEvent.removeListener(worldStateChangeEventListener)
+        WorldManager.world.removeListener(worldStepEventListener)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(optionMenu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.play -> {
+                WorldManager.runWorld()
+                return true
+            }
+            R.id.pause -> {
+                WorldManager.pauseWorld()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+}

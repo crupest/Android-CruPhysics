@@ -1,0 +1,40 @@
+package crupest.cruphysics.physics
+
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import crupest.cruphysics.toMatrix
+import org.dyn4j.dynamics.Body
+import org.dyn4j.geometry.Circle
+
+/**
+ * Created by crupest on 2017/11/24.
+ * Class CircleBodyUserData.
+ */
+
+class CircleBodyUserData(override val body: Body) : BodyUserData {
+
+    private val paint = Paint()
+
+    init {
+        paint.color = Color.BLUE
+    }
+
+
+    override fun draw(canvas: Canvas) {
+        val shape = body.fixtures[0].shape
+        if (shape is Circle) {
+            canvas.save()
+            canvas.concat(body.transform.toMatrix())
+            canvas.drawCircle(
+                    shape.center.x.toFloat(),
+                    shape.center.y.toFloat(),
+                    shape.radius.toFloat(),
+                    paint
+            )
+            canvas.restore()
+        } else {
+            throw UnsupportedOperationException("CircleBodyUserData's related body is a circle.")
+        }
+    }
+}
