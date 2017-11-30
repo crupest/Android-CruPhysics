@@ -103,10 +103,9 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
                         true
                 )
 
-                popupWindow.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(
-                        context,
-                        android.R.color.darker_gray
-                )))
+                popupWindow.setBackgroundDrawable(ColorDrawable(
+                        ContextCompat.getColor(context, R.color.menu_background)
+                ))
 
                 list.setOnItemClickListener { _, _, position, _ ->
                     when (position) {
