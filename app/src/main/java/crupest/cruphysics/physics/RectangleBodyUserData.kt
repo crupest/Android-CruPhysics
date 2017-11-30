@@ -3,7 +3,6 @@ package crupest.cruphysics.physics
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import crupest.cruphysics.toMatrix
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Rectangle
 

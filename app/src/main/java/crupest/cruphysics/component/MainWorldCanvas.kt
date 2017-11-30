@@ -16,7 +16,7 @@ import android.widget.PopupWindow
 import crupest.cruphysics.R
 import crupest.cruphysics.WorldManager
 import crupest.cruphysics.hitTestSquare
-import crupest.cruphysics.toVec2
+import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setTimeout
 

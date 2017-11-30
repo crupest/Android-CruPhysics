@@ -10,6 +10,7 @@ import crupest.cruphysics.*
 import crupest.cruphysics.component.AddCircleObjectWorldCanvas
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.CircleBodyUserData
+import crupest.cruphysics.physics.toVec2
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.geometry.Circle
