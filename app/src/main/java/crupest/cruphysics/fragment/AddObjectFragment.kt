@@ -1,8 +1,11 @@
 package crupest.cruphysics.fragment
 
+import android.content.Context
 import android.support.v4.app.Fragment
 import android.view.View
 import crupest.cruphysics.FixturePropertyData
+import crupest.cruphysics.IOptionMenuActivity
+import crupest.cruphysics.OptionMenuItemSelectedEventArgs
 import crupest.cruphysics.R
 import crupest.cruphysics.component.ObjectPropertyView
 
@@ -11,14 +14,11 @@ import crupest.cruphysics.component.ObjectPropertyView
  * Class AddObjectFragment.
  */
 abstract class AddObjectFragment : Fragment() {
-    interface EventListener {
-        fun onAddObjectFragmentDetach()
-    }
 
-    abstract fun onOk()
+    protected abstract fun onOk()
     protected abstract val rootView: View?
 
-    protected fun extractFixtureProperty() : FixturePropertyData {
+    protected fun extractFixtureProperty(): FixturePropertyData {
         val data = FixturePropertyData()
 
         try {
@@ -49,5 +49,31 @@ abstract class AddObjectFragment : Fragment() {
             throw FixturePropertyExtractException("restitution")
 
         return data
+    }
+
+
+    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Unit = {
+        if (it.menuItem.itemId == R.id.ok) {
+            onOk()
+        }
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+        if (context is IOptionMenuActivity) {
+            context.optionMenu = R.menu.add_object_menu
+            context.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+
+        val activity = context
+        if (activity is IOptionMenuActivity) {
+            activity.optionMenu = 0
+            activity.optionMenuItemSelectedEvent.removeListener(onOptionMenuItemSelectedEventListener)
+        }
     }
 }

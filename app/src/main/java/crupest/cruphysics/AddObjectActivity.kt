@@ -1,6 +1,5 @@
 package crupest.cruphysics
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -9,15 +8,17 @@ import crupest.cruphysics.fragment.*
 
 class AddObjectActivity : AppCompatActivity(),
         AddObjectListFragment.EventListener,
-        AddObjectFragment.EventListener {
+        IOptionMenuActivity {
 
     private var addObjectFragment: AddObjectFragment? = null
 
-    private var optionMenu: Int = 0
+    override var optionMenu: Int = 0
         set(value) {
             field = value
             invalidateOptionsMenu()
         }
+
+    override val optionMenuItemSelectedEvent: Event<OptionMenuItemSelectedEventArgs> = Event()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +33,6 @@ class AddObjectActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    @SuppressLint("CommitTransaction")
     override fun onAddObjectListItemSelected(position: Int) {
         when (position) {
             0 -> {
@@ -52,7 +52,6 @@ class AddObjectActivity : AppCompatActivity(),
                 addObjectFragment = fragment
             }
         }
-        optionMenu = R.menu.add_object_menu
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -62,19 +61,12 @@ class AddObjectActivity : AppCompatActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.itemId == R.id.ok) {
-            addObjectFragment!!.onOk()
-            return true
-        }
-        return false
+        optionMenuItemSelectedEvent.raise(OptionMenuItemSelectedEventArgs(item!!))
+        return true
     }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
-    }
-
-    override fun onAddObjectFragmentDetach() {
-        optionMenu = 0
     }
 }

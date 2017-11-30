@@ -18,7 +18,7 @@ class AddObjectListFragment : Fragment() {
         fun onAddObjectListItemSelected(position: Int)
     }
 
-    var listener: EventListener? = null
+    private var listener: EventListener? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

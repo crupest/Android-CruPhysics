@@ -89,13 +89,4 @@ class AddRectangleObjectFragment : AddObjectFragment() {
 
         WorldManager.viewMatrix.set(worldCanvas!!.myMatrix)
     }
-
-    override fun onDetach() {
-        super.onDetach()
-
-        val activity = context
-        if (activity is AddObjectFragment.EventListener) {
-            activity.onAddObjectFragmentDetach()
-        }
-    }
 }
