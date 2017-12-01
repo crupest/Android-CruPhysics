@@ -27,7 +27,7 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
     }
 
     override fun onOk() {
-
+        //TODO!!!
     }
 
     companion object {

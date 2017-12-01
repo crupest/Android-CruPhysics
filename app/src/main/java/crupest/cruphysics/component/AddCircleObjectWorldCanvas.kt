@@ -17,8 +17,6 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     private val objectPaint = Paint()
     private val objectBorderPaint = Paint()
 
-    private var init = false
-
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 radiusController.position.set(
@@ -39,7 +37,6 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         get() = controllers[1]
 
     init {
-
         objectPaint.color = Color.BLUE
         objectBorderPaint.style = Paint.Style.STROKE
         objectBorderPaint.color = Color.BLACK
@@ -70,7 +67,7 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         drawControllers(canvas)
     }
 
-    private fun reset() {
+    override fun reset() {
         val centerX = width.toFloat() / 2.0f
         val centerY = height.toFloat() / 2.0f
 
@@ -78,15 +75,6 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         radiusController.position.set(centerX + 300.0f, centerY)
 
         onControllerMove()
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-
-        if (!init) {
-            reset()
-            init = true
-        }
     }
 
     val worldCenter: PointF

@@ -32,6 +32,7 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
     }
 
     protected abstract val controllers: Array<Controller>
+    private var init = false
 
     private val controllerPaint = Paint()
     private val controllerBorderPaint = Paint()
@@ -87,5 +88,16 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    protected abstract fun reset()
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        if (!init) {
+            reset()
+            init = true
+        }
     }
 }

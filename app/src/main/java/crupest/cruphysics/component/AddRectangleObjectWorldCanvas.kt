@@ -17,7 +17,6 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     private val objectPaint = Paint()
     private val objectBorderPaint = Paint()
 
-    private var init = false
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
@@ -74,7 +73,7 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         drawControllers(canvas)
     }
 
-    private fun reset() {
+    override fun reset() {
         val centerX = width.toFloat() / 2.0f
         val centerY = height.toFloat() / 2.0f
 
@@ -84,21 +83,11 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         onControllerMove()
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-
-        if (!init) {
-            reset()
-            init = true
-        }
-    }
-
     override fun onViewMatrixChanged(matrix: Matrix) {
         positionController.position.set(matrix.mapPoint(positionController.position))
         sizeController.position.set(matrix.mapPoint(sizeController.position))
         onControllerMove()
     }
-
 
     val worldRect: MyRectF
         get() {
