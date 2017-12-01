@@ -9,16 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import crupest.cruphysics.IOptionMenuActivity
 
 import crupest.cruphysics.R
+import crupest.cruphysics.SingleFragmentActivity
 
 
 class AddObjectListFragment : Fragment() {
-    interface EventListener {
-        fun onAddObjectListItemSelected(position: Int)
-    }
-
-    private var listener: EventListener? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -29,18 +26,22 @@ class AddObjectListFragment : Fragment() {
                 context.resources.getStringArray(R.array.add_object_list))
         listView.adapter = adapter
 
-        listView.setOnItemClickListener(fun(_, _, position, _) {
-            listener?.onAddObjectListItemSelected(position)
-        })
+        listView.setOnItemClickListener { _, _, position, _ ->
+            val activity = context as SingleFragmentActivity
+
+            when (position) {
+                0 -> activity.navigateToFragment(AddCircleObjectFragment())
+                1 -> activity.navigateToFragment(AddRectangleObjectFragment())
+            }
+        }
 
         return rootView
     }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-
-        if (context is EventListener) {
-            listener = context
+        if (context is IOptionMenuActivity) {
+            context.optionMenu = 0
         }
     }
 }

@@ -10,16 +10,15 @@ import crupest.cruphysics.*
 import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.RectangleBodyUserData
+import crupest.cruphysics.utility.createAlertDialog
+import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.geometry.Rectangle
 
 class AddRectangleObjectFragment : AddObjectFragment() {
 
-    override var rootView: View? = null
-        private set(value) {
-            field = value
-        }
+    private var rootView: View? = null
     private var worldCanvas: AddRectangleObjectWorldCanvas? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -59,7 +58,7 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         val fixture = BodyFixture(rectangle)
 
         try {
-            val data = extractFixtureProperty()
+            val data = extractFixtureProperty(rootView!!)
             fixture.density = data.density
             fixture.friction = data.friction
             fixture.restitution = data.restitution

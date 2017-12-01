@@ -11,6 +11,8 @@ import crupest.cruphysics.component.AddCircleObjectWorldCanvas
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.CircleBodyUserData
 import crupest.cruphysics.physics.toVec2
+import crupest.cruphysics.utility.createAlertDialog
+import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.geometry.Circle
@@ -18,10 +20,7 @@ import org.dyn4j.geometry.Circle
 
 class AddCircleObjectFragment : AddObjectFragment() {
 
-    override var rootView: View? = null
-        private set(value) {
-            field = value
-        }
+    private var rootView: View? = null
     private var worldCanvas: AddCircleObjectWorldCanvas? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -48,7 +47,7 @@ class AddCircleObjectFragment : AddObjectFragment() {
         val fixture = BodyFixture(circle)
 
         try {
-            val data = extractFixtureProperty()
+            val data = extractFixtureProperty(rootView!!)
             fixture.density = data.density
             fixture.friction = data.friction
             fixture.restitution = data.restitution

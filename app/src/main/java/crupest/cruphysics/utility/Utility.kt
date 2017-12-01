@@ -1,4 +1,4 @@
-package crupest.cruphysics
+package crupest.cruphysics.utility
 
 import android.app.Activity
 import android.app.AlertDialog

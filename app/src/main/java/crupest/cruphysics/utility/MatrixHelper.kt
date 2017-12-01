@@ -1,4 +1,4 @@
-package crupest.cruphysics
+package crupest.cruphysics.utility
 
 import android.graphics.Matrix
 import android.graphics.Path
