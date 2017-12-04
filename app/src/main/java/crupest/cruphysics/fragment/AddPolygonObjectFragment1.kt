@@ -1,7 +1,6 @@
 package crupest.cruphysics.fragment
 
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -30,26 +29,29 @@ class AddPolygonObjectFragment1 : Fragment() {
         return rootView
     }
 
-    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Unit = {
+    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
         if (it.menuItem.itemId == R.id.ok) {
             val activity = context as AddObjectActivity
             activity.navigateToFragment(AddPolygonObjectFragment2.newInstance(
                     numberPicker!!.value
             ))
+            return@l true
+        }
+        return@l false
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val activity = context
+        if (activity is IOptionMenuActivity) {
+            activity.optionMenu = R.menu.add_object_menu
+            activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
         }
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-
-        if (context is IOptionMenuActivity) {
-            context.optionMenu = R.menu.add_polygon_object_menu1
-            context.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
+    override fun onPause() {
+        super.onPause()
 
         val activity = context
         if (activity is IOptionMenuActivity) {

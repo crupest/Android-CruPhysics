@@ -35,7 +35,7 @@ class RectangleBodyUserData(override val body: Body) : BodyUserData {
             )
             canvas.restore()
         } else {
-            throw UnsupportedOperationException("RectangleBodyUserData's related body is a rectangle.")
+            throw UnsupportedOperationException("RectangleBodyUserData's related body is not a rectangle.")
         }
     }
 }

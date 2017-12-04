@@ -7,11 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 
 import crupest.cruphysics.R
+import crupest.cruphysics.WorldManager
+import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
+import crupest.cruphysics.component.ObjectTypeSpinner
+import crupest.cruphysics.physics.PolygonBodyUserData
+import crupest.cruphysics.utility.showAlertDialog
+import org.dyn4j.dynamics.Body
+import org.dyn4j.dynamics.BodyFixture
+import org.dyn4j.geometry.Polygon
 
 
 class AddPolygonObjectFragment2 : AddObjectFragment() {
 
     private var sideCount: Int = 0
+    private var worldCanvas: AddPolygonObjectWorldCanvas? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,12 +31,59 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
-        return inflater!!.inflate(R.layout.fragment_add_polygon_object_fragment2, container, false)
+        val rootView = inflater!!.inflate(R.layout.fragment_add_polygon_object_fragment2, container, false)
+
+        val worldCanvas = rootView.findViewById<AddPolygonObjectWorldCanvas>(R.id.world_canvas)
+        worldCanvas.sideCount = sideCount
+        this.worldCanvas = worldCanvas
+
+        return rootView
     }
 
     override fun onOk() {
-        //TODO!!!
+        val rootView = view!!
+        val worldCanvas = rootView.findViewById<AddPolygonObjectWorldCanvas>(R.id.world_canvas)
+
+        val shape: Polygon?
+        try {
+            shape = worldCanvas.generatePolygon()
+        } catch (e: IllegalArgumentException) {
+            showAlertDialog(context, e.message.orEmpty())
+            return
+        }
+
+        val body = Body()
+        val fixture = BodyFixture(shape)
+
+        try {
+            val data = extractFixtureProperty(rootView)
+            fixture.density = data.density
+            fixture.friction = data.friction
+            fixture.restitution = data.restitution
+        } catch (e: FixturePropertyExtractException) {
+            showAlertDialog(context, e.message!!)
+            return
+        }
+
+        body.addFixture(fixture)
+        body.setMass(rootView.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
+        body.userData = PolygonBodyUserData(body)
+        WorldManager.world.addBody(body)
+        activity.finish()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        worldCanvas!!.myMatrix.set(WorldManager.viewMatrix)
+        worldCanvas!!.invalidate()
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        WorldManager.viewMatrix.set(worldCanvas!!.myMatrix)
     }
 
     companion object {

@@ -8,8 +8,8 @@ import android.view.MenuItem
 
 /**
  * An activity with a single page fragment.
- * Navigate fragment using <code>navigateToFragment</code>.
- * Please override <code>onCreate</code> to navigate to the first fragment.
+ * Navigate fragment using [navigateToFragment].
+ * Please override [onCreate] to navigate to the first fragment using [navigateToFragment].
  */
 abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity {
 
@@ -24,7 +24,7 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
             invalidateOptionsMenu()
         }
 
-    final override val optionMenuItemSelectedEvent: Event<OptionMenuItemSelectedEventArgs> = Event()
+    final override val optionMenuItemSelectedEvent: ReturnEvent<OptionMenuItemSelectedEventArgs, Boolean> = ReturnEvent()
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         if (optionMenu != 0)
@@ -32,10 +32,8 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        optionMenuItemSelectedEvent.raise(OptionMenuItemSelectedEventArgs(item!!))
-        return true
-    }
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+            optionMenuItemSelectedEvent.raise(OptionMenuItemSelectedEventArgs(item!!)) ?: false
 
     fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean = true) {
         val transaction = supportFragmentManager.beginTransaction()

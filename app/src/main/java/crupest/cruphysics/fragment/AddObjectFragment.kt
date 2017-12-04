@@ -22,23 +22,26 @@ abstract class AddObjectFragment : Fragment() {
      */
     protected abstract fun onOk()
 
-    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Unit = {
+    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
         if (it.menuItem.itemId == R.id.ok) {
             onOk()
+            return@l true
+        }
+        return@l false
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val activity = context
+        if (activity is IOptionMenuActivity) {
+            activity.optionMenu = R.menu.add_object_menu
+            activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
         }
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-
-        if (context is IOptionMenuActivity) {
-            context.optionMenu = R.menu.add_object_menu
-            context.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
-        }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
+    override fun onPause() {
+        super.onPause()
 
         val activity = context
         if (activity is IOptionMenuActivity) {

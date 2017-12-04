@@ -6,5 +6,5 @@ package crupest.cruphysics
  */
 interface IOptionMenuActivity {
     var optionMenu: Int
-    val optionMenuItemSelectedEvent: Event<OptionMenuItemSelectedEventArgs>
+    val optionMenuItemSelectedEvent: ReturnEvent<OptionMenuItemSelectedEventArgs, Boolean>
 }

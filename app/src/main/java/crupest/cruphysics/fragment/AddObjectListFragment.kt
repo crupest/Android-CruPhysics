@@ -32,6 +32,7 @@ class AddObjectListFragment : Fragment() {
             when (position) {
                 0 -> activity.navigateToFragment(AddCircleObjectFragment())
                 1 -> activity.navigateToFragment(AddRectangleObjectFragment())
+                2 -> activity.navigateToFragment(AddPolygonObjectFragment1())
             }
         }
 

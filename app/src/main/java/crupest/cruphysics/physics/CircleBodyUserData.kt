@@ -33,7 +33,7 @@ class CircleBodyUserData(override val body: Body) : BodyUserData {
             )
             canvas.restore()
         } else {
-            throw UnsupportedOperationException("CircleBodyUserData's related body is a circle.")
+            throw UnsupportedOperationException("CircleBodyUserData's related body is not a circle.")
         }
     }
 }
