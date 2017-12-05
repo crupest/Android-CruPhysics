@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import crupest.cruphysics.*
 
 import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
+import crupest.cruphysics.component.CommonObjectPropertyView
+import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.RectangleBodyUserData
 import crupest.cruphysics.utility.createAlertDialog
@@ -57,11 +59,11 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         )
         val fixture = BodyFixture(rectangle)
 
+        val commonObjectPropertyView = view!!.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
         try {
-            val data = extractFixtureProperty(rootView!!)
-            fixture.density = data.density
-            fixture.friction = data.friction
-            fixture.restitution = data.restitution
+            fixture.density = commonObjectPropertyView.density
+            fixture.friction = commonObjectPropertyView.friction
+            fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
             showAlertDialog(context, e.message!!)
             return
@@ -69,7 +71,7 @@ class AddRectangleObjectFragment : AddObjectFragment() {
 
         body.addFixture(fixture)
         body.setMass(rootView!!.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
-        body.userData = RectangleBodyUserData(body)
+        body.userData = RectangleBodyUserData(body, color = commonObjectPropertyView.color)
         WorldManager.world.addBody(body)
 
         activity.finish()

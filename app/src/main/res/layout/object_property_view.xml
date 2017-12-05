@@ -12,9 +12,7 @@
         android:layout_alignBottom="@+id/property_edit"
         android:layout_alignParentTop="true"
         android:layout_marginStart="20dp"
-        android:textColor="#FF000000"
-        android:textSize="20sp"
-        android:gravity="center"
+        android:theme="@style/PropertyLabelTextViewStyle"
         android:labelFor="@id/property_edit" />
 
     <EditText

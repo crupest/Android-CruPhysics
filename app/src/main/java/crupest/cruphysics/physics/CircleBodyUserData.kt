@@ -11,12 +11,12 @@ import org.dyn4j.geometry.Circle
  * Class CircleBodyUserData.
  */
 
-class CircleBodyUserData(override val body: Body) : BodyUserData {
+class CircleBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
 
     private val paint = Paint()
 
     init {
-        paint.color = Color.BLUE
+        paint.color = color
     }
 
 
@@ -36,4 +36,10 @@ class CircleBodyUserData(override val body: Body) : BodyUserData {
             throw UnsupportedOperationException("CircleBodyUserData's related body is not a circle.")
         }
     }
+
+    var color: Int
+        get() = paint.color
+        set(value) {
+            paint.color = value
+        }
 }

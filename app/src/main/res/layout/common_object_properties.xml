@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
     tools:showIn="@layout/fragment_add_circle_object">
 
     <RelativeLayout
@@ -18,10 +15,8 @@
             android:layout_alignParentTop="true"
             android:layout_alignBottom="@+id/object_type_spinner"
             android:layout_marginStart="20dp"
-            android:gravity="center"
             android:text="@string/type"
-            android:textColor="#FF000000"
-            android:textSize="20sp"
+            android:theme="@style/PropertyLabelTextViewStyle"
             tools:ignore="RelativeOverlap" />
 
         <crupest.cruphysics.component.ObjectTypeSpinner
@@ -57,4 +52,27 @@
         app:propertyName="@string/restitution"
         app:propertyValue="0.0" />
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/object_color_label"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginStart="20dp"
+            android:text="@string/color"
+            android:theme="@style/PropertyLabelTextViewStyle" />
+
+        <View
+            android:id="@+id/color_block"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/object_color_label"
+            android:layout_alignBottom="@id/object_color_label"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:background="#FF0000FF"/>
+
+    </RelativeLayout>
+</merge>

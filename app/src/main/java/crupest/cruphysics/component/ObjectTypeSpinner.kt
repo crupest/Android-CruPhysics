@@ -19,10 +19,17 @@ class ObjectTypeSpinner(context: Context, attributeSet: AttributeSet) : Spinner(
         this.setSelection(0)
     }
 
-    val massType: MassType
+    var massType: MassType
         get() = when (selectedItemPosition) {
             0 -> MassType.INFINITE
             1 -> MassType.NORMAL
             else -> throw RuntimeException("Unexpected object type spinner selection.")
+        }
+        set(value) {
+            this.setSelection(when (value) {
+                MassType.INFINITE -> 0
+                MassType.NORMAL -> 1
+                else -> throw UnsupportedOperationException("Unsupported mass type.")
+            })
         }
 }

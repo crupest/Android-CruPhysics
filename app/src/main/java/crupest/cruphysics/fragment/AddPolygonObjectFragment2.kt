@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import crupest.cruphysics.R
 import crupest.cruphysics.WorldManager
 import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
+import crupest.cruphysics.component.CommonObjectPropertyView
+import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.PolygonBodyUserData
 import crupest.cruphysics.utility.showAlertDialog
@@ -55,11 +57,11 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         val body = Body()
         val fixture = BodyFixture(shape)
 
+        val commonObjectPropertyView = view!!.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
         try {
-            val data = extractFixtureProperty(rootView)
-            fixture.density = data.density
-            fixture.friction = data.friction
-            fixture.restitution = data.restitution
+            fixture.density = commonObjectPropertyView.density
+            fixture.friction = commonObjectPropertyView.friction
+            fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
             showAlertDialog(context, e.message!!)
             return
@@ -67,7 +69,7 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
 
         body.addFixture(fixture)
         body.setMass(rootView.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
-        body.userData = PolygonBodyUserData(body)
+        body.userData = PolygonBodyUserData(body, color = commonObjectPropertyView.color)
         WorldManager.world.addBody(body)
         activity.finish()
     }

@@ -1,4 +1,4 @@
-package crupest.cruphysics.fragment
+package crupest.cruphysics.component
 
 /**
  * Created by crupest on 2017/11/25.

@@ -11,12 +11,12 @@ import org.dyn4j.geometry.Rectangle
  * Created by crupest on 2017/11/25.
  * Class RectangleBodyUserData.
  */
-class RectangleBodyUserData(override val body: Body) : BodyUserData {
+class RectangleBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
 
     private val paint = Paint()
 
     init {
-        paint.color = Color.BLUE
+        paint.color = color
     }
 
     override fun draw(canvas: Canvas) {
@@ -38,4 +38,10 @@ class RectangleBodyUserData(override val body: Body) : BodyUserData {
             throw UnsupportedOperationException("RectangleBodyUserData's related body is not a rectangle.")
         }
     }
+
+    var color: Int
+        get() = paint.color
+        set(value) {
+            paint.color = value
+        }
 }

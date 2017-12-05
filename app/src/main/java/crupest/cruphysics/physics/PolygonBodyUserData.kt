@@ -11,13 +11,13 @@ import org.dyn4j.geometry.Polygon
  * Created by crupest on 2017/12/4.
  * Class [PolygonBodyUserData].
  */
-class PolygonBodyUserData(override val body: Body) : BodyUserData {
+class PolygonBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
 
     private val path = Path()
     private val paint = Paint()
 
     init {
-        paint.color = Color.BLUE
+        paint.color = color
 
         val shape = body.fixtures[0].shape
         if (shape is Polygon) {
@@ -33,9 +33,15 @@ class PolygonBodyUserData(override val body: Body) : BodyUserData {
 
 
     override fun draw(canvas: Canvas) {
-            canvas.save()
-            canvas.concat(body.transform.toMatrix())
-            canvas.drawPath(path, paint)
-            canvas.restore()
+        canvas.save()
+        canvas.concat(body.transform.toMatrix())
+        canvas.drawPath(path, paint)
+        canvas.restore()
     }
+
+    var color: Int
+        get() = paint.color
+        set(value) {
+            paint.color = value
+        }
 }

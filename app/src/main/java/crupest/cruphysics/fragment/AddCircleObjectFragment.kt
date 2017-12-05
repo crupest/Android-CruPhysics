@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import crupest.cruphysics.*
 
 import crupest.cruphysics.component.AddCircleObjectWorldCanvas
+import crupest.cruphysics.component.CommonObjectPropertyView
+import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.CircleBodyUserData
 import crupest.cruphysics.physics.toVec2
@@ -46,11 +48,12 @@ class AddCircleObjectFragment : AddObjectFragment() {
         val circle = Circle(radius.toDouble())
         val fixture = BodyFixture(circle)
 
+        val commonObjectPropertyView = view!!.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
+
         try {
-            val data = extractFixtureProperty(rootView!!)
-            fixture.density = data.density
-            fixture.friction = data.friction
-            fixture.restitution = data.restitution
+            fixture.density = commonObjectPropertyView.density
+            fixture.friction = commonObjectPropertyView.friction
+            fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
             showAlertDialog(context, e.message!!)
             return
@@ -58,7 +61,7 @@ class AddCircleObjectFragment : AddObjectFragment() {
 
         body.addFixture(fixture)
         body.setMass(rootView!!.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
-        body.userData = CircleBodyUserData(body)
+        body.userData = CircleBodyUserData(body, color = commonObjectPropertyView.color)
         WorldManager.world.addBody(body)
         activity.finish()
     }

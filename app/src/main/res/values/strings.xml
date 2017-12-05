@@ -20,6 +20,7 @@
     <string name="friction">friction</string>
     <string name="restitution">restitution</string>
     <string name="choose_number_of_sides_tip">Please choose the number of sides:</string>
+    <string name="color">Color</string>
 
     <string-array name="object_type_list">
         <item>static</item>
