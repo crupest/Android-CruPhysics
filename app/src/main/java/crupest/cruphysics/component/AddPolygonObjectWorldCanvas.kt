@@ -19,8 +19,8 @@ class AddPolygonObjectWorldCanvas(context: Context, attrs: AttributeSet)
     : AddObjectWorldCanvas(context, attrs) {
 
     private val path = Path()
-    private val paint = Paint()
-    private val borderPaint = Paint()
+    private val objectPaint = Paint()
+    private val objectBorderPaint = Paint()
 
     override var controllers: Array<Controller> = Array(3) {
         Controller {
@@ -29,10 +29,10 @@ class AddPolygonObjectWorldCanvas(context: Context, attrs: AttributeSet)
     }
 
     init {
-        paint.color = Color.BLUE
-        borderPaint.style = Paint.Style.STROKE
-        borderPaint.color = Color.BLACK
-        borderPaint.strokeWidth = 3.0f
+        objectPaint.color = Color.BLUE
+        objectBorderPaint.style = Paint.Style.STROKE
+        objectBorderPaint.color = Color.BLACK
+        objectBorderPaint.strokeWidth = 3.0f
     }
 
     override fun reset() {
@@ -65,8 +65,8 @@ class AddPolygonObjectWorldCanvas(context: Context, attrs: AttributeSet)
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        canvas!!.drawPath(path, paint)
-        canvas.drawPath(path, borderPaint)
+        canvas!!.drawPath(path, objectPaint)
+        canvas.drawPath(path, objectBorderPaint)
 
         drawControllers(canvas)
     }
@@ -111,4 +111,11 @@ class AddPolygonObjectWorldCanvas(context: Context, attrs: AttributeSet)
     fun generatePolygon(): Polygon = Polygon(*Array(sideCount) {
         viewToWorld(controllers[it].position).toVec2()
     }.reversedArray())
+
+    var color: Int
+        get() = objectPaint.color
+        set(value) {
+            objectPaint.color = value
+            invalidate()
+        }
 }

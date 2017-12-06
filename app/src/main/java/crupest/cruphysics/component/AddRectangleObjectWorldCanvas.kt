@@ -95,4 +95,11 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
             val rightbottom = viewToWorld(sizeController.position)
             return MyRectF(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y)
         }
+
+    var color: Int
+        get() = objectPaint.color
+        set(value) {
+            objectPaint.color = value
+            invalidate()
+        }
 }

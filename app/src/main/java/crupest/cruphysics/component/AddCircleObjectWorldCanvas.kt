@@ -88,4 +88,11 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         radiusController.position.set(matrix.mapPoint(radiusController.position))
         onControllerMove()
     }
+
+    var color: Int
+        get() = objectPaint.color
+        set(value) {
+            objectPaint.color = value
+            invalidate()
+        }
 }

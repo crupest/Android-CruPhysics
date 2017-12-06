@@ -38,6 +38,11 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         worldCanvas.sideCount = sideCount
         this.worldCanvas = worldCanvas
 
+        val commonObjectPropertyView = rootView.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
+        commonObjectPropertyView.colorChangedEvent.addListener {
+            worldCanvas?.color = it.newColor
+        }
+
         return rootView
     }
 

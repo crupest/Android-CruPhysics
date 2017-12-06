@@ -10,6 +10,7 @@ import crupest.cruphysics.R
 import org.dyn4j.geometry.MassType
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
+import crupest.cruphysics.Event
 
 
 /**
@@ -30,6 +31,10 @@ class CommonObjectPropertyView : LinearLayout {
         init()
     }
 
+    class ColorChangedEventArgs(val newColor: Int)
+
+    val colorChangedEvent = Event<ColorChangedEventArgs>()
+
     private fun init() {
         orientation = VERTICAL
         RelativeLayout.inflate(context, R.layout.common_object_properties, this)
@@ -42,7 +47,10 @@ class CommonObjectPropertyView : LinearLayout {
                     .initialColor(color)
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
-                    .setPositiveButton("ok") { _, selectedColor, _ -> color = selectedColor }
+                    .setPositiveButton("ok") { _, selectedColor, _ ->
+                        color = selectedColor
+                        colorChangedEvent.raise(ColorChangedEventArgs(selectedColor))
+                    }
                     .setNegativeButton("cancel") { _, _ -> }
                     .build()
                     .show()

@@ -29,6 +29,11 @@ class AddCircleObjectFragment : AddObjectFragment() {
                 R.layout.fragment_add_circle_object, container, false)
         worldCanvas = rootView.findViewById(R.id.world_canvas)
 
+        val commonObjectPropertyView = rootView.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
+        commonObjectPropertyView.colorChangedEvent.addListener {
+            worldCanvas?.color = it.newColor
+        }
+
         return rootView
     }
 
