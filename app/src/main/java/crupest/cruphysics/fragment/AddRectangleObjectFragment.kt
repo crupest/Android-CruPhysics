@@ -10,7 +10,6 @@ import crupest.cruphysics.*
 import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
-import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.RectangleBodyUserData
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.showAlertDialog
@@ -20,7 +19,6 @@ import org.dyn4j.geometry.Rectangle
 
 class AddRectangleObjectFragment : AddObjectFragment() {
 
-    private var rootView: View? = null
     private var worldCanvas: AddRectangleObjectWorldCanvas? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -29,7 +27,6 @@ class AddRectangleObjectFragment : AddObjectFragment() {
                 R.layout.fragment_add_rectangle_object, container, false)
         worldCanvas = rootView.findViewById(R.id.world_canvas)
 
-        this.rootView = rootView
         return rootView
     }
 
@@ -70,7 +67,7 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         }
 
         body.addFixture(fixture)
-        body.setMass(rootView!!.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
+        body.setMass(commonObjectPropertyView.massType)
         body.userData = RectangleBodyUserData(body, color = commonObjectPropertyView.color)
         WorldManager.world.addBody(body)
 

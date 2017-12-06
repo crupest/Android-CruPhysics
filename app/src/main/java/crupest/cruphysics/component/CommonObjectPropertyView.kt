@@ -8,9 +8,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import crupest.cruphysics.R
 import org.dyn4j.geometry.MassType
-import android.content.DialogInterface
-import com.flask.colorpicker.builder.ColorPickerClickListener
-import com.flask.colorpicker.OnColorSelectedListener
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 
@@ -46,7 +43,7 @@ class CommonObjectPropertyView : LinearLayout {
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
                     .setPositiveButton("ok") { _, selectedColor, _ -> color = selectedColor }
-                    .setNegativeButton("cancel") { dialog, which -> }
+                    .setNegativeButton("cancel") { _, _ -> }
                     .build()
                     .show()
         }

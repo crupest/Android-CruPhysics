@@ -11,7 +11,6 @@ import crupest.cruphysics.WorldManager
 import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
-import crupest.cruphysics.component.ObjectTypeSpinner
 import crupest.cruphysics.physics.PolygonBodyUserData
 import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
@@ -68,7 +67,7 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         }
 
         body.addFixture(fixture)
-        body.setMass(rootView.findViewById<ObjectTypeSpinner>(R.id.object_type_spinner).massType)
+        body.setMass(commonObjectPropertyView.massType)
         body.userData = PolygonBodyUserData(body, color = commonObjectPropertyView.color)
         WorldManager.world.addBody(body)
         activity.finish()
