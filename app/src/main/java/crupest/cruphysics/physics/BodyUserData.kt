@@ -10,7 +10,6 @@ import org.dyn4j.dynamics.Body
  */
 
 interface BodyUserData {
-
     val body: Body
     fun draw(canvas: Canvas)
 }
