@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import crupest.cruphysics.physics.serialization.JsonObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Polygon
 
@@ -44,4 +45,8 @@ class PolygonBodyUserData(override val body: Body, color: Int = Color.BLUE) : Bo
         set(value) {
             paint.color = value
         }
+
+    override fun toJsonObject(): JsonObject {
+        TODO("not implemented")
+    }
 }

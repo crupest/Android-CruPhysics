@@ -1,6 +1,7 @@
 package crupest.cruphysics.physics
 
 import android.graphics.Canvas
+import crupest.cruphysics.physics.serialization.JsonObject
 import org.dyn4j.dynamics.Body
 
 
@@ -12,4 +13,5 @@ import org.dyn4j.dynamics.Body
 interface BodyUserData {
     val body: Body
     fun draw(canvas: Canvas)
+    fun toJsonObject(): JsonObject
 }

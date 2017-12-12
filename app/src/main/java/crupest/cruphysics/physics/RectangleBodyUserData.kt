@@ -3,6 +3,7 @@ package crupest.cruphysics.physics
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import crupest.cruphysics.physics.serialization.JsonObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Rectangle
 
@@ -44,4 +45,8 @@ class RectangleBodyUserData(override val body: Body, color: Int = Color.BLUE) : 
         set(value) {
             paint.color = value
         }
+
+    override fun toJsonObject(): JsonObject {
+        TODO("not implemented")
+    }
 }
