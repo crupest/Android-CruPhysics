@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.putBodyFixtureProperty
 import crupest.cruphysics.physics.serialization.toJsonObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Circle
@@ -14,7 +13,7 @@ import org.dyn4j.geometry.Circle
  * Class CircleBodyUserData.
  */
 
-class CircleBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
+class CircleBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(body) {
 
     private val paint = Paint()
 
@@ -40,26 +39,24 @@ class CircleBodyUserData(override val body: Body, color: Int = Color.BLUE) : Bod
         }
     }
 
-    var color: Int
+    override var color: Int
         get() = paint.color
         set(value) {
             paint.color = value
         }
 
     override fun toJsonObject(): JsonObject {
-        val result = mutableMapOf<String, Any>()
-        val fixture = body.fixtures[0]
-        fixture.putBodyFixtureProperty(result)
-        val shape = fixture.shape
+        val shape = body.fixtures[0].shape
         if (shape is Circle) {
-            result.put("shape", mapOf(
-                    "type" to "circle",
-                    "center" to shape.center.toJsonObject(),
-                    "radius" to shape.radius
-            ))
+            return basePropertyToJsonObject().plus(
+                    "shape" to mapOf(
+                            "type" to "circle",
+                            "center" to shape.center.toJsonObject(),
+                            "radius" to shape.radius
+                    )
+            )
         } else {
             throw UnsupportedOperationException("CircleBodyUserData's related body is not a circle.")
         }
-        return result
     }
 }

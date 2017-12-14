@@ -24,12 +24,6 @@ inline fun <reified T> JsonObject.getProperty(name: String): T {
         throw JsonDataException("Property \"$name\" is not ${T::class.simpleName}")
 }
 
-fun BodyFixture.putBodyFixtureProperty(map: MutableMap<String, Any>) {
-    map.put("density", this.density)
-    map.put("friction", this.friction)
-    map.put("restitution", this.restitution)
-}
-
 fun Vector2.toJsonObject(): JsonObject = mapOf(
         "x" to this.x,
         "y" to this.y

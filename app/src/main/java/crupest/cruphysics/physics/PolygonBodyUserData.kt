@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import crupest.cruphysics.physics.serialization.JsonObject
+import crupest.cruphysics.physics.serialization.toJsonObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Polygon
 
@@ -12,7 +13,7 @@ import org.dyn4j.geometry.Polygon
  * Created by crupest on 2017/12/4.
  * Class [PolygonBodyUserData].
  */
-class PolygonBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
+class PolygonBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(body) {
 
     private val path = Path()
     private val paint = Paint()
@@ -40,13 +41,25 @@ class PolygonBodyUserData(override val body: Body, color: Int = Color.BLUE) : Bo
         canvas.restore()
     }
 
-    var color: Int
+    override var color: Int
         get() = paint.color
         set(value) {
             paint.color = value
         }
 
     override fun toJsonObject(): JsonObject {
-        TODO("not implemented")
+        val shape = body.fixtures[0]
+        if (shape is Polygon) {
+            return basePropertyToJsonObject().plus(
+                    "shape" to mapOf(
+                            "type" to "polygon",
+                            "vertices" to List(shape.vertices.size) {
+                                shape.vertices[it].toJsonObject()
+                            }
+                    )
+            )
+        } else {
+            throw UnsupportedOperationException("PolygonBodyUserData's related body is not a circle.")
+        }
     }
 }

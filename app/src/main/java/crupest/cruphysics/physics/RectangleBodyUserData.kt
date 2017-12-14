@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import crupest.cruphysics.physics.serialization.JsonObject
+import crupest.cruphysics.physics.serialization.toJsonObject
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Rectangle
 
@@ -12,7 +13,7 @@ import org.dyn4j.geometry.Rectangle
  * Created by crupest on 2017/11/25.
  * Class RectangleBodyUserData.
  */
-class RectangleBodyUserData(override val body: Body, color: Int = Color.BLUE) : BodyUserData {
+class RectangleBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(body) {
 
     private val paint = Paint()
 
@@ -40,13 +41,25 @@ class RectangleBodyUserData(override val body: Body, color: Int = Color.BLUE) : 
         }
     }
 
-    var color: Int
+    override var color: Int
         get() = paint.color
         set(value) {
             paint.color = value
         }
 
     override fun toJsonObject(): JsonObject {
-        TODO("not implemented")
+        val shape = body.fixtures[0]
+        if (shape is Rectangle) {
+            return basePropertyToJsonObject().plus(
+                    "shape" to mapOf(
+                            "type" to "rectangle",
+                            "center" to shape.center.toJsonObject(),
+                            "width" to shape.width,
+                            "height" to shape.height
+                    )
+            )
+        } else {
+            throw UnsupportedOperationException("RectangleBodyUserData's related body is not a rectangle.")
+        }
     }
 }
