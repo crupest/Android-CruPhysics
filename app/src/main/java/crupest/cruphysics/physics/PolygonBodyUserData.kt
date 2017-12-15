@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.toJsonObject
+import crupest.cruphysics.physics.serialization.mapper
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Polygon
 
@@ -54,7 +54,7 @@ class PolygonBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(bo
                     "shape" to mapOf(
                             "type" to "polygon",
                             "vertices" to List(shape.vertices.size) {
-                                shape.vertices[it].toJsonObject()
+                                mapper.map(shape.vertices[it])
                             }
                     )
             )

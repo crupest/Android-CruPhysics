@@ -30,6 +30,13 @@ fun Matrix.mapPath(path: Path): Path {
     return result
 }
 
+val Matrix.values: List<Float>
+    get() {
+        val array = FloatArray(9)
+        this.getValues(array)
+        return array.asList()
+    }
+
 class ParcelableMatrix() : Parcelable {
 
     private val values = FloatArray(9)

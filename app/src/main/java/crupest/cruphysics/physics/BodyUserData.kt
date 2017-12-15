@@ -2,7 +2,7 @@ package crupest.cruphysics.physics
 
 import android.graphics.Canvas
 import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.toJsonObject
+import crupest.cruphysics.physics.serialization.mapper
 import org.dyn4j.dynamics.Body
 
 
@@ -19,7 +19,7 @@ abstract class BodyUserData(val body: Body) {
     protected fun basePropertyToJsonObject(): JsonObject {
         val fixture = body.fixtures[0]
         return mapOf(
-                "position" to body.transform.translation.toJsonObject(),
+                "position" to mapper.map(body.transform.translation),
                 "rotation" to body.transform.rotation,
                 "color" to color,
                 "density" to fixture.density,

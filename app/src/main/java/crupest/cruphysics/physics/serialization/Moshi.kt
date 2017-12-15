@@ -1,10 +1,7 @@
 package crupest.cruphysics.physics.serialization
 
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
-import org.dyn4j.dynamics.BodyFixture
-import org.dyn4j.geometry.Vector2
 
 /**
  * Created by crupest on 2017/12/11.
@@ -12,19 +9,36 @@ import org.dyn4j.geometry.Vector2
  */
 
 val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()!!
+val mapper = Mapper()
+val unmapper = Unmapper()
+
 
 typealias JsonObject = Map<String, Any>
 
-inline fun <reified T> JsonObject.getProperty(name: String): T {
-    val property = this[name] ?: throw JsonDataException("Property \"$name\" doesn't exist.")
+fun JsonObject.getStringProperty(name: String): String {
+    val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
 
-    if (property is T)
+    if (property is String)
         return property
     else
-        throw JsonDataException("Property \"$name\" is not ${T::class.simpleName}")
+        throw UnmapException("Property \"$name\" is not of type string.")
 }
 
-fun Vector2.toJsonObject(): JsonObject = mapOf(
-        "x" to this.x,
-        "y" to this.y
-)
+fun JsonObject.getNumberProperty(name: String): Double {
+    val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
+
+    if (property is Double)
+        return property
+    else
+        throw UnmapException("Property \"$name\" is not of type number.")
+}
+
+fun JsonObject.getObjectProperty(name: String): JsonObject {
+    val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
+
+    @Suppress("UNCHECKED_CAST")
+    if (property is Map<*, *>)
+        return property as JsonObject
+    else
+        throw UnmapException("Property \"$name\" is not of type object.")
+}
