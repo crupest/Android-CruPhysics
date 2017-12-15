@@ -1,6 +1,7 @@
 package crupest.cruphysics.physics.serialization
 
 import org.dyn4j.geometry.Circle
+import org.dyn4j.geometry.Polygon
 import org.dyn4j.geometry.Rectangle
 import org.dyn4j.geometry.Vector2
 
@@ -25,5 +26,12 @@ class Mapper {
             "center" to map(rectangle.center),
             "width" to rectangle.width,
             "height" to rectangle.height
+    )
+
+    fun map(polygon: Polygon): JsonObject = mapOf(
+            "type" to "polygon",
+            "vertices" to List(polygon.vertices.size) {
+                map(polygon.vertices[it])
+            }
     )
 }

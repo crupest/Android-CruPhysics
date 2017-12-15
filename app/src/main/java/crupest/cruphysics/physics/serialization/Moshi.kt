@@ -14,6 +14,7 @@ val unmapper = Unmapper()
 
 
 typealias JsonObject = Map<String, Any>
+typealias JsonArray = List<Any>
 
 fun JsonObject.getStringProperty(name: String): String {
     val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
@@ -41,4 +42,14 @@ fun JsonObject.getObjectProperty(name: String): JsonObject {
         return property as JsonObject
     else
         throw UnmapException("Property \"$name\" is not of type object.")
+}
+
+fun JsonObject.getArrayProperty(name: String): JsonArray {
+    val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
+
+    @Suppress("UNCHECKED_CAST")
+    if (property is List<*>)
+        return property as List<Any>
+    else
+        throw UnmapException("Property \"$name\" is not of type array.")
 }

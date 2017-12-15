@@ -51,12 +51,7 @@ class PolygonBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(bo
         val shape = body.fixtures[0]
         if (shape is Polygon) {
             return basePropertyToJsonObject().plus(
-                    "shape" to mapOf(
-                            "type" to "polygon",
-                            "vertices" to List(shape.vertices.size) {
-                                mapper.map(shape.vertices[it])
-                            }
-                    )
+                    "shape" to mapper.map(shape)
             )
         } else {
             throw UnsupportedOperationException("PolygonBodyUserData's related body is not a circle.")

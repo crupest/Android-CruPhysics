@@ -6,6 +6,8 @@ import crupest.cruphysics.physics.serialization.Mapper
 import crupest.cruphysics.physics.serialization.Unmapper
 import crupest.cruphysics.physics.serialization.moshi
 import org.dyn4j.geometry.Circle
+import org.dyn4j.geometry.Polygon
+import org.dyn4j.geometry.Vector2
 import org.junit.Assert
 import org.junit.Test
 
@@ -30,5 +32,22 @@ class PhysicsSerializationTest {
         Assert.assertEquals(circle.radius, circle2.radius, 0.0)
         Assert.assertEquals(circle.center.x, circle2.center.x, 0.0)
         Assert.assertEquals(circle.center.y, circle2.center.y, 0.0)
+    }
+
+    @Test
+    fun polygonSerializationTest() {
+        val polygon = Polygon(
+                Vector2(1.0, 0.0),
+                Vector2(0.0, 1.0),
+                Vector2(0.0, -1.0)
+        )
+
+        val jsonString = adapter.toJson(mapper.map(polygon))
+        val polygon2 = unmapper.unmapPolygon(adapter.fromJson(jsonString) as JsonObject)
+
+
+        Assert.assertEquals(polygon.vertices[0], polygon2.vertices[0])
+        Assert.assertEquals(polygon.vertices[1], polygon2.vertices[1])
+        Assert.assertEquals(polygon.vertices[2], polygon2.vertices[2])
     }
 }
