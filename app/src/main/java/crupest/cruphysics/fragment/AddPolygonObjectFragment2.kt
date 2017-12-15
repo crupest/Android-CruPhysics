@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import crupest.cruphysics.R
-import crupest.cruphysics.WorldManager
+import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException

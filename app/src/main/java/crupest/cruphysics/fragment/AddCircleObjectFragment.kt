@@ -11,6 +11,7 @@ import crupest.cruphysics.component.AddCircleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.physics.CircleBodyUserData
+import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.showAlertDialog

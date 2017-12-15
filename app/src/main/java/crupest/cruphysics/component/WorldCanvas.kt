@@ -8,8 +8,8 @@ import android.graphics.Matrix
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.*
-import crupest.cruphysics.*
 import crupest.cruphysics.physics.BodyUserData
+import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint

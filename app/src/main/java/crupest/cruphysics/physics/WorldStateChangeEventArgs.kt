@@ -1,4 +1,4 @@
-package crupest.cruphysics
+package crupest.cruphysics.physics
 
 import org.dyn4j.dynamics.World
 

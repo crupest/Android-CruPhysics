@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import crupest.cruphysics.component.WorldCanvas
+import crupest.cruphysics.physics.WorldManager
+import crupest.cruphysics.physics.WorldStateChangeEventArgs
 import org.dyn4j.dynamics.Step
 import org.dyn4j.dynamics.StepAdapter
 import org.dyn4j.dynamics.World

@@ -11,6 +11,7 @@ import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.physics.RectangleBodyUserData
+import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body

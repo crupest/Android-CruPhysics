@@ -14,7 +14,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.PopupWindow
 import crupest.cruphysics.R
-import crupest.cruphysics.WorldManager
+import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.ScheduleTask
