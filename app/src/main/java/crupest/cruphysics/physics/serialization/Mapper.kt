@@ -1,5 +1,7 @@
 package crupest.cruphysics.physics.serialization
 
+import crupest.cruphysics.physics.BodyUserData
+import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Circle
 import org.dyn4j.geometry.Polygon
 import org.dyn4j.geometry.Rectangle
@@ -30,8 +32,17 @@ class Mapper {
 
     fun map(polygon: Polygon): JsonObject = mapOf(
             "type" to "polygon",
-            "vertices" to List(polygon.vertices.size) {
-                map(polygon.vertices[it])
+            "vertices" to polygon.vertices.map {
+                map(it)
             }
     )
+
+    fun map(body: Body): JsonObject {
+        val userData = body.userData
+        if (userData is BodyUserData) {
+            return userData.toJsonObject()
+        } else {
+            throw RuntimeException("User data of the body is not a BodyUserData.")
+        }
+    }
 }

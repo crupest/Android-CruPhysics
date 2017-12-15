@@ -1,7 +1,6 @@
 package crupest.cruphysics.physics
 
 import android.graphics.Matrix
-import com.squareup.moshi.JsonDataException
 import crupest.cruphysics.Event
 import crupest.cruphysics.physics.serialization.JsonObject
 import crupest.cruphysics.physics.serialization.mapper
@@ -40,14 +39,10 @@ object WorldManager {
 
     fun toJsonObject(): JsonObject {
         return mapOf(
+                "version" to "1.0",
                 "gravity" to mapper.map(world.gravity),
-                "bodies" to List(world.bodies.size) {
-                    val userData = world.bodies[it].userData
-                    if (userData is BodyUserData) {
-                        return@List userData.toJsonObject()
-                    } else {
-                        throw JsonDataException("User data of the body is not a BodyUserData.")
-                    }
+                "bodies" to world.bodies.map {
+                    mapper.map(it)
                 },
                 "view_matrix" to viewMatrix.values
         )

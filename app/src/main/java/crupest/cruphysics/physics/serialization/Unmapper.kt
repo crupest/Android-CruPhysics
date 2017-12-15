@@ -1,9 +1,6 @@
 package crupest.cruphysics.physics.serialization
 
-import org.dyn4j.geometry.Circle
-import org.dyn4j.geometry.Polygon
-import org.dyn4j.geometry.Rectangle
-import org.dyn4j.geometry.Vector2
+import org.dyn4j.geometry.*
 
 /**
  * Created by crupest on 2017/12/15.
@@ -42,9 +39,16 @@ class Unmapper {
             throw UnmapException("Shape type is not polygon.")
         }
         val vertices = obj.getArrayProperty("vertices")
-        return Polygon(*Array(vertices.size) {
+        return Polygon(*vertices.map {
             @Suppress("UNCHECKED_CAST")
-            unmapVector2(vertices[it] as JsonObject)
-        })
+            unmapVector2(it as JsonObject)
+        }.toTypedArray())
+    }
+
+    fun unmapShape(obj: JsonObject): Shape = when (obj.getStringProperty("type")) {
+        "circle" -> unmapCircle(obj)
+        "rectangle" -> unmapRectangle(obj)
+        "polygon" -> unmapPolygon(obj)
+        else -> throw UnmapException("Unknown shape type.")
     }
 }
