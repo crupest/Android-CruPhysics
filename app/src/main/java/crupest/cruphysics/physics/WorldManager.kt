@@ -2,16 +2,14 @@ package crupest.cruphysics.physics
 
 import android.graphics.Matrix
 import crupest.cruphysics.Event
-import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.mapper
+import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
-import crupest.cruphysics.utility.values
 import org.dyn4j.dynamics.World
 
 object WorldManager {
     val viewMatrix = Matrix()
-    val world = World()
+    var world = World()
     val worldStateChangeEvent = Event<WorldStateChangeEventArgs>()
 
     private var task: ScheduleTask? = null
@@ -39,7 +37,15 @@ object WorldManager {
 
     fun toJsonObject(): JsonObject = mapOf(
             "version" to "1.0",
-            "view_matrix" to viewMatrix.values,
+            "view_matrix" to mapper.map(viewMatrix),
             "world" to mapper.map(world)
     )
+
+    fun fromJsonObject(obj: JsonObject) {
+        if (obj.getStringProperty("version") == "1.0") {
+            world = unmapper.unmapWorld(obj.getObjectProperty("world"))
+            viewMatrix.set(unmapper.unmapMatrix(obj.getArrayProperty("view_matrix")))
+        }
+        throw RuntimeException("Unknown version.")
+    }
 }

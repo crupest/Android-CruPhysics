@@ -1,6 +1,8 @@
 package crupest.cruphysics.physics.serialization
 
+import android.graphics.Matrix
 import crupest.cruphysics.physics.BodyUserData
+import crupest.cruphysics.utility.values
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Circle
@@ -54,4 +56,6 @@ class Mapper {
                     mapper.map(it)
                 }
         )
+
+    fun map(matrix: Matrix): JsonArray = matrix.values
 }

@@ -1,5 +1,6 @@
 package crupest.cruphysics.physics.serialization
 
+import android.graphics.Matrix
 import crupest.cruphysics.physics.CircleBodyUserData
 import crupest.cruphysics.physics.PolygonBodyUserData
 import crupest.cruphysics.physics.RectangleBodyUserData
@@ -91,5 +92,17 @@ class Unmapper {
             world.addBody(it)
         }
         return world
+    }
+
+    fun unmapMatrix(obj: JsonArray): Matrix {
+        val matrix = Matrix()
+        if (obj.size != 9)
+            throw UnmapException("The size of JsonArray is not 9.")
+        matrix.setValues(obj.map {
+            if (it !is Double)
+                throw UnmapException("$it is not Double.")
+            it.toFloat()
+        }.toFloatArray())
+        return matrix
     }
 }
