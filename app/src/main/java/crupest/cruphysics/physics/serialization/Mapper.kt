@@ -2,6 +2,7 @@ package crupest.cruphysics.physics.serialization
 
 import crupest.cruphysics.physics.BodyUserData
 import org.dyn4j.dynamics.Body
+import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Circle
 import org.dyn4j.geometry.Polygon
 import org.dyn4j.geometry.Rectangle
@@ -45,4 +46,12 @@ class Mapper {
             throw RuntimeException("User data of the body is not a BodyUserData.")
         }
     }
+
+    fun map(world: World): JsonObject =
+        mapOf(
+                "gravity" to mapper.map(world.gravity),
+                "bodies" to world.bodies.map {
+                    mapper.map(it)
+                }
+        )
 }

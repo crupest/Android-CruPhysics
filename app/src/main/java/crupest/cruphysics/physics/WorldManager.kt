@@ -37,14 +37,9 @@ object WorldManager {
         }
     }
 
-    fun toJsonObject(): JsonObject {
-        return mapOf(
-                "version" to "1.0",
-                "gravity" to mapper.map(world.gravity),
-                "bodies" to world.bodies.map {
-                    mapper.map(it)
-                },
-                "view_matrix" to viewMatrix.values
-        )
-    }
+    fun toJsonObject(): JsonObject = mapOf(
+            "version" to "1.0",
+            "view_matrix" to viewMatrix.values,
+            "world" to mapper.map(world)
+    )
 }
