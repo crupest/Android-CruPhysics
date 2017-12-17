@@ -7,14 +7,20 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import crupest.cruphysics.component.WorldCanvas
+import crupest.cruphysics.physics.WorldChangeEventArgs
 import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.physics.WorldStateChangeEventArgs
 import org.dyn4j.dynamics.Step
 import org.dyn4j.dynamics.StepAdapter
 import org.dyn4j.dynamics.World
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        val worldFileName = "world.wld"
+    }
 
     private var worldCanvas: WorldCanvas? = null
 
@@ -34,6 +40,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val worldChangeEventListener: (WorldChangeEventArgs) -> Unit = {
+        it.oldWorld.removeListener(worldStepEventListener)
+        it.newWorld.addListener(worldStepEventListener)
+        worldCanvas?.invalidate()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,8 +58,13 @@ class MainActivity : AppCompatActivity() {
         }
         worldCanvas = findViewById(R.id.world_canvas)
 
+        WorldManager.worldChangeEvent.addListener(worldChangeEventListener)
         WorldManager.worldStateChangeEvent.addListener(worldStateChangeEventListener)
         WorldManager.world.addListener(worldStepEventListener)
+
+        val worldFile = File(filesDir, worldFileName)
+        if (worldFile.exists())
+            WorldManager.readFromFile(worldFile)
     }
 
     override fun onResume() {
@@ -66,8 +83,12 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
+        WorldManager.worldChangeEvent.removeListener(worldChangeEventListener)
         WorldManager.worldStateChangeEvent.removeListener(worldStateChangeEventListener)
         WorldManager.world.removeListener(worldStepEventListener)
+
+        val worldFile = File(filesDir, worldFileName)
+        WorldManager.saveToFile(worldFile)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

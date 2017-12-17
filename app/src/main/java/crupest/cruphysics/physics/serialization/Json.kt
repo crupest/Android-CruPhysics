@@ -9,6 +9,7 @@ import com.squareup.moshi.Moshi
  */
 
 val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()!!
+val objectAdapter = moshi.adapter<JsonObject>(Map::class.java)
 val mapper = Mapper()
 val unmapper = Unmapper()
 

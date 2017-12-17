@@ -6,10 +6,15 @@ import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
 import org.dyn4j.dynamics.World
+import java.io.File
 
 object WorldManager {
     val viewMatrix = Matrix()
     var world = World()
+        private set(value) {
+            field = value
+        }
+    val worldChangeEvent = Event<WorldChangeEventArgs>()
     val worldStateChangeEvent = Event<WorldStateChangeEventArgs>()
 
     private var task: ScheduleTask? = null
@@ -43,9 +48,20 @@ object WorldManager {
 
     fun fromJsonObject(obj: JsonObject) {
         if (obj.getStringProperty("version") == "1.0") {
+            val oldWorld = world
             world = unmapper.unmapWorld(obj.getObjectProperty("world"))
+            worldChangeEvent.raise(WorldChangeEventArgs(oldWorld, world))
             viewMatrix.set(unmapper.unmapMatrix(obj.getArrayProperty("view_matrix")))
+        } else {
+            throw RuntimeException("Unknown version.")
         }
-        throw RuntimeException("Unknown version.")
+    }
+
+    fun saveToFile(file: File) {
+        file.writeText(objectAdapter.toJson(toJsonObject()))
+    }
+
+    fun readFromFile(file: File) {
+        fromJsonObject(objectAdapter.fromJson(file.readText())!!)
     }
 }
