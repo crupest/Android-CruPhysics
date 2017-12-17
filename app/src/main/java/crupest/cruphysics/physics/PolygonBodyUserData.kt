@@ -48,7 +48,7 @@ class PolygonBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(bo
         }
 
     override fun toJsonObject(): JsonObject {
-        val shape = body.fixtures[0]
+        val shape = body.fixtures[0].shape
         if (shape is Polygon) {
             return basePropertyToJsonObject().plus(
                     "shape" to mapper.map(shape)

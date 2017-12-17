@@ -48,7 +48,7 @@ class RectangleBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(
         }
 
     override fun toJsonObject(): JsonObject {
-        val shape = body.fixtures[0]
+        val shape = body.fixtures[0].shape
         if (shape is Rectangle) {
             return basePropertyToJsonObject().plus(
                     "shape" to mapper.map(shape)
