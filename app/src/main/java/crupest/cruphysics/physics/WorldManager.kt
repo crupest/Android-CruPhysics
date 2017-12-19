@@ -64,4 +64,16 @@ object WorldManager {
     fun readFromFile(file: File) {
         fromJsonObject(objectAdapter.fromJson(file.readText())!!)
     }
+
+    fun createNewWorld() {
+        val oldWorld = world
+        world = World()
+        resetView()
+        worldChangeEvent.raise(WorldChangeEventArgs(oldWorld, world))
+    }
+
+    fun resetView() {
+        viewMatrix.reset()
+        viewMatrix.postScale(1.0f, -1.0f)
+    }
 }

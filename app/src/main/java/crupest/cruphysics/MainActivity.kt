@@ -106,6 +106,10 @@ class MainActivity : AppCompatActivity() {
                 WorldManager.pauseWorld()
                 return true
             }
+            R.id.create_new -> {
+                WorldManager.createNewWorld()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

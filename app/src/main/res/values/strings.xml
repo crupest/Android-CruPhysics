@@ -31,4 +31,6 @@
         <item>Delete</item>
         <item>Property</item>
     </string-array>
+
+    <string name="create_new">New</string>
 </resources>
