@@ -2,6 +2,7 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.ColorDrawable
 import android.support.v4.content.ContextCompat
@@ -106,6 +107,7 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
                 popupWindow.setBackgroundDrawable(ColorDrawable(
                         ContextCompat.getColor(context, R.color.menu_background)
                 ))
+                popupWindow.elevation = 5.0f
 
                 list.setOnItemClickListener { _, _, position, _ ->
                     when (position) {

@@ -45,7 +45,7 @@ class AddPolygonObjectFragment1 : Fragment() {
 
         val activity = context
         if (activity is IOptionMenuActivity) {
-            activity.optionMenu = R.menu.add_object_menu
+            activity.optionMenu = R.menu.add_polygon_object_menu1
             activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
         }
     }
