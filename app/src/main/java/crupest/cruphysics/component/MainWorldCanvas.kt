@@ -2,7 +2,6 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.ColorDrawable
 import android.support.v4.content.ContextCompat
