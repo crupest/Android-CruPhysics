@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddObjectActivity" />
+        <activity android:name=".WorldSettingsActivity"></activity>
     </application>
 
 </manifest>
