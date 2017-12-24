@@ -19,11 +19,13 @@ val Matrix.invertedMatrix: Matrix
         return matrix
     }
 
-fun Matrix.mapPoint(point: PointF): PointF {
-    val array = floatArrayOf(point.x, point.y)
+fun Matrix.mapPoint(x: Float, y: Float): PointF {
+    val array = floatArrayOf(x, y)
     this.mapPoints(array)
     return PointF(array[0], array[1])
 }
+
+fun Matrix.mapPoint(point: PointF): PointF = this.mapPoint(point.x, point.y)
 
 fun Matrix.mapPath(path: Path): Path {
     val result = Path()
