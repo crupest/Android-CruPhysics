@@ -33,4 +33,9 @@
     </string-array>
 
     <string name="create_new">New</string>
+
+    <string name="x">x</string>
+    <string name="y">y</string>
+    <string name="gravity">gravity</string>
+    <string name="settings">Settings</string>
 </resources>

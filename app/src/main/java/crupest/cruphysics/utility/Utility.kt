@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.PointF
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 
 /**
@@ -34,11 +36,11 @@ fun distance(p1: PointF, p2: PointF): Float {
  * @param context the context
  * @param message the message to show
  */
-fun createAlertDialog(context: Context, message: String) : AlertDialog {
+fun createAlertDialog(context: Context, message: String): AlertDialog {
     val builder = AlertDialog.Builder(context)
     builder.setMessage(message)
-    builder.setPositiveButton("Ok") {
-        dialog, _ -> dialog.dismiss()
+    builder.setPositiveButton("Ok") { dialog, _ ->
+        dialog.dismiss()
     }
     return builder.create()
 }
@@ -49,11 +51,11 @@ fun createAlertDialog(context: Context, message: String) : AlertDialog {
  * @param context the context
  * @param message the message to show
  */
-fun showAlertDialog(context: Context, message: String) : AlertDialog {
+fun showAlertDialog(context: Context, message: String): AlertDialog {
     val builder = AlertDialog.Builder(context)
     builder.setMessage(message)
-    builder.setPositiveButton("Ok") {
-        dialog, _ -> dialog.dismiss()
+    builder.setPositiveButton("Ok") { dialog, _ ->
+        dialog.dismiss()
     }
     return builder.show()
 }
@@ -68,9 +70,23 @@ fun showAlertDialog(context: Context, message: String) : AlertDialog {
  * @param radius the half length of the side of the square, default is <code>40.0f</code>
  * @return true if inside, otherwise false
  */
-fun hitTestSquare(x: Float, y: Float, centerX: Float, centerY: Float, radius: Float = 40.0f) : Boolean {
+fun hitTestSquare(x: Float, y: Float, centerX: Float, centerY: Float, radius: Float = 40.0f): Boolean {
     return x > centerX - radius &&
             x < centerX + radius &&
             y > centerY - radius &&
             y < centerY + radius
+}
+
+open class SimpleTextWatcher : TextWatcher {
+    override fun afterTextChanged(s: Editable?) {
+
+    }
+
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+    }
+
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+    }
 }

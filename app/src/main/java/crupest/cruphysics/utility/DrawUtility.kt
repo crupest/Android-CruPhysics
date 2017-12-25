@@ -63,10 +63,14 @@ fun Canvas.drawArrow(
         stroke: Paint = blackStrokePaint,
         fill: Paint = blackPaint
 ) {
-    val path = PathPool.obtain()
 
     val deltaX = end.x - start.x
     val deltaY = end.y - start.y
+
+    if (deltaX == 0.0f || deltaY == 0.0f)
+        return
+
+    val path = PathPool.obtain()
 
     val matrix = Matrix()
     matrix.postRotate(atan2(deltaY, deltaX))
@@ -83,6 +87,5 @@ fun Canvas.drawArrow(
 
     this.drawPath(path, fill)
     this.drawPath(path, stroke)
-
     PathPool.recycle(path)
 }

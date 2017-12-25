@@ -2,6 +2,7 @@ package crupest.cruphysics.physics.serialization
 
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
+import org.dyn4j.geometry.Vector2
 
 /**
  * Created by crupest on 2017/12/11.
@@ -9,7 +10,7 @@ import com.squareup.moshi.Moshi
  */
 
 val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()!!
-val objectAdapter = moshi.adapter<JsonObject>(Map::class.java)
+val objectAdapter = moshi.adapter<JsonObject>(Map::class.java)!!
 val mapper = Mapper()
 val unmapper = Unmapper()
 
@@ -75,4 +76,14 @@ fun JsonObject.getObjectProperty(name: String): JsonObject {
 fun JsonObject.getArrayProperty(name: String): JsonArray {
     val property = this[name] ?: throw UnmapException("Property \"$name\" doesn't exist.")
     return checkJsonArray(property) ?: throw UnmapException("Property \"$name\" is not of type array.")
+}
+
+fun Vector2.toJson(): String {
+    val adapter = moshi.adapter<Vector2>(Vector2::class.java)
+    return adapter.toJson(this)
+}
+
+fun vector2FromJson(json: String): Vector2 {
+    val adapter = moshi.adapter<Vector2>(Vector2::class.java)
+    return adapter.fromJson(json)!!
 }

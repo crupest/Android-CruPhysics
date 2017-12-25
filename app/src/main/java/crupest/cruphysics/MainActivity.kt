@@ -110,6 +110,10 @@ class MainActivity : AppCompatActivity() {
                 WorldManager.createNewWorld()
                 return true
             }
+            R.id.settings -> {
+                startActivity(Intent(this, WorldSettingsActivity::class.java))
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
