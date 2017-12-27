@@ -14,6 +14,7 @@ import crupest.cruphysics.physics.CircleBodyUserData
 import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.createAlertDialog
+import crupest.cruphysics.utility.getRandomColor
 import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
@@ -34,6 +35,8 @@ class AddCircleObjectFragment : AddObjectFragment() {
         commonObjectPropertyView.colorChangedEvent.addListener {
             worldCanvas?.color = it.newColor
         }
+
+        commonObjectPropertyView.color = getRandomColor()
 
         return rootView
     }

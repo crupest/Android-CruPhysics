@@ -12,6 +12,7 @@ import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.physics.PolygonBodyUserData
+import crupest.cruphysics.utility.getRandomColor
 import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
@@ -42,6 +43,8 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         commonObjectPropertyView.colorChangedEvent.addListener {
             worldCanvas?.color = it.newColor
         }
+
+        commonObjectPropertyView.color = getRandomColor()
 
         return rootView
     }

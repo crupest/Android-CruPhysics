@@ -49,9 +49,9 @@ class CommonObjectPropertyView : LinearLayout {
                     .density(12)
                     .setPositiveButton("ok") { _, selectedColor, _ ->
                         color = selectedColor
-                        colorChangedEvent.raise(ColorChangedEventArgs(selectedColor))
                     }
                     .setNegativeButton("cancel") { _, _ -> }
+                    .lightnessSliderOnly()
                     .build()
                     .show()
         }
@@ -128,5 +128,6 @@ class CommonObjectPropertyView : LinearLayout {
         set(value) {
             val view = findViewById<View>(R.id.color_block)
             view.background = ColorDrawable(value)
+            colorChangedEvent.raise(ColorChangedEventArgs(value))
         }
 }

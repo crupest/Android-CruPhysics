@@ -4,10 +4,12 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.Color
 import android.graphics.PointF
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import java.util.*
 
 /**
  * Created by crupest on 2017/11/2.
@@ -77,16 +79,10 @@ fun hitTestSquare(x: Float, y: Float, centerX: Float, centerY: Float, radius: Fl
             y < centerY + radius
 }
 
-open class SimpleTextWatcher : TextWatcher {
-    override fun afterTextChanged(s: Editable?) {
+val random = Random()
 
-    }
-
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-    }
-
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-    }
-}
+fun getRandomColor() : Int = Color.rgb(
+        random.nextInt(256),
+        random.nextInt(256),
+        random.nextInt(256)
+)
