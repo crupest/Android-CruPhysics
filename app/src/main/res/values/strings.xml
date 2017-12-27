@@ -21,6 +21,7 @@
     <string name="restitution">restitution</string>
     <string name="choose_number_of_sides_tip">Please choose the number of sides:</string>
     <string name="color">Color</string>
+    <string name="next">Next</string>
 
     <string-array name="object_type_list">
         <item>static</item>

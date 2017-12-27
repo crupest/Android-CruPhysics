@@ -1,6 +1,5 @@
 package crupest.cruphysics.fragment
 
-import android.content.Context
 import android.support.v4.app.Fragment
 import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.OptionMenuItemSelectedEventArgs

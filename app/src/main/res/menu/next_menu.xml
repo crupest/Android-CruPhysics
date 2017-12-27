@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/ok"
+        android:id="@+id/next"
         android:icon="@drawable/ic_arrow_forward_white_24dp"
-        android:title="@string/ok"
+        android:title="@string/next"
         app:showAsAction="always" />
 
 </menu>

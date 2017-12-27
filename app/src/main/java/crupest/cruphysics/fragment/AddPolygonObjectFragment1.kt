@@ -30,7 +30,7 @@ class AddPolygonObjectFragment1 : Fragment() {
     }
 
     private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
-        if (it.menuItem.itemId == R.id.ok) {
+        if (it.menuItem.itemId == R.id.next) {
             val activity = context as AddObjectActivity
             activity.navigateToFragment(AddPolygonObjectFragment2.newInstance(
                     numberPicker!!.value
@@ -45,7 +45,7 @@ class AddPolygonObjectFragment1 : Fragment() {
 
         val activity = context
         if (activity is IOptionMenuActivity) {
-            activity.optionMenu = R.menu.add_polygon_object_menu1
+            activity.optionMenu = R.menu.next_menu
             activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
         }
     }
