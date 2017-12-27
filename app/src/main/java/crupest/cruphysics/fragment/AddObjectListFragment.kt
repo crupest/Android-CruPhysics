@@ -21,9 +21,9 @@ class AddObjectListFragment : Fragment() {
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
         override fun getCount(): Int = 3
         override fun getItem(position: Int): Fragment = when (position) {
-            0 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.circle_object))
-            1 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.rectangle_object))
-            2 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.polygon_object))
+            0 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.circle_object), R.drawable.circle_object_sample)
+            1 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.rectangle_object), R.drawable.rectangle_object_sample)
+            2 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.polygon_object), R.drawable.polygon_object_sample)
             else -> throw RuntimeException("Out of range!")
         }
     }
