@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import android.widget.NumberPicker
 import crupest.cruphysics.AddObjectActivity
 import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.OptionMenuItemSelectedEventArgs
 
 import crupest.cruphysics.R
+import crupest.cruphysics.SingleFragmentActivity
 
 class AddPolygonObjectFragment1 : Fragment() {
 
@@ -29,24 +29,22 @@ class AddPolygonObjectFragment1 : Fragment() {
         return rootView
     }
 
-    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
-        if (it.menuItem.itemId == R.id.next) {
-            val activity = context as AddObjectActivity
-            activity.navigateToFragment(AddPolygonObjectFragment2.newInstance(
-                    numberPicker!!.value
-            ))
-            return@l true
-        }
-        return@l false
-    }
-
     override fun onResume() {
         super.onResume()
 
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = R.menu.next_menu
-            activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = l@ {
+                if (it.itemId == R.id.next) {
+                    if (activity is SingleFragmentActivity)
+                        activity.navigateToFragment(AddPolygonObjectFragment2.newInstance(
+                                numberPicker!!.value
+                        ))
+                    return@l true
+                }
+                return@l false
+            }
         }
     }
 
@@ -56,7 +54,7 @@ class AddPolygonObjectFragment1 : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = 0
-            activity.optionMenuItemSelectedEvent.removeListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = null
         }
     }
 }

@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.OptionMenuItemSelectedEventArgs
 
 import crupest.cruphysics.R
 import crupest.cruphysics.SingleFragmentActivity
@@ -28,20 +27,6 @@ class AddObjectListFragment : Fragment() {
         }
     }
 
-    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
-        if (it.menuItem.itemId == R.id.next) {
-            val pager = view!!.findViewById<ViewPager>(R.id.pager)
-            val activity = context as SingleFragmentActivity
-
-            when (pager.currentItem) {
-                0 -> activity.navigateToFragment(AddCircleObjectFragment())
-                1 -> activity.navigateToFragment(AddRectangleObjectFragment())
-                2 -> activity.navigateToFragment(AddPolygonObjectFragment1())
-            }
-            return@l true
-        }
-        return@l false
-    }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -61,7 +46,20 @@ class AddObjectListFragment : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = R.menu.next_menu
-            activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = l@ {
+                if (it.itemId == R.id.next) {
+                    if (activity is SingleFragmentActivity) {
+                        val pager = view!!.findViewById<ViewPager>(R.id.pager)
+                        when (pager.currentItem) {
+                            0 -> activity.navigateToFragment(AddCircleObjectFragment())
+                            1 -> activity.navigateToFragment(AddRectangleObjectFragment())
+                            2 -> activity.navigateToFragment(AddPolygonObjectFragment1())
+                        }
+                    }
+                    return@l true
+                }
+                return@l false
+            }
         }
     }
 
@@ -71,7 +69,7 @@ class AddObjectListFragment : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = 0
-            activity.optionMenuItemSelectedEvent.removeListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = null
         }
     }
 }

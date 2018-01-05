@@ -2,7 +2,6 @@ package crupest.cruphysics.fragment
 
 import android.support.v4.app.Fragment
 import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.OptionMenuItemSelectedEventArgs
 import crupest.cruphysics.R
 
 /**
@@ -21,21 +20,19 @@ abstract class AddObjectFragment : Fragment() {
      */
     protected abstract fun onOk()
 
-    private val onOptionMenuItemSelectedEventListener: (OptionMenuItemSelectedEventArgs) -> Boolean = l@ {
-        if (it.menuItem.itemId == R.id.ok) {
-            onOk()
-            return@l true
-        }
-        return@l false
-    }
-
     override fun onResume() {
         super.onResume()
 
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = R.menu.add_object_menu
-            activity.optionMenuItemSelectedEvent.addListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = l@ {
+                if (it.itemId == R.id.ok) {
+                    onOk()
+                    return@l true
+                }
+                return@l false
+            }
         }
     }
 
@@ -45,7 +42,7 @@ abstract class AddObjectFragment : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = 0
-            activity.optionMenuItemSelectedEvent.removeListener(onOptionMenuItemSelectedEventListener)
+            activity.optionMenuItemSelectedListener = null
         }
     }
 }

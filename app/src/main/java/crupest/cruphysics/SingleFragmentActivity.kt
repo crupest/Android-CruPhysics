@@ -24,7 +24,7 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
             invalidateOptionsMenu()
         }
 
-    final override val optionMenuItemSelectedEvent: ReturnEvent<OptionMenuItemSelectedEventArgs, Boolean> = ReturnEvent()
+    final override var optionMenuItemSelectedListener: ((MenuItem) -> Boolean)? = null
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         if (optionMenu != 0)
@@ -33,7 +33,10 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-            optionMenuItemSelectedEvent.raise(OptionMenuItemSelectedEventArgs(item!!)) ?: false
+            if (optionMenuItemSelectedListener != null)
+                optionMenuItemSelectedListener!!(item!!)
+            else
+                super.onOptionsItemSelected(item)
 
     fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean = true) {
         val transaction = supportFragmentManager.beginTransaction()
