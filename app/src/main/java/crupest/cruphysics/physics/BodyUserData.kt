@@ -19,12 +19,15 @@ abstract class BodyUserData(val body: Body) {
     protected fun basePropertyToJsonObject(): JsonObject {
         val fixture = body.fixtures[0]
         return mapOf(
+                "type" to mapper.map(body.mass.type),
                 "position" to mapper.map(body.transform.translation),
                 "rotation" to body.transform.rotation,
                 "color" to color,
                 "density" to fixture.density,
                 "friction" to fixture.friction,
-                "restitution" to fixture.restitution
+                "restitution" to fixture.restitution,
+                "linearVelocity" to mapper.map(body.linearVelocity),
+                "angularVelocity" to body.angularVelocity
         )
     }
 }

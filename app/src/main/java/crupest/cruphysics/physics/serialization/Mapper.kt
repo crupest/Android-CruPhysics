@@ -5,10 +5,7 @@ import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.utility.values
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
-import org.dyn4j.geometry.Circle
-import org.dyn4j.geometry.Polygon
-import org.dyn4j.geometry.Rectangle
-import org.dyn4j.geometry.Vector2
+import org.dyn4j.geometry.*
 
 /**
  * Created by crupest on 2017/12/15.
@@ -58,4 +55,10 @@ class Mapper {
         )
 
     fun map(matrix: Matrix): JsonArray = matrix.values
+
+    fun map(type: MassType): String = when (type) {
+        MassType.NORMAL -> "dynamic"
+        MassType.INFINITE -> "static"
+        else -> throw UnsupportedOperationException("Other mass types are not supported.")
+    }
 }

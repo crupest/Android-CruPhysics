@@ -71,6 +71,10 @@ class Unmapper {
         body.rotate(obj.getNumberProperty("rotation"))
         body.addFixture(fixture)
 
+        body.linearVelocity = unmapVector2(obj.getObjectProperty("linearVelocity"))
+        body.angularVelocity = obj.getNumberProperty("angularVelocity")
+        body.setMassType(unmapMassType(obj.getStringProperty("type")))
+
         val color = obj.getNumberProperty("color").toInt()
 
         body.userData = when (shape) {
@@ -89,8 +93,8 @@ class Unmapper {
         obj.getArrayProperty("bodies").map {
             unmapBody(checkJsonObject(it) ?: throw UnmapException("$it is not a JsonObject."))
         }.forEach {
-            world.addBody(it)
-        }
+                    world.addBody(it)
+                }
         return world
     }
 
@@ -104,5 +108,11 @@ class Unmapper {
             it.toFloat()
         }.toFloatArray())
         return matrix
+    }
+
+    fun unmapMassType(string: String): MassType = when (string) {
+        "dynamic" -> MassType.NORMAL
+        "static" -> MassType.INFINITE
+        else -> throw UnmapException("Unknown mass type.")
     }
 }
