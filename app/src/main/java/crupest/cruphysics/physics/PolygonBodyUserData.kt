@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.mapper
+import crupest.cruphysics.physics.serialization.mapper.map
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Polygon
 
@@ -51,7 +51,7 @@ class PolygonBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(bo
         val shape = body.fixtures[0].shape
         if (shape is Polygon) {
             return basePropertyToJsonObject().plus(
-                    "shape" to mapper.map(shape)
+                    "shape" to map(shape)
             )
         } else {
             throw UnsupportedOperationException("PolygonBodyUserData's related body is not a circle.")

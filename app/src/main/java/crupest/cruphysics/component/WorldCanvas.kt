@@ -9,7 +9,7 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.*
 import crupest.cruphysics.physics.BodyUserData
-import crupest.cruphysics.physics.WorldManager
+import crupest.cruphysics.physics.ViewWorld
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
@@ -21,6 +21,8 @@ import crupest.cruphysics.utility.mapPoint
 
 open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
+
+    lateinit var viewWorld: ViewWorld
 
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
@@ -38,18 +40,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         })
     }
 
-    val myMatrix = Matrix()
+    fun worldToView(point: PointF): PointF = viewWorld.viewMatrix.mapPoint(point)
 
-    fun worldToView(point: PointF): PointF = myMatrix.mapPoint(point)
-
-    fun viewToWorld(point: PointF): PointF = myMatrix.invertedMatrix.mapPoint(point)
+    fun viewToWorld(point: PointF): PointF = viewWorld.viewMatrix.invertedMatrix.mapPoint(point)
 
     override fun onDraw(canvas: Canvas?) {
         canvas!!.drawColor(Color.WHITE)
         canvas.save()
-        canvas.concat(myMatrix)
+        canvas.concat(viewWorld.viewMatrix)
 
-        for (body in WorldManager.world.bodies) {
+        for (body in viewWorld.world.bodies) {
             (body.userData as BodyUserData).draw(canvas)
         }
 
@@ -82,7 +82,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                                 event.getX(0) - oldPosition.x,
                                 event.getY(0) - oldPosition.y
                         )
-                        myMatrix.postConcat(matrix)
+                        viewWorld.viewMatrix.postConcat(matrix)
                         onViewMatrixChanged(matrix)
                         invalidate()
                     }
@@ -96,7 +96,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         val scale = newDistance / oldDistance
                         val matrix = Matrix()
                         matrix.postScale(scale, scale, width / 2.0f, height / 2.0f)
-                        myMatrix.postConcat(matrix)
+                        viewWorld.viewMatrix.postConcat(matrix)
                         onViewMatrixChanged(matrix)
                         invalidate()
                     }

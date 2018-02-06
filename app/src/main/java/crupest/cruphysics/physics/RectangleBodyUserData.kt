@@ -4,7 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import crupest.cruphysics.physics.serialization.JsonObject
-import crupest.cruphysics.physics.serialization.mapper
+import crupest.cruphysics.physics.serialization.mapper.map
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Rectangle
 
@@ -51,7 +51,7 @@ class RectangleBodyUserData(body: Body, color: Int = Color.BLUE) : BodyUserData(
         val shape = body.fixtures[0].shape
         if (shape is Rectangle) {
             return basePropertyToJsonObject().plus(
-                    "shape" to mapper.map(shape)
+                    "shape" to map(shape)
             )
         } else {
             throw UnsupportedOperationException("RectangleBodyUserData's related body is not a rectangle.")

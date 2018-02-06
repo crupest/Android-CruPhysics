@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.PopupWindow
 import crupest.cruphysics.R
-import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.ScheduleTask
@@ -77,9 +76,8 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
     @SuppressLint("InflateParams", "RtlHardcoded")
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {
-            val world = WorldManager.world
 
-            val body = world.bodies.find {
+            val body = viewWorld.world.bodies.find {
                 it.contains(viewToWorld(PointF(x, y)).toVec2())
             }
 
@@ -111,7 +109,7 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
                 list.setOnItemClickListener { _, _, position, _ ->
                     when (position) {
                         0 -> {
-                            world.removeBody(body)
+                            viewWorld.world.removeBody(body)
                             invalidate()
                         }
                     }

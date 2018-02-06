@@ -2,6 +2,7 @@ package crupest.cruphysics.physics
 
 import android.graphics.Matrix
 import android.graphics.PointF
+import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Transform
 import org.dyn4j.geometry.Vector2
 
@@ -18,3 +19,6 @@ fun Transform.toMatrix(): Matrix {
     matrix.preRotate(Math.toDegrees(this.rotation).toFloat())
     return matrix
 }
+
+val Body.positionDebugString: String
+    get() = "(${this.transform.translationX}, ${this.transform.translationY})"

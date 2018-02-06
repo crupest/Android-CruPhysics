@@ -42,9 +42,9 @@ fun setTimeout(seconds: Double, task: () -> Unit) : ScheduleTask {
 }
 
 fun setInterval(seconds: Double, task: () -> Unit) : ScheduleTask =
-        setInterval(seconds, task, true)
+        setInterval(seconds, true, task)
 
-fun setInterval(seconds: Double, task: () -> Unit, runNow: Boolean) : ScheduleTask {
+fun setInterval(seconds: Double, runNow: Boolean, task: () -> Unit) : ScheduleTask {
     return object : ScheduleTask {
         private val timer = Timer()
         private val timerTask = object : TimerTask() {

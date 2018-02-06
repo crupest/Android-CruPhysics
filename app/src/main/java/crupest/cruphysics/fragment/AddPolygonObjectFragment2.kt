@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
+import crupest.cruphysics.AddObjectActivity
 import crupest.cruphysics.R
-import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.component.AddPolygonObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
@@ -22,7 +21,7 @@ import org.dyn4j.geometry.Polygon
 class AddPolygonObjectFragment2 : AddObjectFragment() {
 
     private var sideCount: Int = 0
-    private var worldCanvas: AddPolygonObjectWorldCanvas? = null
+    private lateinit var worldCanvas: AddPolygonObjectWorldCanvas
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,18 +34,24 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.fragment_add_polygon_object_fragment2, container, false)
 
-        val worldCanvas = rootView.findViewById<AddPolygonObjectWorldCanvas>(R.id.world_canvas)
+        worldCanvas = rootView.findViewById(R.id.world_canvas)
         worldCanvas.sideCount = sideCount
-        this.worldCanvas = worldCanvas
 
         val commonObjectPropertyView = rootView.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
         commonObjectPropertyView.colorChangedEvent.addListener {
-            worldCanvas?.color = it.newColor
+            worldCanvas.color = it.newColor
         }
 
         commonObjectPropertyView.color = getRandomColor()
 
         return rootView
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        val a = context as AddObjectActivity
+        worldCanvas.viewWorld = a.viewWorld
     }
 
     override fun onOk() {
@@ -77,26 +82,14 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         body.addFixture(fixture)
         body.setMass(commonObjectPropertyView.massType)
         body.userData = PolygonBodyUserData(body, color = commonObjectPropertyView.color)
-        WorldManager.world.addBody(body)
-        activity.finish()
-    }
 
-    override fun onResume() {
-        super.onResume()
-
-        worldCanvas!!.myMatrix.set(WorldManager.viewMatrix)
-        worldCanvas!!.invalidate()
-
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        WorldManager.viewMatrix.set(worldCanvas!!.myMatrix)
+        val a = context as AddObjectActivity
+        a.viewWorld.world.addBody(body)
+        a.setResultAndFinish()
     }
 
     companion object {
-        private val ARG_SIDE_COUNT = "SideCount"
+        private const val ARG_SIDE_COUNT = "SideCount"
 
         /**
          * Use this factory method to create a new instance of

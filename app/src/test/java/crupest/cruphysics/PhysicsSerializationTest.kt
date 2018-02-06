@@ -2,6 +2,7 @@ package crupest.cruphysics
 
 import com.squareup.moshi.JsonAdapter
 import crupest.cruphysics.physics.serialization.*
+import crupest.cruphysics.physics.serialization.mapper.Mapper
 import org.dyn4j.geometry.Circle
 import org.dyn4j.geometry.Polygon
 import org.dyn4j.geometry.Vector2

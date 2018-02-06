@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import crupest.cruphysics.*
-
 import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.physics.RectangleBodyUserData
-import crupest.cruphysics.physics.WorldManager
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.getRandomColor
 import crupest.cruphysics.utility.showAlertDialog
@@ -21,7 +19,7 @@ import org.dyn4j.geometry.Rectangle
 
 class AddRectangleObjectFragment : AddObjectFragment() {
 
-    private var worldCanvas: AddRectangleObjectWorldCanvas? = null
+    private lateinit var worldCanvas: AddRectangleObjectWorldCanvas
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -31,7 +29,7 @@ class AddRectangleObjectFragment : AddObjectFragment() {
 
         val commonObjectPropertyView = rootView.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
         commonObjectPropertyView.colorChangedEvent.addListener {
-            worldCanvas?.color = it.newColor
+            worldCanvas.color = it.newColor
         }
 
         commonObjectPropertyView.color = getRandomColor()
@@ -39,8 +37,15 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         return rootView
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        val a = context as AddObjectActivity
+        worldCanvas.viewWorld = a.viewWorld
+    }
+
     override fun onOk() {
-        val rect = worldCanvas!!.worldRect
+        val rect = worldCanvas.worldRect
 
         if (rect.width == 0.0f) {
             val dialog = createAlertDialog(context, "The width can't be zero.")
@@ -78,22 +83,9 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         body.addFixture(fixture)
         body.setMass(commonObjectPropertyView.massType)
         body.userData = RectangleBodyUserData(body, color = commonObjectPropertyView.color)
-        WorldManager.world.addBody(body)
 
-        activity.finish()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        worldCanvas!!.myMatrix.set(WorldManager.viewMatrix)
-        worldCanvas!!.invalidate()
-
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        WorldManager.viewMatrix.set(worldCanvas!!.myMatrix)
+        val a = context as AddObjectActivity
+        a.viewWorld.world.addBody(body)
+        a.setResultAndFinish()
     }
 }
