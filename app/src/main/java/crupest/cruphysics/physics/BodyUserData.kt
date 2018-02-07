@@ -20,7 +20,6 @@ abstract class BodyUserData(val body: Body) {
     protected fun basePropertyToJsonObject(): JsonObject {
         val fixture = body.fixtures[0]
 
-        Log.d("BodyUserData", "The body position is ${body.positionDebugString}")
         return mapOf(
                 "type" to map(body.mass.type),
                 "position" to map(body.transform.translation),

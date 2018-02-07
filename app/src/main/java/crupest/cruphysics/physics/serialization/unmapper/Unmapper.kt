@@ -68,7 +68,6 @@ fun unmapBody(obj: JsonObject): Body {
 
     val body = Body()
     body.translate(unmapVector2(obj.getObjectProperty("position")))
-    Log.d("Unmapper", "The body position is ${body.positionDebugString}.")
     body.rotate(obj.getNumberProperty("rotation"))
     body.addFixture(fixture)
 
