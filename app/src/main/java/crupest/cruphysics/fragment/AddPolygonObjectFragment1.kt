@@ -17,9 +17,9 @@ class AddPolygonObjectFragment1 : Fragment() {
 
     private var numberPicker: NumberPicker? = null
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_add_polygon_object_fragment1, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_polygon_object_fragment1, container, false)
 
         val numberPicker = rootView.findViewById<NumberPicker>(R.id.number_picker)
         numberPicker.minValue = 3

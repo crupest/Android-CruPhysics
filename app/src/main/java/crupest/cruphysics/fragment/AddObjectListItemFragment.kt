@@ -20,14 +20,14 @@ class AddObjectListItemFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            name = arguments.getString(ARG_NAME)
-            imageSrc = arguments.getInt(ARG_IMAGE_SRC)
+            name = arguments!!.getString(ARG_NAME)
+            imageSrc = arguments!!.getInt(ARG_IMAGE_SRC)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_add_object_list_item, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_object_list_item, container, false)
 
         val nameText = rootView.findViewById<TextView>(R.id.name)
         val image = rootView.findViewById<ImageView>(R.id.image)

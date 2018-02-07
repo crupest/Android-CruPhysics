@@ -26,9 +26,9 @@ class AddCircleObjectFragment : AddObjectFragment() {
 
     private lateinit var worldCanvas: AddCircleObjectWorldCanvas
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(
+        val rootView = inflater.inflate(
                 R.layout.fragment_add_circle_object, container, false)
         worldCanvas = rootView.findViewById(R.id.world_canvas)
 
@@ -52,7 +52,7 @@ class AddCircleObjectFragment : AddObjectFragment() {
     override fun onOk() {
         val radius = worldCanvas.worldRadius
         if (radius == 0.0f) {
-            val dialog = createAlertDialog(context, "Radius can't be zero.")
+            val dialog = createAlertDialog(context!!, "Radius can't be zero.")
             dialog.show()
             return
         }
@@ -69,7 +69,7 @@ class AddCircleObjectFragment : AddObjectFragment() {
             fixture.friction = commonObjectPropertyView.friction
             fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
-            showAlertDialog(context, e.message!!)
+            showAlertDialog(context!!, e.message!!)
             return
         }
 

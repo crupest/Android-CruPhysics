@@ -26,13 +26,13 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            sideCount = arguments.getInt(ARG_SIDE_COUNT)
+            sideCount = arguments!!.getInt(ARG_SIDE_COUNT)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_add_polygon_object_fragment2, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_polygon_object_fragment2, container, false)
 
         worldCanvas = rootView.findViewById(R.id.world_canvas)
         worldCanvas.sideCount = sideCount
@@ -62,7 +62,7 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
         try {
             shape = worldCanvas.generatePolygon()
         } catch (e: IllegalArgumentException) {
-            showAlertDialog(context, e.message.orEmpty())
+            showAlertDialog(context!!, e.message.orEmpty())
             return
         }
 
@@ -75,7 +75,7 @@ class AddPolygonObjectFragment2 : AddObjectFragment() {
             fixture.friction = commonObjectPropertyView.friction
             fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
-            showAlertDialog(context, e.message!!)
+            showAlertDialog(context!!, e.message!!)
             return
         }
 

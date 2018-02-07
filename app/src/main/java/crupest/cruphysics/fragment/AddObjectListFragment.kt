@@ -20,17 +20,17 @@ class AddObjectListFragment : Fragment() {
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
         override fun getCount(): Int = 3
         override fun getItem(position: Int): Fragment = when (position) {
-            0 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.circle_object), R.drawable.circle_object_sample)
-            1 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.rectangle_object), R.drawable.rectangle_object_sample)
-            2 -> AddObjectListItemFragment.newInstance(context.resources.getString(R.string.polygon_object), R.drawable.polygon_object_sample)
+            0 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.circle_object), R.drawable.circle_object_sample)
+            1 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_object), R.drawable.rectangle_object_sample)
+            2 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.polygon_object), R.drawable.polygon_object_sample)
             else -> throw RuntimeException("Out of range!")
         }
     }
 
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(R.layout.fragment_add_object_list, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_object_list, container, false)
 
         val viewPager = rootView.findViewById<ViewPager>(R.id.pager)
 

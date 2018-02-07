@@ -21,9 +21,9 @@ class AddRectangleObjectFragment : AddObjectFragment() {
 
     private lateinit var worldCanvas: AddRectangleObjectWorldCanvas
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater!!.inflate(
+        val rootView = inflater.inflate(
                 R.layout.fragment_add_rectangle_object, container, false)
         worldCanvas = rootView.findViewById(R.id.world_canvas)
 
@@ -48,13 +48,13 @@ class AddRectangleObjectFragment : AddObjectFragment() {
         val rect = worldCanvas.worldRect
 
         if (rect.width == 0.0f) {
-            val dialog = createAlertDialog(context, "The width can't be zero.")
+            val dialog = createAlertDialog(context!!, "The width can't be zero.")
             dialog.show()
             return
         }
 
         if (rect.height == 0.0f) {
-            val dialog = createAlertDialog(context, "The height can't be zero.")
+            val dialog = createAlertDialog(context!!, "The height can't be zero.")
             dialog.show()
             return
         }
@@ -76,7 +76,7 @@ class AddRectangleObjectFragment : AddObjectFragment() {
             fixture.friction = commonObjectPropertyView.friction
             fixture.restitution = commonObjectPropertyView.restitution
         } catch (e: FixturePropertyExtractException) {
-            showAlertDialog(context, e.message!!)
+            showAlertDialog(context!!, e.message!!)
             return
         }
 
