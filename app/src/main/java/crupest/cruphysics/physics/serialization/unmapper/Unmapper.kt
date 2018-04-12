@@ -1,7 +1,6 @@
 package crupest.cruphysics.physics.serialization.unmapper
 
 import android.graphics.Matrix
-import android.util.Log
 import crupest.cruphysics.physics.*
 import crupest.cruphysics.physics.serialization.*
 import org.dyn4j.dynamics.Body

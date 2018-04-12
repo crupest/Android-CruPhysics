@@ -33,11 +33,13 @@ fun map(rectangle: Rectangle): JsonObject = mapOf(
         "height" to rectangle.height
 )
 
+fun map(vertices: Array<Vector2>): JsonArray = vertices.map {
+    map(it)
+}
+
 fun map(polygon: Polygon): JsonObject = mapOf(
         "type" to "polygon",
-        "vertices" to polygon.vertices.map {
-            map(it)
-        }
+        "vertices" to map(polygon.vertices)
 )
 
 fun map(body: Body): JsonObject {
@@ -49,12 +51,14 @@ fun map(body: Body): JsonObject {
     }
 }
 
+fun map(bodies: List<Body>): JsonArray = bodies.map {
+    map(it)
+}
+
 fun map(world: World): JsonObject =
         mapOf(
-                "gravity" to crupest.cruphysics.physics.serialization.mapper.map(world.gravity),
-                "bodies" to world.bodies.map {
-                    crupest.cruphysics.physics.serialization.mapper.map(it)
-                }
+                "gravity" to map(world.gravity),
+                "bodies" to map(world.bodies)
         )
 
 fun map(matrix: Matrix): JsonArray = matrix.values
