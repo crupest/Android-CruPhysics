@@ -3,7 +3,6 @@ package crupest.cruphysics.component
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import crupest.cruphysics.MyRectF
 import crupest.cruphysics.utility.mapPoint
 
 /**
@@ -12,6 +11,33 @@ import crupest.cruphysics.utility.mapPoint
  */
 class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     : AddObjectWorldCanvas(context, attrs) {
+
+    /**
+     * A rect in double-precision.
+     * What is different from [android.graphics.RectF] is
+     * the [top] is on top of (in other words, bigger than) [bottom].
+     * This is used for create rectangle in physics engine.
+     */
+    class Rect(
+            var left: Float = 0.0f,
+            var top: Float = 0.0f,
+            var right: Float = 0.0f,
+            var bottom: Float = 0.0f) {
+
+        val width: Float
+            get() = right - left
+
+        val height: Float
+            get() = top - bottom
+
+        val centerX: Float
+            get() = (left + right) / 2.0f
+
+        val centerY: Float
+            get() = (top + bottom) / 2.0f
+    }
+
+
 
     private val path = Path()
     private val objectPaint = Paint()
@@ -89,11 +115,11 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         onControllerMove()
     }
 
-    val worldRect: MyRectF
+    val worldRect: Rect
         get() {
             val lefttop = viewToWorld(positionController.position)
             val rightbottom = viewToWorld(sizeController.position)
-            return MyRectF(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y)
+            return Rect(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y)
         }
 
     var color: Int
