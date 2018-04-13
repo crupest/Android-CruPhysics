@@ -1,7 +1,6 @@
 package crupest.cruphysics.physics
 
 import android.graphics.Canvas
-import android.util.Log
 import crupest.cruphysics.physics.serialization.JsonObject
 import crupest.cruphysics.physics.serialization.mapper.map
 import org.dyn4j.dynamics.Body

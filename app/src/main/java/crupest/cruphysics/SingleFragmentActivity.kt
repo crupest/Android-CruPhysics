@@ -16,6 +16,7 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_single_fragment)
+        setSupportActionBar(findViewById(R.id.tool_bar))
     }
 
     final override var optionMenu: Int = 0

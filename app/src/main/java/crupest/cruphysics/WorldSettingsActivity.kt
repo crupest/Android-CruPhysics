@@ -18,6 +18,7 @@ class WorldSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_world_settings)
+        setSupportActionBar(findViewById(R.id.tool_bar))
 
         val transaction = fragmentManager.beginTransaction()
         transaction.add(R.id.content, SettingsFragment())
