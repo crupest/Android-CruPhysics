@@ -66,8 +66,8 @@ fun unmapBody(obj: JsonObject): Body {
     fixture.restitution = obj.getNumberProperty("restitution")
 
     val body = Body()
-    body.translate(unmapVector2(obj.getObjectProperty("position")))
     body.rotate(obj.getNumberProperty("rotation"))
+    body.translate(unmapVector2(obj.getObjectProperty("position")))
     body.addFixture(fixture)
 
     body.linearVelocity = unmapVector2(obj.getObjectProperty("linearVelocity"))
