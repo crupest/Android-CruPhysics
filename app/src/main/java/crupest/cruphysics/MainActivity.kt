@@ -9,8 +9,10 @@ import android.view.Menu
 import android.view.MenuItem
 import crupest.cruphysics.component.WorldCanvas
 import crupest.cruphysics.physics.ViewWorld
-import crupest.cruphysics.physics.serialization.JsonParser
+import crupest.cruphysics.physics.serialization.fromJson
 import crupest.cruphysics.physics.serialization.mapper.map
+import crupest.cruphysics.physics.serialization.parseAsJsonObject
+import crupest.cruphysics.physics.serialization.toJson
 import crupest.cruphysics.physics.serialization.unmapper.unmapViewWorld
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
@@ -31,7 +33,6 @@ class MainActivity : AppCompatActivity() {
         const val SETTINGS_REQUEST_CODE = 2001
     }
 
-    private val json = JsonParser()
     private lateinit var worldCanvas: WorldCanvas
     private var viewWorld: ViewWorld = ViewWorld()
         set(value) {
@@ -57,9 +58,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun Vector2.toJson(): String = json.moshi.adapter(Vector2::class.java).toJson(this)
-    private fun String.toVector2(): Vector2 = json.moshi.adapter(Vector2::class.java).fromJson(this)!!
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
             val intent = Intent(this, AddObjectActivity::class.java)
-            intent.putExtra(ARG_WORLD, json.objectAdapter.toJson(map(viewWorld)))
+            intent.putExtra(ARG_WORLD, map(viewWorld).toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
         worldCanvas = findViewById(R.id.world_canvas)
@@ -83,8 +81,7 @@ class MainActivity : AppCompatActivity() {
         if (!noUpdateWorld) {
             val worldFile = File(filesDir, WORLD_FILE_NAME)
             if (worldFile.exists()) {
-                val o = json.objectAdapter.fromJson(worldFile.readText())
-                viewWorld = unmapViewWorld(o!!)
+                viewWorld = unmapViewWorld(worldFile.readText().parseAsJsonObject()!!)
             }
         }
 
@@ -102,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         pauseWorld()
 
         val worldFile = File(filesDir, WORLD_FILE_NAME)
-        worldFile.writeText(json.objectAdapter.toJson(map(viewWorld)))
+        worldFile.writeText(map(viewWorld).toJson())
     }
 
     override fun onDestroy() {
@@ -143,11 +140,11 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ADD_OBJECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val s = data!!.getStringExtra(AddObjectActivity.RESULT_WORLD)
-            viewWorld = unmapViewWorld(json.objectAdapter.fromJson(s)!!)
+            viewWorld = unmapViewWorld(s.parseAsJsonObject()!!)
             noUpdateWorld = true
         } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val s = data!!.getStringExtra(WorldSettingsActivity.RESULT_GRAVITY)
-            newGravity = s.toVector2()
+            newGravity = s.fromJson()
         }
     }
 

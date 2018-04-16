@@ -1,11 +1,8 @@
 package crupest.cruphysics.utility
 
-import android.annotation.SuppressLint
 import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.PointF
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
 
 /**
  * Created by crupest on 2017/11/16.
@@ -39,18 +36,3 @@ val Matrix.values: List<Float>
         this.getValues(array)
         return array.asList()
     }
-
-@SuppressLint("ParcelCreator")
-@Parcelize
-class ParcelableMatrix(val values: FloatArray = FloatArray(9)) : Parcelable {
-
-    constructor(matrix: Matrix) : this(FloatArray(9)) {
-        matrix.getValues(values)
-    }
-
-    fun toMatrix(): Matrix {
-        val matrix = Matrix()
-        matrix.setValues(values)
-        return matrix
-    }
-}

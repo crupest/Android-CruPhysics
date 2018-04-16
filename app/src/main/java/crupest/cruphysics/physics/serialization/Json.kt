@@ -11,10 +11,20 @@ import crupest.cruphysics.physics.serialization.unmapper.UnmapException
 
 fun createDefaultKotlinMoshi(): Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()!!
 
-class JsonParser {
+object JsonParser {
     val moshi = createDefaultKotlinMoshi()
     val objectAdapter = moshi.adapter<JsonObject>(Map::class.java)!!
 }
+
+
+fun JsonObject.toJson(): String = JsonParser.objectAdapter.toJson(this)
+fun String.parseAsJsonObject(): JsonObject? = JsonParser.objectAdapter.fromJson(this)
+
+inline fun <reified T> T.toJson(): String =
+        JsonParser.moshi.adapter<T>(T::class.java).toJson(this)
+
+inline fun <reified T> String.fromJson(): T? =
+        JsonParser.moshi.adapter<T>(T::class.java).fromJson(this)
 
 typealias JsonObject = Map<String, Any>
 typealias JsonArray = List<Any>

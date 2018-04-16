@@ -1,8 +1,6 @@
 package crupest.cruphysics.fragment
 
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +13,7 @@ import crupest.cruphysics.component.FixturePropertyExtractException
 import crupest.cruphysics.physics.CircleBodyUserData
 import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.createAlertDialog
-import crupest.cruphysics.utility.getRandomColor
+import crupest.cruphysics.utility.generateRandomColor
 import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
@@ -37,7 +35,7 @@ class AddCircleObjectFragment : AddObjectFragment() {
             worldCanvas.color = it.newColor
         }
 
-        commonObjectPropertyView.color = getRandomColor()
+        commonObjectPropertyView.color = generateRandomColor()
 
         return rootView
     }

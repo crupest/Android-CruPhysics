@@ -4,8 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import crupest.cruphysics.fragment.AddObjectListFragment
 import crupest.cruphysics.physics.ViewWorld
-import crupest.cruphysics.physics.serialization.JsonParser
 import crupest.cruphysics.physics.serialization.mapper.map
+import crupest.cruphysics.physics.serialization.parseAsJsonObject
+import crupest.cruphysics.physics.serialization.toJson
 import crupest.cruphysics.physics.serialization.unmapper.unmapViewWorld
 
 class AddObjectActivity : SingleFragmentActivity() {
@@ -15,7 +16,6 @@ class AddObjectActivity : SingleFragmentActivity() {
         const val RESULT_WORLD = "WORLD"
     }
 
-    val json = JsonParser()
     lateinit var viewWorld: ViewWorld
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,8 +26,7 @@ class AddObjectActivity : SingleFragmentActivity() {
         } else {
             savedInstanceState.getString(ARG_WORLD)
         }
-        val o = json.objectAdapter.fromJson(s)!!
-        viewWorld = unmapViewWorld(o)
+        viewWorld = unmapViewWorld(s.parseAsJsonObject())
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
@@ -39,7 +38,7 @@ class AddObjectActivity : SingleFragmentActivity() {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
-        outState!!.putString(ARG_WORLD, json.objectAdapter.toJson(map(viewWorld)))
+        outState!!.putString(ARG_WORLD, map(viewWorld).toJson())
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -49,7 +48,7 @@ class AddObjectActivity : SingleFragmentActivity() {
 
     fun setResultAndFinish() {
         val result = Intent()
-        result.putExtra(AddObjectActivity.RESULT_WORLD, json.objectAdapter.toJson(map(viewWorld)))
+        result.putExtra(AddObjectActivity.RESULT_WORLD, map(viewWorld).toJson())
         setResult(RESULT_OK, result)
         finish()
     }

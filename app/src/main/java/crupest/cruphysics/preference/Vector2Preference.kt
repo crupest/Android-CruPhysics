@@ -15,8 +15,9 @@ import crupest.cruphysics.R
 import org.dyn4j.geometry.Vector2
 import android.os.Parcel
 import android.os.Parcelable
-import crupest.cruphysics.physics.serialization.JsonParser
 import crupest.cruphysics.physics.serialization.createDefaultKotlinMoshi
+import crupest.cruphysics.physics.serialization.fromJson
+import crupest.cruphysics.physics.serialization.toJson
 
 
 /**
@@ -34,7 +35,6 @@ class Vector2Preference(context: Context, attributeSet: AttributeSet) : DialogPr
         }
     }
 
-    private val json = JsonParser()
     private val myVector = Vector2()
 
     private var widgetText: TextView? = null
@@ -48,9 +48,6 @@ class Vector2Preference(context: Context, attributeSet: AttributeSet) : DialogPr
 
         widgetLayoutResource = R.layout.vector_preference_widget
     }
-
-    private fun Vector2.toJson(): String = json.moshi.adapter(Vector2::class.java).toJson(this)
-    private fun String.toVector2(): Vector2 = json.moshi.adapter(Vector2::class.java).fromJson(this)!!
 
     @SuppressLint("SetTextI18n")
     private fun updateWidget() {
@@ -101,14 +98,15 @@ class Vector2Preference(context: Context, attributeSet: AttributeSet) : DialogPr
 
     override fun onSetInitialValue(restorePersistedValue: Boolean, defaultValue: Any?) {
         if (restorePersistedValue) {
-            myVector.set(getPersistedString(DEFAULT_VALUE).toVector2())
+            myVector.set(getPersistedString(DEFAULT_VALUE).fromJson())
         } else {
             myVector.set(0.0, 0.0)
             persistString(myVector.toString())
         }
     }
 
-    override fun onGetDefaultValue(a: TypedArray?, index: Int): Any = a!!.getString(index).toVector2()
+    override fun onGetDefaultValue(a: TypedArray?, index: Int): Any =
+            a!!.getString(index).fromJson()!!
 
     override fun onSaveInstanceState(): Parcelable {
         val superState = super.onSaveInstanceState()
