@@ -30,9 +30,8 @@ fun Matrix.mapPath(path: Path): Path {
     return result
 }
 
-val Matrix.values: List<Float>
-    get() {
-        val array = FloatArray(9)
-        this.getValues(array)
-        return array.asList()
-    }
+fun Matrix.getValues(): FloatArray {
+    val array = FloatArray(9)
+    this.getValues(array)
+    return array
+}

@@ -67,9 +67,10 @@ class CommonObjectPropertyView : LinearLayout {
         get() {
             val density: Double
             try {
-                density = findViewById<ObjectPropertyView>(R.id.density_property_view).propertyValue.toString().toDouble()
+                density = findViewById<ObjectPropertyView>(R.id.density_property_view)
+                        .propertyValue.toString().toDouble()
             } catch (e: NumberFormatException) {
-                throw FixturePropertyExtractException("density")
+                throw FixturePropertyExtractException("density", e)
             }
             if (density <= 0.0)
                 throw FixturePropertyExtractException("density")
@@ -88,7 +89,7 @@ class CommonObjectPropertyView : LinearLayout {
             try {
                 friction = findViewById<ObjectPropertyView>(R.id.friction_property_view).propertyValue.toString().toDouble()
             } catch (e: NumberFormatException) {
-                throw FixturePropertyExtractException("friction")
+                throw FixturePropertyExtractException("friction", e)
             }
             if (friction < 0.0)
                 throw FixturePropertyExtractException("friction")
@@ -107,7 +108,7 @@ class CommonObjectPropertyView : LinearLayout {
             try {
                 restitution = findViewById<ObjectPropertyView>(R.id.restitution_property_view).propertyValue.toString().toDouble()
             } catch (e: NumberFormatException) {
-                throw FixturePropertyExtractException("restitution")
+                throw FixturePropertyExtractException("restitution", e)
             }
             if (restitution < 0.0)
                 throw FixturePropertyExtractException("restitution")

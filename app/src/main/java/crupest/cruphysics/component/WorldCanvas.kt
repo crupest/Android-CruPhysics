@@ -7,22 +7,25 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.util.AttributeSet
-import android.view.*
-import crupest.cruphysics.physics.BodyUserData
-import crupest.cruphysics.physics.ViewWorld
+import android.view.MotionEvent
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+import crupest.cruphysics.physics.createWorldViewMatrix
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
 
 /**
  * Created by crupest on 2017/11/4.
- * View component WorldCanvas
+ * View component [WorldCanvas]
  */
 
 open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
 
-    lateinit var viewWorld: ViewWorld
+    lateinit var drawWorldDelegate: IDrawWorldDelegate
+
+    private val viewMatrix: Matrix = createWorldViewMatrix()
 
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
@@ -40,19 +43,17 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         })
     }
 
-    fun worldToView(point: PointF): PointF = viewWorld.viewMatrix.mapPoint(point)
+    fun PointF.worldToView(): PointF = worldToView(this.x, this.y)
+    fun worldToView(x: Float, y: Float): PointF = viewMatrix.mapPoint(x, y)
 
-    fun viewToWorld(point: PointF): PointF = viewWorld.viewMatrix.invertedMatrix.mapPoint(point)
+    fun PointF.viewToWorld(): PointF = viewToWorld(this.x, this.y)
+    fun viewToWorld(x: Float, y: Float): PointF = viewMatrix.invertedMatrix.mapPoint(x, y)
 
     override fun onDraw(canvas: Canvas?) {
         canvas!!.drawColor(Color.WHITE)
         canvas.save()
-        canvas.concat(viewWorld.viewMatrix)
-
-        for (body in viewWorld.world.bodies) {
-            (body.userData as BodyUserData).draw(canvas)
-        }
-
+        canvas.concat(viewMatrix)
+        drawWorldDelegate.draw(canvas)
         canvas.restore()
     }
 
@@ -62,10 +63,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
         fun recordPointerPosition(index: Int) {
-            val position = previousPointerPositionMap.getOrPut(event!!.getPointerId(index)) {
+            previousPointerPositionMap.getOrPut(event!!.getPointerId(index)) {
                 PointF()
-            }
-            position.set(event.getX(index), event.getY(index))
+            }.set(event.getX(index), event.getY(index))
         }
 
         when (event!!.actionMasked) {
@@ -76,14 +76,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             MotionEvent.ACTION_MOVE, MotionEvent.ACTION_OUTSIDE -> {
                 when (event.pointerCount) {
                     1 -> {
-                        val oldPosition = previousPointerPositionMap[event.getPointerId(0)]!!
-                        val matrix = Matrix()
-                        matrix.postTranslate(
-                                event.getX(0) - oldPosition.x,
-                                event.getY(0) - oldPosition.y
-                        )
-                        viewWorld.viewMatrix.postConcat(matrix)
-                        onViewMatrixChanged(matrix)
+                        val postMatrix = previousPointerPositionMap[event.getPointerId(0)]!!.run {
+                            Matrix().apply {
+                                postTranslate(
+                                        event.getX(0) - this@run.x,
+                                        event.getY(0) - this@run.y
+                                )
+                            }
+                        }
+                        viewMatrix.postConcat(postMatrix)
+                        onViewMatrixChanged(postMatrix)
                         invalidate()
                     }
                     2 -> {
@@ -94,9 +96,10 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         val newPosition2 = PointF(event.getX(1), event.getY(1))
                         val newDistance = distance(newPosition1, newPosition2)
                         val scale = newDistance / oldDistance
-                        val matrix = Matrix()
-                        matrix.postScale(scale, scale, width / 2.0f, height / 2.0f)
-                        viewWorld.viewMatrix.postConcat(matrix)
+                        val matrix = Matrix().apply {
+                            postScale(scale, scale, width / 2.0f, height / 2.0f)
+                        }
+                        viewMatrix.postConcat(matrix)
                         onViewMatrixChanged(matrix)
                         invalidate()
                     }
@@ -113,7 +116,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         return super.onTouchEvent(event)
     }
 
-    // matrix: the matrix post-concat
+    /**
+     *  @param matrix the matrix post-concat
+     */
     protected open fun onViewMatrixChanged(matrix: Matrix) {
 
     }

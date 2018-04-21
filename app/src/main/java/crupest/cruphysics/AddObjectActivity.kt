@@ -3,10 +3,8 @@ package crupest.cruphysics
 import android.content.Intent
 import android.os.Bundle
 import crupest.cruphysics.fragment.AddObjectListFragment
-import crupest.cruphysics.physics.ViewWorld
 import crupest.cruphysics.physics.serialization.mapper.map
 import crupest.cruphysics.physics.serialization.parseAsJsonObject
-import crupest.cruphysics.physics.serialization.toJson
 import crupest.cruphysics.physics.serialization.unmapper.unmapViewWorld
 
 class AddObjectActivity : SingleFragmentActivity() {
@@ -16,8 +14,6 @@ class AddObjectActivity : SingleFragmentActivity() {
         const val RESULT_WORLD = "WORLD"
     }
 
-    lateinit var viewWorld: ViewWorld
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -26,7 +22,7 @@ class AddObjectActivity : SingleFragmentActivity() {
         } else {
             savedInstanceState.getString(ARG_WORLD)
         }
-        viewWorld = unmapViewWorld(s.parseAsJsonObject())
+        viewWorld = unmapViewWorld(s.parseAsJsonObject()!!)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)

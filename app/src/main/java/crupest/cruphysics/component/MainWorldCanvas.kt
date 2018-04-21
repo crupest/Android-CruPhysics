@@ -15,7 +15,6 @@ import android.widget.ListView
 import android.widget.PopupWindow
 import crupest.cruphysics.R
 import crupest.cruphysics.utility.hitTestSquare
-import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setTimeout
 
@@ -27,6 +26,8 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
 
     private var singleLongTouchTimerTask: ScheduleTask? = null
     private var singleLongTouchDownPosition: PointF? = null
+
+    lateinit var mainWorldDelegate: IMainWorldDelegate
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -76,9 +77,8 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
     @SuppressLint("InflateParams", "RtlHardcoded")
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {
-
-            val body = viewWorld.world.bodies.find {
-                it.contains(viewToWorld(PointF(x, y)).toVec2())
+            val body = viewToWorld(x, y).run {
+                mainWorldDelegate.bodyHitTest(this.x.toDouble(), this.y.toDouble())
             }
 
             if (body != null) {
@@ -99,19 +99,16 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
                         500,
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         true
-                )
-
-                popupWindow.setBackgroundDrawable(ColorDrawable(
-                        ContextCompat.getColor(context, R.color.menu_background)
-                ))
-                popupWindow.elevation = 5.0f
+                ).apply {
+                    this.setBackgroundDrawable(ColorDrawable(
+                            ContextCompat.getColor(context, R.color.menu_background)
+                    ))
+                    this.elevation = 5.0f
+                }
 
                 list.setOnItemClickListener { _, _, position, _ ->
                     when (position) {
-                        0 -> {
-                            viewWorld.world.removeBody(body)
-                            invalidate()
-                        }
+                        0 -> mainWorldDelegate.onRemoveBody(body)
                     }
                     popupWindow.dismiss()
                 }

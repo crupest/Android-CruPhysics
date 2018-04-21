@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceFragment
 import android.support.v7.app.AppCompatActivity
-import crupest.cruphysics.physics.serialization.fromJson
-import crupest.cruphysics.physics.serialization.toJson
+import crupest.cruphysics.serialization.fromJson
+import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.preference.Vector2Preference
 import org.dyn4j.geometry.Vector2
 

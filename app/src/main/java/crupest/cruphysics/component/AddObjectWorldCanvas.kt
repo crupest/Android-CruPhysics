@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
+import org.dyn4j.geometry.Convex
+import org.dyn4j.geometry.Vector2
 
 /**
  * Created by crupest on 2017/11/4.
@@ -33,9 +35,20 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     protected abstract val controllers: Array<Controller>
     private var init = false
+    protected val objectPaint: Paint = Paint().apply { this.color = Color.BLUE }
+    protected val objectBorderPaint: Paint = Paint().apply {
+        this.style = Paint.Style.STROKE
+        this.color = Color.BLACK
+        this.strokeWidth = 3.0f
+    }
 
-    private val controllerPaint = Paint()
-    private val controllerBorderPaint = Paint()
+    private val controllerPaint: Paint = Paint().apply {
+        this.color = Color.WHITE
+    }
+    private val controllerBorderPaint = Paint().apply {
+        this.style = Paint.Style.STROKE
+        this.color = Color.BLACK
+    }
 
     private var draggedControllerIndex = -1
     private val draggedController: Controller
@@ -47,12 +60,6 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
             controllers.indexOfFirst { it.hitTest(x, y, false) }
         else
             strictResult
-    }
-
-    init {
-        controllerPaint.color = Color.WHITE
-        controllerBorderPaint.style = Paint.Style.STROKE
-        controllerBorderPaint.color = Color.BLACK
     }
 
     //Remember to call this to draw controllers.
@@ -100,4 +107,13 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
             init = true
         }
     }
+
+    abstract fun generateShapeAndPosition(): ShapeAndPosition
+
+    var color: Int
+        get() = objectPaint.color
+        set(value) {
+            objectPaint.color = value
+            invalidate()
+        }
 }

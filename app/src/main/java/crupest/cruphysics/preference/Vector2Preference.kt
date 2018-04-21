@@ -15,9 +15,9 @@ import crupest.cruphysics.R
 import org.dyn4j.geometry.Vector2
 import android.os.Parcel
 import android.os.Parcelable
-import crupest.cruphysics.physics.serialization.createDefaultKotlinMoshi
-import crupest.cruphysics.physics.serialization.fromJson
-import crupest.cruphysics.physics.serialization.toJson
+import crupest.cruphysics.serialization.createDefaultKotlinMoshi
+import crupest.cruphysics.serialization.fromJson
+import crupest.cruphysics.serialization.toJson
 
 
 /**

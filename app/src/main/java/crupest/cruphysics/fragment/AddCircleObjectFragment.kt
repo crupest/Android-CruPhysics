@@ -9,15 +9,8 @@ import crupest.cruphysics.*
 
 import crupest.cruphysics.component.AddCircleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
-import crupest.cruphysics.component.FixturePropertyExtractException
-import crupest.cruphysics.physics.CircleBodyUserData
-import crupest.cruphysics.physics.toVec2
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.generateRandomColor
-import crupest.cruphysics.utility.showAlertDialog
-import org.dyn4j.dynamics.Body
-import org.dyn4j.dynamics.BodyFixture
-import org.dyn4j.geometry.Circle
 
 
 class AddCircleObjectFragment : AddObjectFragment() {
@@ -55,28 +48,6 @@ class AddCircleObjectFragment : AddObjectFragment() {
             return
         }
 
-        val body = Body()
-        body.translate(worldCanvas.worldCenter.toVec2())
-        val circle = Circle(radius.toDouble())
-        val fixture = BodyFixture(circle)
 
-        val commonObjectPropertyView = view!!.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
-
-        try {
-            fixture.density = commonObjectPropertyView.density
-            fixture.friction = commonObjectPropertyView.friction
-            fixture.restitution = commonObjectPropertyView.restitution
-        } catch (e: FixturePropertyExtractException) {
-            showAlertDialog(context!!, e.message!!)
-            return
-        }
-
-        body.addFixture(fixture)
-        body.setMass(commonObjectPropertyView.massType)
-        body.userData = CircleBodyUserData(body, color = commonObjectPropertyView.color)
-
-        val a = context as AddObjectActivity
-        a.viewWorld.world.addBody(body)
-        a.setResultAndFinish()
     }
 }

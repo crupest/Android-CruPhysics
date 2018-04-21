@@ -9,7 +9,6 @@ import crupest.cruphysics.*
 import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 import crupest.cruphysics.component.CommonObjectPropertyView
 import crupest.cruphysics.component.FixturePropertyExtractException
-import crupest.cruphysics.physics.RectangleBodyUserData
 import crupest.cruphysics.utility.createAlertDialog
 import crupest.cruphysics.utility.generateRandomColor
 import crupest.cruphysics.utility.showAlertDialog

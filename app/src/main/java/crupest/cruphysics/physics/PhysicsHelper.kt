@@ -3,8 +3,8 @@ package crupest.cruphysics.physics
 import android.graphics.Matrix
 import android.graphics.PointF
 import org.dyn4j.dynamics.Body
-import org.dyn4j.geometry.Transform
-import org.dyn4j.geometry.Vector2
+import org.dyn4j.dynamics.BodyFixture
+import org.dyn4j.geometry.*
 
 /**
  * Created by crupest on 2017/11/17.
@@ -20,5 +20,32 @@ fun Transform.toMatrix(): Matrix {
     return matrix
 }
 
-val Body.positionDebugString: String
-    get() = "(${this.transform.translationX}, ${this.transform.translationY})"
+fun Body.checkAndGetFixture(): BodyFixture {
+    if (this.fixtureCount != 1)
+        throw IllegalStateException("The body has 0 or more than 1 fixture.")
+    return this.getFixture(0)
+}
+
+fun createWorldViewMatrix(): Matrix = Matrix().apply { preScale(1.0f, -1.0f) }
+
+val Body.cruUserData: BodyUserData
+    get() = this.userData as BodyUserData
+
+
+inline fun Shape.switchShape(circleHandler: (Circle) -> Unit,
+                             rectangleHandler: (Rectangle) -> Unit) {
+    when (this) {
+        is Circle -> circleHandler(this)
+        is Rectangle -> rectangleHandler(this)
+        else -> throw UnsupportedOperationException(
+                "Shape ${this::class.simpleName} is unsupported.")
+    }
+}
+
+inline fun <T> Shape.switchShapeR(circleHandler: (Circle) -> T,
+                                  rectangleHandler: (Rectangle) -> T) = when (this) {
+    is Circle -> circleHandler(this)
+    is Rectangle -> rectangleHandler(this)
+    else -> throw UnsupportedOperationException(
+            "Shape ${this::class.simpleName} is unsupported.")
+}

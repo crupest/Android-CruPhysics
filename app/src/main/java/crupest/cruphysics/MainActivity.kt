@@ -2,27 +2,27 @@ package crupest.cruphysics
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Matrix
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import crupest.cruphysics.component.WorldCanvas
-import crupest.cruphysics.physics.ViewWorld
-import crupest.cruphysics.physics.serialization.fromJson
-import crupest.cruphysics.physics.serialization.mapper.map
-import crupest.cruphysics.physics.serialization.parseAsJsonObject
-import crupest.cruphysics.physics.serialization.toJson
-import crupest.cruphysics.physics.serialization.unmapper.unmapViewWorld
+import crupest.cruphysics.physics.serialization.ViewWorldData
+import crupest.cruphysics.physics.serialization.toData
+import crupest.cruphysics.serialization.fromJson
+import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
-import org.dyn4j.dynamics.Step
-import org.dyn4j.dynamics.StepAdapter
 import org.dyn4j.dynamics.World
-import org.dyn4j.geometry.Vector2
 import java.io.File
 
 
+/**
+ * Activity class [MainActivity].
+ * Represents the main activity.
+ */
 class MainActivity : AppCompatActivity() {
 
     companion object {
@@ -33,16 +33,9 @@ class MainActivity : AppCompatActivity() {
         const val SETTINGS_REQUEST_CODE = 2001
     }
 
-    private lateinit var worldCanvas: WorldCanvas
-    private var viewWorld: ViewWorld = ViewWorld()
-        set(value) {
-            val oldWorld = field
-            field = value
-            onWorldChanged(oldWorld, value)
-        }
+    //Region: properties ui
 
-    private var noUpdateWorld = false
-    private var newGravity: Vector2? = null
+    private lateinit var worldCanvas: WorldCanvas
 
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
@@ -50,13 +43,17 @@ class MainActivity : AppCompatActivity() {
             invalidateOptionsMenu()
         }
 
+
+
+    //Region: properties world
+
+    private var world: World = World()
+    private var viewMatrix: Matrix = Matrix()
     private var task: ScheduleTask? = null
 
-    private val worldStepEventListener = object : StepAdapter() {
-        override fun end(step: Step?, world: World?) {
-            worldCanvas.postInvalidate()
-        }
-    }
+
+
+    //Region: properties ui
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,42 +67,17 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
         worldCanvas = findViewById(R.id.world_canvas)
-        worldCanvas.viewWorld = viewWorld
 
-        viewWorld.world.addListener(worldStepEventListener)
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (!noUpdateWorld) {
-            val worldFile = File(filesDir, WORLD_FILE_NAME)
-            if (worldFile.exists()) {
-                viewWorld = unmapViewWorld(worldFile.readText().parseAsJsonObject()!!)
-            }
-        }
-
-        if (newGravity != null) {
-            viewWorld.world.gravity = newGravity
-        }
-
-        noUpdateWorld = false
-        newGravity = null
     }
 
     override fun onPause() {
         super.onPause()
-
         pauseWorld()
-
-        val worldFile = File(filesDir, WORLD_FILE_NAME)
-        worldFile.writeText(map(viewWorld).toJson())
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        viewWorld.world.removeListener(worldStepEventListener)
+        saveWorldToFile()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -124,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.create_new -> {
-                viewWorld = ViewWorld()
+                TODO()
                 return true
             }
             R.id.settings -> {
@@ -140,39 +112,76 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ADD_OBJECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val s = data!!.getStringExtra(AddObjectActivity.RESULT_WORLD)
-            viewWorld = unmapViewWorld(s.parseAsJsonObject()!!)
-            noUpdateWorld = true
+            TODO()
         } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val s = data!!.getStringExtra(WorldSettingsActivity.RESULT_GRAVITY)
-            newGravity = s.fromJson()
+            TODO()
         }
     }
 
-    private fun onWorldChanged(oldWorld: ViewWorld, newWorld: ViewWorld) {
-        oldWorld.world.removeListener(worldStepEventListener)
-        newWorld.world.addListener(worldStepEventListener)
-        worldCanvas.viewWorld = newWorld
-        worldCanvas.invalidate()
+
+    //Region: world
+
+    private fun createNewWorld() {
+        TODO()
     }
 
     private fun onWorldStateChanged(newState: Boolean) {
         optionMenu = if (newState) R.menu.main_menu_play else R.menu.main_menu_pause
     }
 
-    fun runWorld() {
+    private fun onWorldStepped() {
+        worldCanvas.invalidate()
+    }
+
+    private fun runWorld() {
         if (task == null) {
             task = setInterval(1.0 / 60.0) {
-                viewWorld.world.update(1.0 / 60.0)
+                world.update(1.0 / 60.0)
+                runOnUiThread {
+                    onWorldStepped()
+                }
             }
             onWorldStateChanged(true)
         }
     }
 
-    fun pauseWorld() {
+    private fun pauseWorld() {
         if (task != null) {
             task!!.cancel()
             task = null
             onWorldStateChanged(false)
+        }
+    }
+
+
+    //Region: serialization
+
+    /**
+     * Get the file that records the world.
+     */
+    private fun getWorldFile() = File(filesDir, WORLD_FILE_NAME)
+
+    /**
+     * Save the current world state to file([getWorldFile]).
+     */
+    private fun saveWorldToFile() {
+        getWorldFile().writeText(
+                ViewWorldData(world = world.toData(), camera = viewMatrix.toData()).toJson()
+        )
+    }
+
+    /**
+     * Read the world state from the file([getWorldFile]).
+     * Return true if the world is read successfully.
+     * Return false if the file doesn't exists.
+     * Throw an exception if the file has a bad format.
+     */
+    private fun readWorldFromFile(): Boolean {
+        val worldFile = getWorldFile()
+        if (worldFile.exists()) {
+            val viewWorldData: ViewWorldData = worldFile.readText().fromJson()!!
+            TODO()
         }
     }
 }
