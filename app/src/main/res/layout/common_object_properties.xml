@@ -1,78 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="@layout/fragment_add_circle_object">
 
-    <RelativeLayout
+    <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="5">
 
         <TextView
-            android:id="@+id/object_type_label"
+            android:id="@+id/body_type_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignBottom="@+id/object_type_spinner"
-            android:layout_marginStart="20dp"
+            android:layout_columnWeight="1"
             android:text="@string/type"
-            android:theme="@style/PropertyLabelTextViewStyle"
-            tools:ignore="RelativeOverlap" />
+            android:theme="@style/PropertyLabelTextViewStyle" />
 
-        <crupest.cruphysics.component.ObjectTypeSpinner
-            android:id="@+id/object_type_spinner"
-            android:layout_width="130dp"
-            android:layout_height="35dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp" />
-
-    </RelativeLayout>
-
-    <crupest.cruphysics.component.ObjectPropertyView
-        android:id="@+id/density_property_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        app:propertyName="@string/density"
-        app:propertyValue="1.0" />
-
-    <crupest.cruphysics.component.ObjectPropertyView
-        android:id="@+id/friction_property_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        app:propertyName="@string/friction"
-        app:propertyValue="0.2" />
-
-    <crupest.cruphysics.component.ObjectPropertyView
-        android:id="@+id/restitution_property_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        app:propertyName="@string/restitution"
-        app:propertyValue="0.0" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <Spinner
+            android:id="@+id/body_type_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1" />
 
         <TextView
-            android:id="@+id/object_color_label"
+            android:id="@+id/label_density"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginStart="20dp"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/edit_density"
+            android:text="@string/density"
+            android:theme="@style/PropertyLabelTextViewStyle" />
+
+        <EditText
+            android:id="@+id/edit_density"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:id="@+id/label_restitution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/edit_restitution"
+            android:text="@string/restitution"
+            android:theme="@style/PropertyLabelTextViewStyle" />
+
+        <EditText
+            android:id="@+id/edit_restitution"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:id="@+id/label_friction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/edit_friction"
+            android:text="@string/friction"
+            android:theme="@style/PropertyLabelTextViewStyle" />
+
+        <EditText
+            android:id="@+id/edit_friction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:inputType="numberDecimal" />
+
+
+        <TextView
+            android:id="@+id/label_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/color"
             android:theme="@style/PropertyLabelTextViewStyle" />
 
         <View
             android:id="@+id/color_block"
             android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/object_color_label"
-            android:layout_alignBottom="@id/object_color_label"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
-            android:background="#FF0000FF"/>
+            android:layout_height="wrap_content" />
+    </GridLayout>
 
-    </RelativeLayout>
 </merge>

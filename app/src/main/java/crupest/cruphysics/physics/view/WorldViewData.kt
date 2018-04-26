@@ -7,10 +7,13 @@ import crupest.cruphysics.physics.cruUserData
 import crupest.cruphysics.physics.switchShape
 import crupest.cruphysics.physics.toMatrix
 import org.dyn4j.dynamics.Body
-import org.dyn4j.geometry.Circle
-import org.dyn4j.geometry.Rectangle
 
-class WorldViewData : IDrawWorldDelegate {
+class WorldViewData() : IDrawWorldDelegate {
+    constructor(bodies: Iterable<Body>) : this() {
+        for (body in bodies)
+            registerBody(body)
+    }
+
     private val bodyViewDataMap: MutableMap<Body, BodyViewData> = mutableMapOf()
 
     fun registerBody(body: Body) {
@@ -38,7 +41,7 @@ class WorldViewData : IDrawWorldDelegate {
             canvas.concat(body.transform.toMatrix())
 
             shape.switchShape(
-                    {
+                    circleHandler = {
                         canvas.drawCircle(
                                 it.center.x.toFloat(),
                                 it.center.y.toFloat(),
@@ -46,7 +49,7 @@ class WorldViewData : IDrawWorldDelegate {
                                 bodyViewData.paint
                         )
                     },
-                    {
+                    rectangleHandler = {
                         val hw = it.width / 2.0
                         val hh = it.height / 2.0
                         canvas.drawRect(

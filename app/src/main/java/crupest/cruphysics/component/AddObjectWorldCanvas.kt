@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
-import org.dyn4j.geometry.Convex
-import org.dyn4j.geometry.Vector2
+import crupest.cruphysics.physics.serialization.ShapeData
+import crupest.cruphysics.physics.serialization.Vector2Data
 
 /**
  * Created by crupest on 2017/11/4.
@@ -108,12 +108,12 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
         }
     }
 
-    abstract fun generateShapeAndPosition(): ShapeAndPosition
+    abstract fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data>
 
     var color: Int
         get() = objectPaint.color
         set(value) {
             objectPaint.color = value
-            invalidate()
+            repaint()
         }
 }

@@ -25,16 +25,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     lateinit var drawWorldDelegate: IDrawWorldDelegate
 
-    private val viewMatrix: Matrix = createWorldViewMatrix()
+    val viewMatrix: Matrix = createWorldViewMatrix()
 
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
-                this@WorldCanvas.setWillNotDraw(false)
+
             }
 
             override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-
+                repaint()
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder?) {
@@ -49,8 +49,18 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     fun PointF.viewToWorld(): PointF = viewToWorld(this.x, this.y)
     fun viewToWorld(x: Float, y: Float): PointF = viewMatrix.invertedMatrix.mapPoint(x, y)
 
-    override fun onDraw(canvas: Canvas?) {
-        canvas!!.drawColor(Color.WHITE)
+    fun repaint() {
+        val canvas = if (android.os.Build.VERSION.SDK_INT >= 26)
+            holder.lockHardwareCanvas() else holder.lockCanvas()
+
+        if (canvas != null)
+            onPaint(canvas)
+
+        holder.unlockCanvasAndPost(canvas)
+    }
+
+    protected open fun onPaint(canvas: Canvas) {
+        canvas.drawColor(Color.WHITE)
         canvas.save()
         canvas.concat(viewMatrix)
         drawWorldDelegate.draw(canvas)

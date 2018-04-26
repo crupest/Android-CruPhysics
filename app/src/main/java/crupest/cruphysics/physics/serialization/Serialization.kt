@@ -31,7 +31,7 @@ fun CameraData.fromData(): Matrix = Matrix().apply {
     )
     this.preScale(
             this@fromData.scale.toFloat(),
-            this@fromData.scale.toFloat()
+            -this@fromData.scale.toFloat()
     )
 }
 

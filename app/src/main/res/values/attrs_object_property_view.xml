@@ -1,7 +1,0 @@
-<resources>
-    <declare-styleable name="ObjectPropertyView">
-        <attr name="propertyName" format="string" />
-        <attr name="propertyValue" format="string" />
-        <attr name="android:inputType" />
-    </declare-styleable>
-</resources>

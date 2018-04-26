@@ -3,13 +3,10 @@ package crupest.cruphysics.component
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import crupest.cruphysics.physics.toVec2
+import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
-import org.dyn4j.geometry.Circle
-import org.dyn4j.geometry.Convex
-import org.dyn4j.geometry.Vector2
 
 /**
  * Created by crupest on 2017/11/6.
@@ -38,13 +35,13 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         get() = controllers[1]
 
     private fun onControllerMove() {
-        invalidate()
+        repaint()
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
+    override fun onPaint(canvas: Canvas) {
+        super.onPaint(canvas)
 
-        canvas!!.drawCircle(
+        canvas.drawCircle(
                 centerController.position.x,
                 centerController.position.y,
                 distance(centerController.position, radiusController.position),
@@ -71,15 +68,10 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         onControllerMove()
     }
 
-    override fun generateShapeAndPosition(): ShapeAndPosition {
+    override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
         val center = centerController.position.viewToWorld()
-        return ShapeAndPosition(
-                Circle(distance(
-                        center,
-                        radiusController.position.viewToWorld()
-                ).toDouble()),
-                center.toVec2()
-        )
+        return CircleData(
+                radius = distance(center, radiusController.position.viewToWorld()).toDouble()
+        ).createShapeData() to Vector2Data(center.x.toDouble(), center.y.toDouble())
     }
-
 }

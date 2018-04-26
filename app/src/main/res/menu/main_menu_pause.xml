@@ -14,10 +14,4 @@
         android:id="@+id/create_new"
         android:title="@string/create_new"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/settings"
-        android:title="@string/settings"
-        app:showAsAction="never" />
-
 </menu>

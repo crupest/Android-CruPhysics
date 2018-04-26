@@ -15,12 +15,12 @@
 
     <string name="back">Back</string>
     <string name="ok">OK</string>
-    <string name="density">density</string>
     <string name="type">type</string>
+    <string name="density">density</string>
     <string name="friction">friction</string>
     <string name="restitution">restitution</string>
     <string name="choose_number_of_sides_tip">Please choose the number of sides:</string>
-    <string name="color">Color</string>
+    <string name="color">color</string>
     <string name="next">Next</string>
 
     <string-array name="object_type_list">
@@ -34,9 +34,4 @@
     </string-array>
 
     <string name="create_new">New</string>
-
-    <string name="x">x</string>
-    <string name="y">y</string>
-    <string name="gravity">gravity</string>
-    <string name="settings">Settings</string>
 </resources>

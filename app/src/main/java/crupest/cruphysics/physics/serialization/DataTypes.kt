@@ -28,6 +28,9 @@ data class ShapeData(
         @field:Json(name = "rectangle_data") var rectangleData: RectangleData? = null
 )
 
+fun CircleData.createShapeData() = ShapeData(type = SHAPE_TYPE_CIRCLE, circleData = this)
+fun RectangleData.createShapeData() = ShapeData(type = SHAPE_TYPE_RECTANGLE, rectangleData = this)
+
 data class BodyAppearanceData(val color: Int = 0x000000)
 
 const val BODY_TYPE_STATIC = "static"

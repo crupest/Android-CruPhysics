@@ -2,19 +2,22 @@ package crupest.cruphysics
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Matrix
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import crupest.cruphysics.component.WorldCanvas
+import crupest.cruphysics.component.MainWorldCanvas
+import crupest.cruphysics.physics.resetWorldViewMatrix
 import crupest.cruphysics.physics.serialization.ViewWorldData
+import crupest.cruphysics.physics.serialization.fromData
 import crupest.cruphysics.physics.serialization.toData
+import crupest.cruphysics.physics.view.WorldViewData
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
+import crupest.cruphysics.utility.showAlertDialog
 import org.dyn4j.dynamics.World
 import java.io.File
 
@@ -28,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val WORLD_FILE_NAME = "world.wld"
         const val ARG_WORLD = "WORLD"
+        const val ARG_VIEW_MATRIX = "VIEW_MATRIX"
         const val ARG_GRAVITY = "GRAVITY"
         const val ADD_OBJECT_REQUEST_CODE = 2000
         const val SETTINGS_REQUEST_CODE = 2001
@@ -35,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     //Region: properties ui
 
-    private lateinit var worldCanvas: WorldCanvas
+    private lateinit var worldCanvas: MainWorldCanvas
 
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
@@ -44,16 +48,14 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
     //Region: properties world
 
-    private var world: World = World()
-    private var viewMatrix: Matrix = Matrix()
+    private lateinit var world: World
     private var task: ScheduleTask? = null
 
+    private lateinit var worldViewData: WorldViewData
 
-
-    //Region: properties ui
+    //Region: methods ui
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,11 +65,13 @@ class MainActivity : AppCompatActivity() {
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
             val intent = Intent(this, AddObjectActivity::class.java)
-            intent.putExtra(ARG_WORLD, map(viewWorld).toJson())
+            intent.putExtra(ARG_WORLD, world.toData().toJson())
+            intent.putExtra(ARG_VIEW_MATRIX, worldCanvas.viewMatrix.toData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
         worldCanvas = findViewById(R.id.world_canvas)
 
+        readWorldFromFile()
     }
 
     override fun onPause() {
@@ -96,12 +100,13 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.create_new -> {
-                TODO()
+                pauseWorld()
+                createNewWorld()
                 return true
             }
             R.id.settings -> {
                 val intent = Intent(this, WorldSettingsActivity::class.java)
-                intent.putExtra(ARG_GRAVITY, viewWorld.world.gravity.toJson())
+                intent.putExtra(ARG_GRAVITY, world.gravity.toData().toJson())
                 startActivityForResult(intent, SETTINGS_REQUEST_CODE)
                 return true
             }
@@ -123,24 +128,23 @@ class MainActivity : AppCompatActivity() {
     //Region: world
 
     private fun createNewWorld() {
-        TODO()
+        world = World()
+        worldViewData = WorldViewData()
+        worldCanvas.drawWorldDelegate = worldViewData
+        worldCanvas.viewMatrix.resetWorldViewMatrix()
+
+        worldCanvas.repaint()
     }
 
     private fun onWorldStateChanged(newState: Boolean) {
         optionMenu = if (newState) R.menu.main_menu_play else R.menu.main_menu_pause
     }
 
-    private fun onWorldStepped() {
-        worldCanvas.invalidate()
-    }
-
     private fun runWorld() {
         if (task == null) {
             task = setInterval(1.0 / 60.0) {
                 world.update(1.0 / 60.0)
-                runOnUiThread {
-                    onWorldStepped()
-                }
+                worldCanvas.repaint()
             }
             onWorldStateChanged(true)
         }
@@ -166,22 +170,35 @@ class MainActivity : AppCompatActivity() {
      * Save the current world state to file([getWorldFile]).
      */
     private fun saveWorldToFile() {
-        getWorldFile().writeText(
-                ViewWorldData(world = world.toData(), camera = viewMatrix.toData()).toJson()
-        )
+        getWorldFile().writeText(ViewWorldData(
+                world = world.toData(), camera = worldCanvas.viewMatrix.toData()).toJson())
     }
 
     /**
      * Read the world state from the file([getWorldFile]).
-     * Return true if the world is read successfully.
-     * Return false if the file doesn't exists.
-     * Throw an exception if the file has a bad format.
+     * If the world file doesn't exist or is of bad format,
+     * a new world will be created and an alert dialog will be shown.
      */
-    private fun readWorldFromFile(): Boolean {
+    private fun readWorldFromFile() {
         val worldFile = getWorldFile()
         if (worldFile.exists()) {
-            val viewWorldData: ViewWorldData = worldFile.readText().fromJson()!!
-            TODO()
+            try {
+                val viewWorldData: ViewWorldData = worldFile.readText().fromJson()
+                        ?: throw RuntimeException()
+
+                world = viewWorldData.world.fromData()
+                worldViewData = WorldViewData(world.bodies)
+                worldCanvas.drawWorldDelegate = worldViewData
+                worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
+
+            } catch (exception: Exception) {
+                showAlertDialog(this,
+                        "World file's format is bad. A new world is created!")
+            }
+        } else {
+            showAlertDialog(this,
+                    "World file doesn't exist. A new world is created!")
         }
+        createNewWorld()
     }
 }

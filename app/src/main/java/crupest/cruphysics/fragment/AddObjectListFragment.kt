@@ -53,7 +53,6 @@ class AddObjectListFragment : Fragment() {
                         when (pager.currentItem) {
                             0 -> activity.navigateToFragment(AddCircleObjectFragment())
                             1 -> activity.navigateToFragment(AddRectangleObjectFragment())
-                            2 -> activity.navigateToFragment(AddPolygonObjectFragment1())
                         }
                     }
                     return@l true

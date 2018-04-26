@@ -12,33 +12,16 @@ fun distance(p1: PointF, p2: PointF): Float =
         sqrt((p1.x - p2.x).pow(2) + (p1.y - p2.y).pow(2))
 
 /**
- * @brief create a simple alert dialog with a message (don't show)
- * @param context the context
- * @param message the message to show
- */
-fun createAlertDialog(context: Context, message: String): AlertDialog {
-    val builder = AlertDialog.Builder(context)
-    builder.setMessage(message)
-    builder.setPositiveButton("Ok") { dialog, _ ->
-        dialog.dismiss()
-    }
-    return builder.create()
-}
-
-
-/**
  * @brief show a simple alert dialog with a message
  * @param context the context
  * @param message the message to show
  */
-fun showAlertDialog(context: Context, message: String): AlertDialog {
-    val builder = AlertDialog.Builder(context)
-    builder.setMessage(message)
-    builder.setPositiveButton("Ok") { dialog, _ ->
-        dialog.dismiss()
-    }
-    return builder.show()
-}
+fun showAlertDialog(context: Context, message: String): AlertDialog =
+        AlertDialog.Builder(context)
+                .setMessage(message)
+                .setPositiveButton("Ok") { dialog, _ ->
+                    dialog.dismiss()
+                }.show()
 
 
 /**
@@ -61,7 +44,7 @@ fun hitTestSquare(x: Float, y: Float,
 
 val random = Random()
 
-fun generateRandomColor() : Int = Color.rgb(
+fun generateRandomColor(): Int = Color.rgb(
         random.nextInt(256),
         random.nextInt(256),
         random.nextInt(256)

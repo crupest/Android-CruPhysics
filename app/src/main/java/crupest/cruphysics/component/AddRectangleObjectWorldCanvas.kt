@@ -3,10 +3,12 @@ package crupest.cruphysics.component
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import crupest.cruphysics.physics.serialization.RectangleData
+import crupest.cruphysics.physics.serialization.ShapeData
+import crupest.cruphysics.physics.serialization.Vector2Data
+import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
-import org.dyn4j.geometry.Rectangle
-import org.dyn4j.geometry.Vector2
 
 /**
  * Created by crupest on 2017/11/17.
@@ -39,13 +41,13 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         get() = controllers[1]
 
     private fun onControllerMove() {
-        invalidate()
+        repaint()
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
+    override fun onPaint(canvas: Canvas) {
+        super.onPaint(canvas)
 
-        canvas!!.drawRectangle(
+        canvas.drawRectangle(
                 positionController.position.x,
                 positionController.position.y,
                 sizeController.position.x,
@@ -73,18 +75,15 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         onControllerMove()
     }
 
-    override fun generateShapeAndPosition(): ShapeAndPosition {
+    override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
         val leftTop = positionController.position.viewToWorld()
         val rightBottom = sizeController.position.viewToWorld()
-        return ShapeAndPosition(
-                Rectangle(
-                        (rightBottom.x - leftTop.x).toDouble(),
-                        (leftTop.y - rightBottom.y).toDouble()
-                ),
-                Vector2(
-                        (leftTop.x + rightBottom.x).toDouble() / 2.0,
-                        (leftTop.y + rightBottom.y).toDouble() / 2.0
-                )
+        return RectangleData(
+                width = (rightBottom.x - leftTop.x).toDouble(),
+                height = (leftTop.y - rightBottom.y).toDouble()
+        ).createShapeData() to Vector2Data(
+                x = (leftTop.x + rightBottom.x).toDouble() / 2.0,
+                y = (leftTop.y + rightBottom.y).toDouble() / 2.0
         )
     }
 }
