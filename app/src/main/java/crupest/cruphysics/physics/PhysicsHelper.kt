@@ -23,10 +23,12 @@ fun Body.checkAndGetFixture(): BodyFixture {
     return this.getFixture(0)
 }
 
-fun createWorldViewMatrix(): Matrix = Matrix().apply { preScale(1.0f, -1.0f) }
+const val WORLD_VIEW_INIT_SCALE = 500.0f
+fun createWorldViewMatrix(): Matrix = Matrix().apply { preScale(
+        WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE) }
 fun Matrix.resetWorldViewMatrix() {
-    this.reset()
-    this.preScale(1.0f, -1.0f)
+    reset()
+    preScale(WORLD_VIEW_INIT_SCALE, WORLD_VIEW_INIT_SCALE)
 }
 
 val Body.cruUserData: BodyUserData

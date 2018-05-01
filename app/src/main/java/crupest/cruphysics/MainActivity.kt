@@ -7,18 +7,19 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.physics.resetWorldViewMatrix
-import crupest.cruphysics.physics.serialization.ViewWorldData
-import crupest.cruphysics.physics.serialization.fromData
-import crupest.cruphysics.physics.serialization.toData
+import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
 import crupest.cruphysics.utility.showAlertDialog
+import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
+import org.dyn4j.geometry.Vector2
 import java.io.File
 
 
@@ -26,15 +27,13 @@ import java.io.File
  * Activity class [MainActivity].
  * Represents the main activity.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     companion object {
         const val WORLD_FILE_NAME = "world.wld"
         const val ARG_WORLD = "WORLD"
-        const val ARG_VIEW_MATRIX = "VIEW_MATRIX"
-        const val ARG_GRAVITY = "GRAVITY"
+        const val ARG_CAMERA = "CAMERA"
         const val ADD_OBJECT_REQUEST_CODE = 2000
-        const val SETTINGS_REQUEST_CODE = 2001
     }
 
     //Region: properties ui
@@ -65,13 +64,24 @@ class MainActivity : AppCompatActivity() {
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
             val intent = Intent(this, AddObjectActivity::class.java)
-            intent.putExtra(ARG_WORLD, world.toData().toJson())
-            intent.putExtra(ARG_VIEW_MATRIX, worldCanvas.viewMatrix.toData().toJson())
+            intent.putExtra(AddObjectActivity.ARG_WORLD, world.toData().toJson())
+            intent.putExtra(AddObjectActivity.ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
         worldCanvas = findViewById(R.id.world_canvas)
+        worldCanvas.mainWorldDelegate = this
 
-        readWorldFromFile()
+        if (savedInstanceState == null)
+            readWorldFromFile()
+        else {
+            val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()!!
+            val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()!!
+
+            world = worldData.fromData()
+            cameraData.fromData(worldCanvas.viewMatrix)
+        }
+
+        createViewData()
     }
 
     override fun onPause() {
@@ -82,6 +92,13 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         saveWorldToFile()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        outState!!.putString(ARG_WORLD, world.toData().toJson())
+        outState.putString(ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -104,26 +121,25 @@ class MainActivity : AppCompatActivity() {
                 createNewWorld()
                 return true
             }
-            R.id.settings -> {
-                val intent = Intent(this, WorldSettingsActivity::class.java)
-                intent.putExtra(ARG_GRAVITY, world.gravity.toData().toJson())
-                startActivityForResult(intent, SETTINGS_REQUEST_CODE)
-                return true
-            }
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ADD_OBJECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val s = data!!.getStringExtra(AddObjectActivity.RESULT_WORLD)
-            TODO()
-        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val s = data!!.getStringExtra(WorldSettingsActivity.RESULT_GRAVITY)
-            TODO()
+            val bodyData: BodyData = data!!.getStringExtra(AddObjectActivity.RESULT_BODY).fromJson()!!
+            val cameraData: CameraData = data.getStringExtra(AddObjectActivity.RESULT_CAMERA).fromJson()!!
+
+            addBody(bodyData.fromData())
+            cameraData.fromData(worldCanvas.viewMatrix)
+            worldCanvas.repaint()
         }
     }
 
+    private fun createViewData() {
+        worldViewData = WorldViewData(world.bodies)
+        worldCanvas.drawWorldDelegate = worldViewData
+    }
 
     //Region: world
 
@@ -158,6 +174,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun addBody(body: Body) {
+        world.addBody(body)
+        worldViewData.registerBody(body)
+    }
+
+    override fun removeBody(body: Body) {
+        worldViewData.unregisterBody(body)
+        world.removeBody(body)
+        worldCanvas.repaint()
+    }
+
+    override fun bodyHitTest(x: Double, y: Double): Body? =
+            world.bodies.firstOrNull { it.contains(Vector2(x, y)) }
 
     //Region: serialization
 
@@ -187,8 +216,6 @@ class MainActivity : AppCompatActivity() {
                         ?: throw RuntimeException()
 
                 world = viewWorldData.world.fromData()
-                worldViewData = WorldViewData(world.bodies)
-                worldCanvas.drawWorldDelegate = worldViewData
                 worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
 
             } catch (exception: Exception) {

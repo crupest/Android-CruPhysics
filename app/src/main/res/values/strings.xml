@@ -5,12 +5,10 @@
 
     <string name="circle_object">Circle object</string>
     <string name="rectangle_object">Rectangle object</string>
-    <string name="polygon_object">Polygon object</string>
 
     <string-array name="add_object_list">
         <item>@string/circle_object</item>
         <item>@string/rectangle_object</item>
-        <item>@string/polygon_object</item>
     </string-array>
 
     <string name="back">Back</string>

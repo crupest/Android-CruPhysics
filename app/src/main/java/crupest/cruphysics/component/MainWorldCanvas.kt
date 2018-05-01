@@ -108,7 +108,7 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
 
                 list.setOnItemClickListener { _, _, position, _ ->
                     when (position) {
-                        0 -> mainWorldDelegate.onRemoveBody(body)
+                        0 -> mainWorldDelegate.removeBody(body)
                     }
                     popupWindow.dismiss()
                 }

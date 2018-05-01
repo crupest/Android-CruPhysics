@@ -1,11 +1,13 @@
 package crupest.cruphysics.fragment
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Spinner
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
@@ -13,6 +15,8 @@ import crupest.cruphysics.AddObjectActivity
 import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.R
 import crupest.cruphysics.component.AddObjectWorldCanvas
+import crupest.cruphysics.physics.serialization.*
+import crupest.cruphysics.utility.generateRandomColor
 import crupest.cruphysics.utility.showAlertDialog
 
 /**
@@ -21,12 +25,47 @@ import crupest.cruphysics.utility.showAlertDialog
  */
 
 
-/**
- * An fragment with a option menu containing a "check" menu item.
- */
 abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
 
     private lateinit var worldCanvas: AddObjectWorldCanvas
+
+    private fun onOk() {
+
+        fun checkOrThrow(id: Int, propertyName: String, predicate: (Double) -> Boolean): Double {
+            val number = view!!.findViewById<EditText>(id).text.toString().toDoubleOrNull()
+                    ?: throw RuntimeException("${propertyName.capitalize()} is not a number.")
+            if (!predicate(number))
+                throw RuntimeException("${propertyName.capitalize()} is not in valid range.")
+            return number
+        }
+
+        try {
+            val density = checkOrThrow(R.id.edit_density, "density") { it > 0.0 }
+            val restitution = checkOrThrow(R.id.edit_restitution, "restitution") { it >= 0.0 }
+            val friction = checkOrThrow(R.id.edit_friction, "friction") { it >= 0.0 }
+
+            val (shape, position) = worldCanvas.generateShapeAndPosition()
+
+            val a = context as AddObjectActivity
+            a.setResultAndFinish(BodyData(
+                    shape = shape,
+                    type = when (view!!.findViewById<Spinner>(R.id.body_type_spinner).selectedItemPosition) {
+                        0 -> BODY_TYPE_STATIC
+                        1 -> BODY_TYPE_DYNAMIC
+                        else -> throw RuntimeException("Unexpected object type spinner selection.")
+                    },
+                    density = density,
+                    restitution = restitution,
+                    friction = friction,
+                    position = position,
+                    appearance = BodyAppearanceData(
+                            color = worldCanvas.color
+                    )
+            ), worldCanvas.viewMatrix.toData())
+        } catch (e: Exception) {
+            showAlertDialog(context!!, e.message.orEmpty())
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -39,76 +78,42 @@ abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
         typeSpinner.adapter = adapter
         typeSpinner.setSelection(0)
 
-
         val colorBlock: View = rootView.findViewById(R.id.color_block)
+
+        val initColor = generateRandomColor()
+        worldCanvas.color = initColor
+        colorBlock.background = ColorDrawable(initColor)
+
         colorBlock.setOnClickListener {
             ColorPickerDialogBuilder
                     .with(context)
                     .setTitle("Choose color:")
-                    .initialColor(color)
+                    .initialColor(worldCanvas.color)
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
                     .setPositiveButton("ok") { _, selectedColor, _ ->
-                        color = selectedColor
+                        worldCanvas.color = selectedColor
+                        colorBlock.background = ColorDrawable(selectedColor)
                     }
                     .setNegativeButton("cancel") { _, _ -> }
                     .lightnessSliderOnly()
                     .build()
                     .show()
         }
-        //TODO: finish the view init code
+
+        rootView.findViewById<EditText>(R.id.edit_density).setText("1.0")
+        rootView.findViewById<EditText>(R.id.edit_restitution).setText("0.0")
+        rootView.findViewById<EditText>(R.id.edit_friction).setText("0.2")
+
         return rootView
     }
 
-    /**
-     * Backup: TODO
-    get() = when (selectedItemPosition) {
-    0 -> MassType.INFINITE
-    1 -> MassType.NORMAL
-    else -> throw RuntimeException("Unexpected object type spinner selection.")
-    }
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
 
-    var color: Int
-    get() {
-    val view = findViewById<View>(R.id.color_block)
-    return (view.background as ColorDrawable).color
-    }
-    set(value) {
-    val view = findViewById<View>(R.id.color_block)
-    view.background = ColorDrawable(value)
-    colorChangedEvent.raise(ColorChangedEventArgs(value))
-    }
-     */
-
-
-    //TODO: add shape generation exception handling code
-
-    /**
-     * invoked when the "check" menu item in option menu is clicked.
-     */
-    protected open fun onOk() {
-        val body = Body()
-        body.translate(getPosition())
-        val fixture = BodyFixture(generateShape())
-
-        val commonObjectPropertyView = view!!.findViewById<CommonObjectPropertyView>(R.id.common_object_property)
-
-        try {
-            fixture.density = commonObjectPropertyView.density
-            fixture.friction = commonObjectPropertyView.friction
-            fixture.restitution = commonObjectPropertyView.restitution
-        } catch (e: FixturePropertyExtractException) {
-            showAlertDialog(context!!, e.message!!)
-            return
-        }
-
-        body.addFixture(fixture)
-        body.setMass(commonObjectPropertyView.massType)
-        body.userData = createBodyUserData(body, commonObjectPropertyView.color)
-
-        val a = context as AddObjectActivity
-        a.viewWorld.world.addBody(body)
-        a.setResultAndFinish()
+        val activity = context as AddObjectActivity
+        worldCanvas.viewMatrix.set(activity.cameraData.fromData())
+        worldCanvas.drawWorldDelegate = activity.worldViewData
     }
 
     override fun onResume() {
@@ -117,12 +122,11 @@ abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = R.menu.add_object_menu
-            activity.optionMenuItemSelectedListener = l@ {
+            activity.optionMenuItemSelectedListener = {
                 if (it.itemId == R.id.ok) {
                     onOk()
-                    return@l true
-                }
-                return@l false
+                    true
+                } else false
             }
         }
     }
@@ -135,5 +139,7 @@ abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
             activity.optionMenu = 0
             activity.optionMenuItemSelectedListener = null
         }
+
+        (activity as AddObjectActivity).cameraData = worldCanvas.viewMatrix.toData()
     }
 }

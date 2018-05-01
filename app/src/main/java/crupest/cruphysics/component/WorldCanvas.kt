@@ -14,6 +14,7 @@ import crupest.cruphysics.physics.createWorldViewMatrix
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by crupest on 2017/11/4.
@@ -27,10 +28,12 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     val viewMatrix: Matrix = createWorldViewMatrix()
 
+    private var created: AtomicBoolean = AtomicBoolean(false)
+
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
-
+                    created.set(true)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -38,7 +41,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder?) {
-
+                created.set(false)
             }
         })
     }
@@ -50,6 +53,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     fun viewToWorld(x: Float, y: Float): PointF = viewMatrix.invertedMatrix.mapPoint(x, y)
 
     fun repaint() {
+        if (!created.get())
+            return
+
         val canvas = if (android.os.Build.VERSION.SDK_INT >= 26)
             holder.lockHardwareCanvas() else holder.lockCanvas()
 
@@ -96,7 +102,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         }
                         viewMatrix.postConcat(postMatrix)
                         onViewMatrixChanged(postMatrix)
-                        invalidate()
+                        repaint()
                     }
                     2 -> {
                         val oldPosition1 = previousPointerPositionMap[event.getPointerId(0)]!!
@@ -111,7 +117,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         }
                         viewMatrix.postConcat(matrix)
                         onViewMatrixChanged(matrix)
-                        invalidate()
+                        repaint()
                     }
                 }
                 for (index in 0 until event.pointerCount)

@@ -24,14 +24,26 @@ fun Matrix.toData(): CameraData {
     ), scale = values[Matrix.MSCALE_X].toDouble())
 }
 
-fun CameraData.fromData(): Matrix = Matrix().apply {
-    this.preTranslate(
-            this@fromData.translation.x.toFloat(),
-            this@fromData.translation.y.toFloat()
+fun CameraData.fromData(): Matrix = Matrix().also {
+    it.preTranslate(
+            this.translation.x.toFloat(),
+            this.translation.y.toFloat()
     )
-    this.preScale(
-            this@fromData.scale.toFloat(),
-            -this@fromData.scale.toFloat()
+    it.preScale(
+            this.scale.toFloat(),
+            -this.scale.toFloat()
+    )
+}
+
+fun CameraData.fromData(matrix: Matrix) {
+    matrix.reset()
+    matrix.preTranslate(
+            this.translation.x.toFloat(),
+            this.translation.y.toFloat()
+    )
+    matrix.preScale(
+            this.scale.toFloat(),
+            -this.scale.toFloat()
     )
 }
 

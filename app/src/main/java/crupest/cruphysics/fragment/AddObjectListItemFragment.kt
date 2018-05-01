@@ -14,11 +14,12 @@ import crupest.cruphysics.R
 
 class AddObjectListItemFragment : Fragment() {
 
-    private var name: String = ""
+    private lateinit var name: String
     private var imageSrc: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (arguments != null) {
             name = arguments!!.getString(ARG_NAME)
             imageSrc = arguments!!.getInt(ARG_IMAGE_SRC)
@@ -44,8 +45,8 @@ class AddObjectListItemFragment : Fragment() {
     }
 
     companion object {
-        private val ARG_NAME = "Name"
-        private val ARG_IMAGE_SRC = "ImageSrc"
+        private const val ARG_NAME = "Name"
+        private const val ARG_IMAGE_SRC = "ImageSrc"
 
         fun newInstance(name: String, imageSrc: Int = 0): AddObjectListItemFragment {
             val fragment = AddObjectListItemFragment()

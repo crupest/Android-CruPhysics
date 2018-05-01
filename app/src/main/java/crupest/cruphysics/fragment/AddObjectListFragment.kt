@@ -18,11 +18,10 @@ import crupest.cruphysics.SingleFragmentActivity
 class AddObjectListFragment : Fragment() {
 
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
-        override fun getCount(): Int = 3
+        override fun getCount(): Int = 2
         override fun getItem(position: Int): Fragment = when (position) {
             0 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.circle_object), R.drawable.circle_object_sample)
             1 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_object), R.drawable.rectangle_object_sample)
-            2 -> AddObjectListItemFragment.newInstance(context!!.resources.getString(R.string.polygon_object), R.drawable.polygon_object_sample)
             else -> throw RuntimeException("Out of range!")
         }
     }
@@ -46,7 +45,7 @@ class AddObjectListFragment : Fragment() {
         val activity = context
         if (activity is IOptionMenuActivity) {
             activity.optionMenu = R.menu.next_menu
-            activity.optionMenuItemSelectedListener = l@ {
+            activity.optionMenuItemSelectedListener = {
                 if (it.itemId == R.id.next) {
                     if (activity is SingleFragmentActivity) {
                         val pager = view!!.findViewById<ViewPager>(R.id.pager)
@@ -55,9 +54,8 @@ class AddObjectListFragment : Fragment() {
                             1 -> activity.navigateToFragment(AddRectangleObjectFragment())
                         }
                     }
-                    return@l true
-                }
-                return@l false
+                    true
+                } else false
             }
         }
     }

@@ -70,8 +70,13 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
         val center = centerController.position.viewToWorld()
+        val radius = distance(center, radiusController.position.viewToWorld()).toDouble()
+
+        if (radius == 0.0)
+            throw RuntimeException("Circle's radius must be bigger than 0.")
+
         return CircleData(
-                radius = distance(center, radiusController.position.viewToWorld()).toDouble()
+                radius = radius
         ).createShapeData() to Vector2Data(center.x.toDouble(), center.y.toDouble())
     }
 }

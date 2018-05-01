@@ -78,9 +78,17 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
         val leftTop = positionController.position.viewToWorld()
         val rightBottom = sizeController.position.viewToWorld()
+        val width = (rightBottom.x - leftTop.x).toDouble()
+        val height = (leftTop.y - rightBottom.y).toDouble()
+
+        if (width == 0.0)
+            throw RuntimeException("Rectangle's width must be bigger than 0.")
+        if (height == 0.0)
+            throw RuntimeException("Rectangle's height must be bigger than 0.")
+
         return RectangleData(
-                width = (rightBottom.x - leftTop.x).toDouble(),
-                height = (leftTop.y - rightBottom.y).toDouble()
+                width = width,
+                height = height
         ).createShapeData() to Vector2Data(
                 x = (leftTop.x + rightBottom.x).toDouble() / 2.0,
                 y = (leftTop.y + rightBottom.y).toDouble() / 2.0

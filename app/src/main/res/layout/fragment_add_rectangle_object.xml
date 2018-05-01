@@ -11,10 +11,7 @@
         android:layout_height="match_parent"
         android:layout_weight="2">
 
-        <crupest.cruphysics.component.CommonObjectPropertyView
-            android:id="@+id/common_object_property"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+        <include layout="@layout/common_object_properties"/>
 
     </ScrollView>
 
