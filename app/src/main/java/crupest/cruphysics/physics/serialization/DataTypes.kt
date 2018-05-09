@@ -1,5 +1,6 @@
 package crupest.cruphysics.physics.serialization
 
+import android.support.annotation.ColorInt
 import com.squareup.moshi.Json
 
 
@@ -31,7 +32,8 @@ data class ShapeData(
 fun CircleData.createShapeData() = ShapeData(type = SHAPE_TYPE_CIRCLE, circleData = this)
 fun RectangleData.createShapeData() = ShapeData(type = SHAPE_TYPE_RECTANGLE, rectangleData = this)
 
-data class BodyAppearanceData(val color: Int = 0x000000)
+data class BodyAppearanceData(
+        @param:ColorInt @field:ColorInt @get:ColorInt @setparam:ColorInt var color: Int = 0x000000)
 
 const val BODY_TYPE_STATIC = "static"
 const val BODY_TYPE_DYNAMIC = "dynamic"

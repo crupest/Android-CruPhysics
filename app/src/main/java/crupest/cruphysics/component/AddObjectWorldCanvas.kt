@@ -1,7 +1,11 @@
 package crupest.cruphysics.component
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PointF
+import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
 import crupest.cruphysics.physics.serialization.ShapeData
@@ -110,6 +114,8 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     abstract fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data>
 
+    @get: ColorInt
+    @setparam:ColorInt
     var color: Int
         get() = objectPaint.color
         set(value) {
