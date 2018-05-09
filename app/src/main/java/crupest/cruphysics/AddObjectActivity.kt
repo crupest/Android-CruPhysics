@@ -36,9 +36,9 @@ class AddObjectActivity : SingleFragmentActivity() {
             cameraString = savedInstanceState.getString(ARG_CAMERA)
         }
 
-        cameraData = cameraString.fromJson()!!
+        cameraData = cameraString.fromJson()
 
-        worldData = worldString.fromJson()!!
+        worldData = worldString.fromJson()
         worldViewData = StaticWorldViewData(worldData)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

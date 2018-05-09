@@ -1,5 +1,6 @@
 package crupest.cruphysics.serialization
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 
@@ -17,5 +18,6 @@ object JsonParser {
 inline fun <reified T> T.toJson(): String =
         JsonParser.moshi.adapter<T>(T::class.java).toJson(this)
 
-inline fun <reified T> String.fromJson(): T? =
-        JsonParser.moshi.adapter<T>(T::class.java).fromJson(this)
+inline fun <reified T> String.fromJson(): T =
+        JsonParser.moshi.adapter<T>(T::class.java).fromJson(this) ?:
+                throw JsonDataException("The 'fromJson' return null.")

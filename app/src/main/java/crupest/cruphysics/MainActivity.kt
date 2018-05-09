@@ -74,8 +74,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         if (savedInstanceState == null)
             readWorldFromFile()
         else {
-            val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()!!
-            val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()!!
+            val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
+            val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
 
             world = worldData.fromData()
             cameraData.fromData(worldCanvas.viewMatrix)
@@ -127,8 +127,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ADD_OBJECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val bodyData: BodyData = data!!.getStringExtra(AddObjectActivity.RESULT_BODY).fromJson()!!
-            val cameraData: CameraData = data.getStringExtra(AddObjectActivity.RESULT_CAMERA).fromJson()!!
+            val bodyData: BodyData = data!!.getStringExtra(AddObjectActivity.RESULT_BODY).fromJson()
+            val cameraData: CameraData = data.getStringExtra(AddObjectActivity.RESULT_CAMERA).fromJson()
 
             addBody(bodyData.fromData())
             cameraData.fromData(worldCanvas.viewMatrix)
@@ -213,7 +213,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         if (worldFile.exists()) {
             try {
                 val viewWorldData: ViewWorldData = worldFile.readText().fromJson()
-                        ?: throw RuntimeException()
 
                 world = viewWorldData.world.fromData()
                 worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
