@@ -26,10 +26,5 @@
         <item>dynamic</item>
     </string-array>
 
-    <string-array name="object_menu_item_list">
-        <item>Delete</item>
-        <item>Property</item>
-    </string-array>
-
     <string name="create_new">New</string>
 </resources>
