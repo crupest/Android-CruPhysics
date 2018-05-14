@@ -5,8 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.physics.resetWorldViewMatrix
@@ -36,6 +39,22 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         const val ADD_OBJECT_REQUEST_CODE = 2000
     }
 
+    private class HistoryAdapter: RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+        override fun getItemCount(): Int {
+            TODO("not implemented")
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
+            TODO("not implemented")
+        }
+
+        override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
+            TODO("not implemented")
+        }
+
+        private class HistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
+    }
+
     //Region: properties ui
 
     private lateinit var worldCanvas: MainWorldCanvas
@@ -61,6 +80,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.tool_bar))
 
+        val historyView: RecyclerView = findViewById(R.id.history)
+
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
             val intent = Intent(this, AddObjectActivity::class.java)
@@ -68,6 +89,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             intent.putExtra(AddObjectActivity.ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
+
         worldCanvas = findViewById(R.id.world_canvas)
         worldCanvas.mainWorldDelegate = this
 

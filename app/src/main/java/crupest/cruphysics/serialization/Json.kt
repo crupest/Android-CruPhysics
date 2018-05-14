@@ -3,13 +3,18 @@ package crupest.cruphysics.serialization
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Rfc3339DateJsonAdapter
+import java.util.*
 
 /**
  * Created by crupest on 2017/12/11.
  * Global moshi object for physics serialization.
  */
 
-fun createDefaultKotlinMoshi(): Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()!!
+fun createDefaultKotlinMoshi(): Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .add(Date::class.java, Rfc3339DateJsonAdapter())
+        .build()!!
 
 object JsonParser {
     val moshi = createDefaultKotlinMoshi()
