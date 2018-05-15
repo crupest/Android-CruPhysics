@@ -1,17 +1,20 @@
 package crupest.cruphysics
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.annotation.MenuRes
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.ImageView
+import android.widget.TextView
+import com.squareup.picasso.Picasso
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
+import crupest.cruphysics.data.WorldRepository
 import crupest.cruphysics.physics.resetWorldViewMatrix
 import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
@@ -19,11 +22,13 @@ import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
-import crupest.cruphysics.utility.showAlertDialog
+import org.apache.commons.codec.digest.DigestUtils
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
 import java.io.File
+import java.text.DateFormat
+import java.util.*
 
 
 /**
@@ -33,32 +38,50 @@ import java.io.File
 class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     companion object {
-        const val WORLD_FILE_NAME = "world.wld"
         const val ARG_WORLD = "WORLD"
         const val ARG_CAMERA = "CAMERA"
         const val ADD_OBJECT_REQUEST_CODE = 2000
+
+
+        const val WORLD_FILE_DIR_NAME = "worlds"
+        const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
     }
 
-    private class HistoryAdapter: RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
-        override fun getItemCount(): Int {
-            TODO("not implemented")
+    private class HistoryAdapter(val context: Context, val repository: WorldRepository) :
+            RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+
+        override fun getItemCount(): Int = repository.recordCount
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val rootView = LayoutInflater.from(context).inflate(
+                    R.layout.history_item,
+                    parent,
+                    false
+            )
+            return ViewHolder(rootView)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder {
-            TODO("not implemented")
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val record = repository.getRecord(position)
+            holder.timeTextView.text = DateFormat
+                    .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG)
+                    .format(Date(record.timestamp))
+            Picasso.with(context).load(File(record.thumbnailFile)).fit().into(holder.worldImageView)
         }
 
-        override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-            TODO("not implemented")
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val timeTextView: TextView = itemView.findViewById(R.id.time)
+            val worldImageView: ImageView = itemView.findViewById(R.id.world)
         }
-
-        private class HistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
     }
 
     //Region: properties ui
 
     private lateinit var worldCanvas: MainWorldCanvas
 
+    @get:MenuRes
+    @setparam:MenuRes
+    @field:MenuRes
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
             field = value
@@ -73,12 +96,26 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     private lateinit var worldViewData: WorldViewData
 
+
+    //Region: properties data
+    private lateinit var worldRepository: WorldRepository
+
+    private val worldDir: File by lazy {
+        getDir(WORLD_FILE_DIR_NAME, MODE_PRIVATE)
+    }
+
+    private val thumbnailDir: File by lazy {
+        getDir(THUMBNAIL_FILE_DIR_NAME, MODE_PRIVATE)
+    }
+
     //Region: methods ui
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.tool_bar))
+
+        worldRepository = WorldRepository(applicationContext)
 
         val historyView: RecyclerView = findViewById(R.id.history)
 
@@ -94,7 +131,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         worldCanvas.mainWorldDelegate = this
 
         if (savedInstanceState == null)
-            readWorldFromFile()
+            //TODO
         else {
             val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
@@ -103,7 +140,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             cameraData.fromData(worldCanvas.viewMatrix)
         }
 
-        createViewData()
+        //TODO
     }
 
     override fun onPause() {
@@ -212,41 +249,26 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     //Region: serialization
 
-    /**
-     * Get the file that records the world.
-     */
-    private fun getWorldFile() = File(filesDir, WORLD_FILE_NAME)
-
-    /**
-     * Save the current world state to file([getWorldFile]).
-     */
-    private fun saveWorldToFile() {
-        getWorldFile().writeText(ViewWorldData(
-                world = world.toData(), camera = worldCanvas.viewMatrix.toData()).toJson())
+    private fun saveWorldToFile(): String {
+        val string = ViewWorldData(
+                world = world.toData(),
+                camera = worldCanvas.viewMatrix.toData()
+        ).toJson()
+        val fileName = DigestUtils.sha1Hex(string)
+        worldDir.resolve(fileName).writeText(string)
+        return fileName
     }
 
-    /**
-     * Read the world state from the file([getWorldFile]).
-     * If the world file doesn't exist or is of bad format,
-     * a new world will be created and an alert dialog will be shown.
-     */
-    private fun readWorldFromFile() {
-        val worldFile = getWorldFile()
-        if (worldFile.exists()) {
-            try {
-                val viewWorldData: ViewWorldData = worldFile.readText().fromJson()
+    private fun readWorldFromFile(file: File) {
+        val viewWorldData: ViewWorldData = file.readText().fromJson()
 
-                world = viewWorldData.world.fromData()
-                worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
+        world = viewWorldData.world.fromData()
+        worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
+        createViewData()
+    }
 
-            } catch (exception: Exception) {
-                showAlertDialog(this,
-                        "World file's format is bad. A new world is created!")
-            }
-        } else {
-            showAlertDialog(this,
-                    "World file doesn't exist. A new world is created!")
-        }
-        createNewWorld()
+    private fun saveCurrentWorldToDatabase() {
+        worldRepository.addRecord()
+        //TODO
     }
 }

@@ -65,4 +65,6 @@ class WorldViewData() : IDrawWorldDelegate {
             canvas.restore()
         }
     }
+
+    //TODO: thumbnail.
 }
