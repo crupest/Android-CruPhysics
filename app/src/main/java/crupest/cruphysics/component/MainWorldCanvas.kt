@@ -2,6 +2,7 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -79,5 +80,9 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
                 )).show(this, x.toInt(), y.toInt())
             }
         }
+    }
+
+    override fun onViewMatrixChanged(matrix: Matrix) {
+        mainWorldDelegate.notifyWorldDirty()
     }
 }

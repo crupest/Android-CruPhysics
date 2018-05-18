@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.support.annotation.MenuRes
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.ImageView
@@ -35,7 +36,7 @@ import java.util.*
  * Activity class [MainActivity].
  * Represents the main activity.
  */
-class MainActivity : AppCompatActivity(), IMainWorldDelegate {
+class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileResolver {
 
     companion object {
         const val ARG_WORLD = "WORLD"
@@ -47,8 +48,9 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
     }
 
-    private class HistoryAdapter(val context: Context, val repository: WorldRepository) :
-            RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+    private class HistoryAdapter(
+            val context: Context, val repository: WorldRepository
+    ) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
 
         override fun getItemCount(): Int = repository.recordCount
 
@@ -66,7 +68,10 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG)
                     .format(Date(record.timestamp))
-            Picasso.with(context).load(File(record.thumbnailFile)).fit().into(holder.worldImageView)
+            Picasso.with(context)
+                    .load(repository.fileResolver.getThumbnailFile(record.thumbnailFile))
+                    .fit()
+                    .into(holder.worldImageView)
         }
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -78,8 +83,11 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     //Region: properties ui
 
     private lateinit var worldCanvas: MainWorldCanvas
+    private lateinit var historyAdapter: HistoryAdapter
 
-    @get:MenuRes @setparam:MenuRes @field:MenuRes
+    @get:MenuRes
+    @setparam:MenuRes
+    @field:MenuRes
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
             field = value
@@ -114,9 +122,12 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.tool_bar))
 
-        worldRepository = WorldRepository(applicationContext)
+        worldRepository = WorldRepository(applicationContext, this)
 
         val historyView: RecyclerView = findViewById(R.id.history)
+        historyView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        historyAdapter = HistoryAdapter(this, worldRepository)
+        historyView.adapter = historyAdapter
 
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
@@ -129,8 +140,12 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         worldCanvas = findViewById(R.id.world_canvas)
         worldCanvas.mainWorldDelegate = this
 
-        if (savedInstanceState == null)
-        else {
+        if (savedInstanceState == null) {
+            if (worldRepository.recordCount == 0)
+                createNewWorld()
+            else
+                readWorldFromFile(getWorldFile(worldRepository.getRecord(0).worldFile))
+        } else {
             val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
 
@@ -138,7 +153,11 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             cameraData.fromData(worldCanvas.viewMatrix)
         }
 
-        //TODO
+        worldRepository.addCompleteEvent.addListener {
+            runOnUiThread {
+                historyAdapter.notifyItemInserted(0)
+            }
+        }
     }
 
     override fun onPause() {
@@ -149,6 +168,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     override fun onDestroy() {
         super.onDestroy()
 
+        saveCurrentWorldIfDirty()
         worldRepository.close()
     }
 
@@ -190,6 +210,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
             addBody(bodyData.fromData())
             cameraData.fromData(worldCanvas.viewMatrix)
+            //Directly save without checking dirty.
+            saveCurrentWorldToDatabase()
             worldCanvas.repaint()
         }
     }
@@ -229,6 +251,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             task!!.cancel()
             task = null
             onWorldStateChanged(false)
+            saveCurrentWorldToDatabase()
         }
     }
 
@@ -246,7 +269,16 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     override fun bodyHitTest(x: Double, y: Double): Body? =
             world.bodies.firstOrNull { it.contains(Vector2(x, y)) }
 
+    override fun notifyWorldDirty() {
+        worldDirty = true
+    }
+
+
     //Region: serialization
+
+    override fun getWorldFile(fileName: String): File = worldDir.resolve(fileName)
+
+    override fun getThumbnailFile(fileName: String): File = thumbnailDir.resolve(fileName)
 
     private fun serializeWorld(): String = ViewWorldData(
             world = world.toData(),
@@ -264,11 +296,13 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     }
 
     private fun saveCurrentWorldToDatabase() {
-        worldRepository.addRecord(serializeWorld(), generateThumbnail(), worldDir, thumbnailDir)
+        worldRepository.addRecord(serializeWorld(), generateThumbnail())
     }
 
     private fun saveCurrentWorldIfDirty() {
-        if (worldDirty)
+        if (worldDirty) {
             saveCurrentWorldToDatabase()
+            worldDirty = false
+        }
     }
 }

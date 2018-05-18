@@ -14,9 +14,9 @@ abstract class WorldDatabase : RoomDatabase() {
         private var instance: WorldDatabase? = null
 
         fun getInstance(context: Context): WorldDatabase {
-            if (instance != null)
+            if (instance == null)
                 synchronized(this) {
-                    if (instance != null)
+                    if (instance == null)
                         instance = Room
                                 .databaseBuilder(context, WorldDatabase::class.java, DATABASE_NAME)
                                 .build()

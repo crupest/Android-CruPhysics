@@ -72,6 +72,7 @@ class WorldViewData() : IDrawWorldDelegate {
         val bitmap = Bitmap.createBitmap(1000, 500, Bitmap.Config.ARGB_8888)
         Canvas(bitmap).also {
             it.concat(viewMatrix)
+            it.scale(0.2f, 0.2f)
             draw(it)
         }
         return bitmap

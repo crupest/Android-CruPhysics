@@ -38,10 +38,11 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="260dp"
+        android:layout_width="350dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#FFFFFF">
 
         <TextView
             android:layout_width="match_parent"
