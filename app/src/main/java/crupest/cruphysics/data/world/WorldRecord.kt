@@ -1,4 +1,4 @@
-package crupest.cruphysics.data
+package crupest.cruphysics.data.world
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity

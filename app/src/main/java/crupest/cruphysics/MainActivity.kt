@@ -3,6 +3,7 @@ package crupest.cruphysics
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.annotation.MenuRes
 import android.support.design.widget.FloatingActionButton
@@ -14,7 +15,7 @@ import android.widget.TextView
 import com.squareup.picasso.Picasso
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
-import crupest.cruphysics.data.WorldRepository
+import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.physics.resetWorldViewMatrix
 import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
@@ -22,7 +23,6 @@ import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval
-import org.apache.commons.codec.digest.DigestUtils
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
@@ -79,9 +79,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     private lateinit var worldCanvas: MainWorldCanvas
 
-    @get:MenuRes
-    @setparam:MenuRes
-    @field:MenuRes
+    @get:MenuRes @setparam:MenuRes @field:MenuRes
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
             field = value
@@ -96,6 +94,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     private lateinit var worldViewData: WorldViewData
 
+    private var worldDirty: Boolean = false
 
     //Region: properties data
     private lateinit var worldRepository: WorldRepository
@@ -131,7 +130,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         worldCanvas.mainWorldDelegate = this
 
         if (savedInstanceState == null)
-            //TODO
         else {
             val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
@@ -150,7 +148,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     override fun onDestroy() {
         super.onDestroy()
-        saveWorldToFile()
+
+        worldRepository.close()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -249,15 +248,12 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     //Region: serialization
 
-    private fun saveWorldToFile(): String {
-        val string = ViewWorldData(
-                world = world.toData(),
-                camera = worldCanvas.viewMatrix.toData()
-        ).toJson()
-        val fileName = DigestUtils.sha1Hex(string)
-        worldDir.resolve(fileName).writeText(string)
-        return fileName
-    }
+    private fun serializeWorld(): String = ViewWorldData(
+            world = world.toData(),
+            camera = worldCanvas.viewMatrix.toData()
+    ).toJson()
+
+    private fun generateThumbnail(): Bitmap = worldViewData.generateThumbnail(worldCanvas.viewMatrix)
 
     private fun readWorldFromFile(file: File) {
         val viewWorldData: ViewWorldData = file.readText().fromJson()
@@ -268,7 +264,11 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     }
 
     private fun saveCurrentWorldToDatabase() {
-        worldRepository.addRecord()
-        //TODO
+        worldRepository.addRecord(serializeWorld(), generateThumbnail(), worldDir, thumbnailDir)
+    }
+
+    private fun saveCurrentWorldIfDirty() {
+        if (worldDirty)
+            saveCurrentWorldToDatabase()
     }
 }

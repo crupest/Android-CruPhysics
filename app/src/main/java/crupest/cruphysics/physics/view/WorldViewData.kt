@@ -1,6 +1,8 @@
 package crupest.cruphysics.physics.view
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import crupest.cruphysics.component.IDrawWorldDelegate
 import crupest.cruphysics.physics.checkAndGetFixture
 import crupest.cruphysics.physics.cruUserData
@@ -66,5 +68,12 @@ class WorldViewData() : IDrawWorldDelegate {
         }
     }
 
-    //TODO: thumbnail.
+    fun generateThumbnail(viewMatrix: Matrix): Bitmap {
+        val bitmap = Bitmap.createBitmap(1000, 500, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).also {
+            it.concat(viewMatrix)
+            draw(it)
+        }
+        return bitmap
+    }
 }
