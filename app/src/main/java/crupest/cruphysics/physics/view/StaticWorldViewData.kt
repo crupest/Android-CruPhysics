@@ -16,7 +16,7 @@ class StaticWorldViewData(val worldData: WorldData) : IDrawWorldDelegate {
             canvas.save()
 
             canvas.translate(bodyData.position.x.toFloat(), bodyData.position.y.toFloat())
-            canvas.rotate(Math.toRadians(bodyData.rotation).toFloat())
+            canvas.rotate(Math.toDegrees(bodyData.rotation).toFloat())
 
             bodyData.shape.circleData?.also {
                 canvas.drawCircle(
