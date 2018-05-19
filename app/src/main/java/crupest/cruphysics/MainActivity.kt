@@ -302,12 +302,11 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     private fun saveCurrentWorldToDatabase() {
         worldRepository.addRecord(serializeWorld(), generateThumbnail())
+        worldDirty = false
     }
 
     private fun saveCurrentWorldIfDirty() {
-        if (worldDirty) {
+        if (worldDirty)
             saveCurrentWorldToDatabase()
-            worldDirty = false
-        }
     }
 }
