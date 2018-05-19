@@ -1,16 +1,19 @@
 package crupest.cruphysics
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.annotation.MenuRes
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.CardView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.squareup.picasso.Picasso
@@ -48,33 +51,34 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
     }
 
-    private class HistoryAdapter(
-            val context: Context, val repository: WorldRepository
-    ) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+    private inner class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
 
-        override fun getItemCount(): Int = repository.recordCount
+        override fun getItemCount(): Int = worldRepository.recordCount
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val rootView = LayoutInflater.from(context).inflate(
+            val rootView = LayoutInflater.from(this@MainActivity).inflate(
                     R.layout.history_item,
                     parent,
                     false
-            )
+            ) as CardView
             return ViewHolder(rootView)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val record = repository.getRecord(position)
+            val record = worldRepository.getRecord(position)
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG)
                     .format(Date(record.timestamp))
-            Picasso.with(context)
-                    .load(repository.fileResolver.getThumbnailFile(record.thumbnailFile))
+            Picasso.with(this@MainActivity)
+                    .load(getThumbnailFile(record.thumbnailFile))
                     .fit()
                     .into(holder.worldImageView)
+            holder.rootView.setOnClickListener {
+                readWorldFromFile(getWorldFile(record.worldFile))
+            }
         }
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        inner class ViewHolder(val rootView: CardView) : RecyclerView.ViewHolder(rootView) {
             val timeTextView: TextView = itemView.findViewById(R.id.time)
             val worldImageView: ImageView = itemView.findViewById(R.id.world)
         }
@@ -126,7 +130,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
         val historyView: RecyclerView = findViewById(R.id.history)
         historyView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        historyAdapter = HistoryAdapter(this, worldRepository)
+        historyAdapter = HistoryAdapter()
         historyView.adapter = historyAdapter
 
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
@@ -293,6 +297,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         world = viewWorldData.world.fromData()
         worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
         createViewData()
+        worldCanvas.repaint()
     }
 
     private fun saveCurrentWorldToDatabase() {
