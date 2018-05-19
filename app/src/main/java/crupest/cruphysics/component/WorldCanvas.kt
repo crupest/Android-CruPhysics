@@ -52,6 +52,12 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     fun PointF.viewToWorld(): PointF = viewToWorld(this.x, this.y)
     fun viewToWorld(x: Float, y: Float): PointF = viewMatrix.invertedMatrix.mapPoint(x, y)
 
+    fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
+        it.postScale(scale, scale, this.width / 2.0f, this.height / 2.0f)
+        //align center
+        it.postTranslate((width - this.width) / 2.0f, (height - this.height) / 2.0f)
+    }
+
     fun repaint() {
         if (!created.get())
             return

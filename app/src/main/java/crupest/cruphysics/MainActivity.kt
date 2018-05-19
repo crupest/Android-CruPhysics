@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
         const val WORLD_FILE_DIR_NAME = "worlds"
         const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
+
+        const val THUMBNAIL_WIDTH = 800
+        const val THUMBNAIL_HEIGHT = 1200
     }
 
     private inner class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
@@ -289,7 +292,9 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
             camera = worldCanvas.viewMatrix.toData()
     ).toJson()
 
-    private fun generateThumbnail(): Bitmap = worldViewData.generateThumbnail(worldCanvas.viewMatrix)
+    private fun generateThumbnail(): Bitmap =
+            worldViewData.generateThumbnail(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
+                    worldCanvas.getThumbnailViewMatrix(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, 0.5f))
 
     private fun readWorldFromFile(file: File) {
         val viewWorldData: ViewWorldData = file.readText().fromJson()
