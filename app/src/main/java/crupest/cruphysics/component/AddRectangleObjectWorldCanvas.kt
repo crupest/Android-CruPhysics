@@ -1,7 +1,8 @@
 package crupest.cruphysics.component
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.RectangleData
 import crupest.cruphysics.physics.serialization.ShapeData
@@ -9,6 +10,7 @@ import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
+import crupest.cruphysics.utility.move
 
 /**
  * Created by crupest on 2017/11/17.
@@ -19,13 +21,15 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                sizeController.position.set(
-                        sizeController.position.x + (it.newPosition.x - it.oldPosition.x),
-                        sizeController.position.y + (it.newPosition.y - it.oldPosition.y)
+                it.updateMove()
+                sizeController.position.move(
+                        it.newPosition.x - it.oldPosition.x,
+                        it.newPosition.y - it.oldPosition.y
                 )
                 onControllerMove()
             },
             Controller {
+                //set position manually
                 sizeController.position.set(
                         maxOf(positionController.position.x, it.newPosition.x),
                         maxOf(positionController.position.y, it.newPosition.y)

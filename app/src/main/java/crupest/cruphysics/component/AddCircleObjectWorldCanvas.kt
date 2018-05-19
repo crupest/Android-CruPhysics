@@ -1,12 +1,17 @@
 package crupest.cruphysics.component
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Matrix
 import android.util.AttributeSet
-import crupest.cruphysics.physics.serialization.*
+import crupest.cruphysics.physics.serialization.CircleData
+import crupest.cruphysics.physics.serialization.ShapeData
+import crupest.cruphysics.physics.serialization.Vector2Data
+import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
+import crupest.cruphysics.utility.move
 
 /**
  * Created by crupest on 2017/11/6.
@@ -17,13 +22,15 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                radiusController.position.set(
-                        radiusController.position.x + (it.newPosition.x - it.oldPosition.x),
-                        radiusController.position.y + (it.newPosition.y - it.oldPosition.y)
+                it.updateMove()
+                radiusController.position.move(
+                        it.newPosition.x - it.oldPosition.x,
+                        it.newPosition.y - it.oldPosition.y
                 )
                 onControllerMove()
             },
             Controller {
+                it.updateMove()
                 onControllerMove()
             }
     )

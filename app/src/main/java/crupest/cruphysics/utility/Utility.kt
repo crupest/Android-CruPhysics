@@ -11,6 +11,14 @@ import kotlin.math.sqrt
 fun distance(p1: PointF, p2: PointF): Float =
         sqrt((p1.x - p2.x).pow(2) + (p1.y - p2.y).pow(2))
 
+fun PointF.copy(): PointF = PointF(this.x, this.y)
+
+fun PointF.move(x: Float, y: Float): PointF {
+    this.x += x
+    this.y += y
+    return this
+}
+
 /**
  * @brief show a simple alert dialog with a message
  * @param context the context

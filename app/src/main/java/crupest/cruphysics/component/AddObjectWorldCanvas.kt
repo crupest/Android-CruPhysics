@@ -10,6 +10,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import crupest.cruphysics.physics.serialization.ShapeData
 import crupest.cruphysics.physics.serialization.Vector2Data
+import crupest.cruphysics.utility.copy
+import crupest.cruphysics.utility.fillPaint
+import crupest.cruphysics.utility.hitTestSquare
+import crupest.cruphysics.utility.strokePaint
 
 /**
  * Created by crupest on 2017/11/4.
@@ -18,41 +22,38 @@ import crupest.cruphysics.physics.serialization.Vector2Data
 abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
     : WorldCanvas(context, attrs) {
 
-    protected class ControllerMoveEventArgs(val controller: Controller, val oldPosition: PointF, val newPosition: PointF)
-    protected class Controller(x: Float, y: Float, val moveEventListener: (ControllerMoveEventArgs) -> Unit) {
-        constructor(moveEventListener: (ControllerMoveEventArgs) -> Unit) : this(0.0f, 0.0f, moveEventListener)
+    protected class ControllerDraggedEventArgs(
+            val controller: Controller,
+            val oldPosition: PointF,
+            val newPosition: PointF
+    ) {
+        fun updateMove() {
+            controller.position.set(newPosition)
+        }
+    }
+
+    protected class Controller(x: Float, y: Float,
+                               val moveEventListener: (ControllerDraggedEventArgs) -> Unit) {
+        constructor(draggedEventListener: (ControllerDraggedEventArgs) -> Unit)
+                : this(0.0f, 0.0f, draggedEventListener)
 
         val position = PointF(x, y)
         val radius = 15.0f
 
-        fun hitTest(x: Float, y: Float, strict: Boolean = true): Boolean {
-            val f = { radius: Float ->
-                x > position.x - radius &&
-                        x < position.x + radius &&
-                        y > position.y - radius &&
-                        y < position.y + radius
-            }
-
-            return if (strict) f(radius) else f(40.0f)
-        }
+        fun hitTest(x: Float, y: Float, strict: Boolean = true): Boolean =
+                hitTestSquare(x, y, position.x, position.y, if (strict) radius else 40.0f)
     }
 
     protected abstract val controllers: Array<Controller>
-    private var init = false
-    protected val objectPaint: Paint = Paint().apply { this.color = Color.BLUE }
-    protected val objectBorderPaint: Paint = Paint().apply {
-        this.style = Paint.Style.STROKE
-        this.color = Color.BLACK
-        this.strokeWidth = 3.0f
-    }
 
-    private val controllerPaint: Paint = Paint().apply {
-        this.color = Color.WHITE
-    }
-    private val controllerBorderPaint = Paint().apply {
-        this.style = Paint.Style.STROKE
-        this.color = Color.BLACK
-    }
+    private var init = false
+
+
+    protected val objectPaint: Paint = fillPaint(Color.BLUE)
+    protected val objectBorderPaint: Paint = strokePaint(Color.BLACK, 3.0f)
+    private val controllerPaint: Paint = fillPaint(Color.WHITE)
+    private val controllerBorderPaint: Paint = strokePaint(Color.BLACK)
+
 
     private var draggedControllerIndex = -1
     private val draggedController: Controller
@@ -84,10 +85,9 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
         } else if (event.action == MotionEvent.ACTION_MOVE
                 || event.action == MotionEvent.ACTION_OUTSIDE) {
             if (draggedControllerIndex != -1) {
-                val oldPosition = PointF(draggedController.position.x, draggedController.position.y)
+                val oldPosition = draggedController.position.copy()
                 val newPosition = PointF(event.x, event.y)
-                draggedController.position.set(newPosition)
-                draggedController.moveEventListener(ControllerMoveEventArgs(
+                draggedController.moveEventListener(ControllerDraggedEventArgs(
                         draggedController, oldPosition, newPosition
                 ))
                 return true
