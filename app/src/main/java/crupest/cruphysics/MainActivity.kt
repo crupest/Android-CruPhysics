@@ -168,6 +168,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         worldRepository.addCompleteEvent.addListener {
             runOnUiThread {
                 historyAdapter.notifyItemInserted(0)
+                historyView.scrollToPosition(0)
             }
         }
     }
