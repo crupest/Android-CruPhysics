@@ -44,7 +44,7 @@ abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
             val restitution = checkOrThrow(R.id.edit_restitution, "restitution") { it >= 0.0 }
             val friction = checkOrThrow(R.id.edit_friction, "friction") { it >= 0.0 }
 
-            val (shape, position) = worldCanvas.generateShapeAndPosition()
+            val (shape, position, rotation) = worldCanvas.generateShapeInfo()
 
             val a = context as AddObjectActivity
             a.setResultAndFinish(BodyData(
@@ -58,6 +58,7 @@ abstract class AddObjectFragment(private val layoutId: Int) : Fragment() {
                     restitution = restitution,
                     friction = friction,
                     position = position,
+                    rotation = rotation,
                     appearance = BodyAppearanceData(
                             color = worldCanvas.color
                     )

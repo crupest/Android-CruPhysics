@@ -10,7 +10,6 @@ import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
-import crupest.cruphysics.utility.move
 
 /**
  * Created by crupest on 2017/11/17.
@@ -21,39 +20,43 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                it.updateMove()
-                sizeController.position.move(
-                        it.newPosition.x - it.oldPosition.x,
-                        it.newPosition.y - it.oldPosition.y
-                )
-                onControllerMove()
+                centerX = it.position.x
+                centerY = it.position.y
+                updateControllerPosition()
+                repaint()
             },
             Controller {
-                //set position manually
-                sizeController.position.set(
-                        maxOf(positionController.position.x, it.newPosition.x),
-                        maxOf(positionController.position.y, it.newPosition.y)
-                )
-                onControllerMove()
+                //TODO: Calculate the foot from "position" to diagonal
+                updateControllerPosition()
+                repaint()
             }
     )
 
-    private val positionController
+    private var centerX: Float = 0.0f
+    private var centerY: Float = 0.0f
+    private var rWidth: Float = 0.0f
+    private var rHeight: Float = 0.0f
+    private var angle: Float = 0.0f
+
+    private val centerController
         get() = controllers[0]
 
     private val sizeController
         get() = controllers[1]
 
-    private fun onControllerMove() {
-        repaint()
+    private val rotationController
+        get() = controllers[2]
+
+    private fun updateControllerPosition() {
+
     }
 
     override fun onPaint(canvas: Canvas) {
         super.onPaint(canvas)
 
         canvas.drawRectangle(
-                positionController.position.x,
-                positionController.position.y,
+                centerController.position.x,
+                centerController.position.y,
                 sizeController.position.x,
                 sizeController.position.y,
                 objectPaint,
@@ -63,24 +66,22 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         drawControllers(canvas)
     }
 
-    override fun reset() {
+    override fun initialize() {
         val centerX = width.toFloat() / 2.0f
         val centerY = height.toFloat() / 2.0f
 
-        positionController.position.set(centerX - 300.0f, centerY - 200.0f)
+        centerController.position.set(centerX - 300.0f, centerY - 200.0f)
         sizeController.position.set(centerX + 300.0f, centerY + 200.0f)
 
-        onControllerMove()
     }
 
     override fun onViewMatrixChanged(matrix: Matrix) {
-        positionController.position.set(matrix.mapPoint(positionController.position))
+        centerController.position.set(matrix.mapPoint(centerController.position))
         sizeController.position.set(matrix.mapPoint(sizeController.position))
-        onControllerMove()
     }
 
-    override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
-        val leftTop = positionController.position.viewToWorld()
+    override fun generateShapeInfo(): Pair<ShapeData, Vector2Data> {
+        val leftTop = centerController.position.viewToWorld()
         val rightBottom = sizeController.position.viewToWorld()
         val width = (rightBottom.x - leftTop.x).toDouble()
         val height = (leftTop.y - rightBottom.y).toDouble()

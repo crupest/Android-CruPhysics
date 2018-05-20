@@ -8,8 +8,6 @@ import android.graphics.PointF
 import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
-import crupest.cruphysics.physics.serialization.ShapeData
-import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.utility.copy
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.hitTestSquare
@@ -22,16 +20,7 @@ import crupest.cruphysics.utility.strokePaint
 abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
     : WorldCanvas(context, attrs) {
 
-    protected class ControllerDraggedEventArgs(
-            val controller: Controller,
-            val oldPosition: PointF,
-            val newPosition: PointF
-    ) {
-        fun updateMove() {
-            controller.position.set(newPosition)
-        }
-    }
-
+    protected class ControllerDraggedEventArgs(val position: PointF)
     protected class Controller(x: Float, y: Float,
                                val moveEventListener: (ControllerDraggedEventArgs) -> Unit) {
         constructor(draggedEventListener: (ControllerDraggedEventArgs) -> Unit)
@@ -45,6 +34,7 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
     }
 
     protected abstract val controllers: Array<Controller>
+
 
     private var init = false
 
@@ -88,7 +78,7 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
                 val oldPosition = draggedController.position.copy()
                 val newPosition = PointF(event.x, event.y)
                 draggedController.moveEventListener(ControllerDraggedEventArgs(
-                        draggedController, oldPosition, newPosition
+                        newPosition
                 ))
                 return true
             }
@@ -101,18 +91,17 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
         return super.onTouchEvent(event)
     }
 
-    protected abstract fun reset()
+    protected abstract fun initialize()
+    abstract fun generateShapeInfo(): ShapeInfo
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
         if (!init) {
-            reset()
+            initialize()
             init = true
         }
     }
-
-    abstract fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data>
 
     @get: ColorInt
     @setparam:ColorInt

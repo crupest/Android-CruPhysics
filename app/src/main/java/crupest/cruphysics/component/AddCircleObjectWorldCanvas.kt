@@ -5,13 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.CircleData
-import crupest.cruphysics.physics.serialization.ShapeData
 import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
-import crupest.cruphysics.utility.move
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Created by crupest on 2017/11/6.
@@ -22,18 +23,23 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                it.updateMove()
-                radiusController.position.move(
-                        it.newPosition.x - it.oldPosition.x,
-                        it.newPosition.y - it.oldPosition.y
-                )
-                onControllerMove()
+                centerX = it.position.x
+                centerY = it.position.y
+                updateControllerPosition()
+                repaint()
             },
             Controller {
-                it.updateMove()
-                onControllerMove()
+                radius = distance(it.position.x, centerX, it.position.y, centerY)
+                angle = atan2(it.position.y - centerY, it.position.x - centerX)
+                updateControllerPosition()
+                repaint()
             }
     )
+
+    private var centerX: Float = 0.0f
+    private var centerY: Float = 0.0f
+    private var radius: Float = 300.0f
+    private var angle: Float = 0.0f //in radium
 
     private val centerController: Controller
         get() = controllers[0]
@@ -41,17 +47,22 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     private val radiusController: Controller
         get() = controllers[1]
 
-    private fun onControllerMove() {
-        repaint()
+    private fun updateControllerPosition() {
+        centerController.position.set(centerX, centerY)
+        radiusController.position.set(
+                centerX + radius * cos(radius),
+                centerY + radius * sin(radius)
+        )
     }
 
     override fun onPaint(canvas: Canvas) {
         super.onPaint(canvas)
 
+        //Don't need to rotate.
         canvas.drawCircle(
-                centerController.position.x,
-                centerController.position.y,
-                distance(centerController.position, radiusController.position),
+                centerX,
+                centerY,
+                radius,
                 objectPaint,
                 objectBorderPaint
         )
@@ -59,31 +70,36 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         drawControllers(canvas)
     }
 
-    override fun reset() {
-        val centerX = width.toFloat() / 2.0f
-        val centerY = height.toFloat() / 2.0f
+    override fun initialize() {
+        centerX = width.toFloat() / 2.0f
+        centerY = height.toFloat() / 2.0f
 
-        centerController.position.set(centerX, centerY)
-        radiusController.position.set(centerX + 300.0f, centerY)
-
-        onControllerMove()
+        updateControllerPosition()
+        repaint()
     }
 
     override fun onViewMatrixChanged(matrix: Matrix) {
-        centerController.position.set(matrix.mapPoint(centerController.position))
-        radiusController.position.set(matrix.mapPoint(radiusController.position))
-        onControllerMove()
+        val newCenter = matrix.mapPoint(centerX, centerY)
+        centerX = newCenter.x
+        centerY = newCenter.y
+
+        radius = matrix.mapRadius(radius)
+
+        updateControllerPosition()
+        repaint()
     }
 
-    override fun generateShapeAndPosition(): Pair<ShapeData, Vector2Data> {
+    override fun generateShapeInfo(): ShapeInfo {
         val center = centerController.position.viewToWorld()
         val radius = distance(center, radiusController.position.viewToWorld()).toDouble()
 
         if (radius == 0.0)
             throw RuntimeException("Circle's radius must be bigger than 0.")
 
-        return CircleData(
-                radius = radius
-        ).createShapeData() to Vector2Data(center.x.toDouble(), center.y.toDouble())
+        return ShapeInfo(
+                CircleData(radius = radius).createShapeData(),
+                Vector2Data(center.x.toDouble(), center.y.toDouble()),
+                angle.toDouble()
+        )
     }
 }
