@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.CircleData
-import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.physics.serialization.createShapeData
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
@@ -23,14 +22,14 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                centerX = it.position.x
-                centerY = it.position.y
+                centerX = it.x
+                centerY = it.y
                 updateControllerPosition()
                 repaint()
             },
             Controller {
-                radius = distance(it.position.x, centerX, it.position.y, centerY)
-                angle = atan2(it.position.y - centerY, it.position.x - centerX)
+                radius = distance(centerX, centerY, it.x, it.y)
+                angle = atan2(it.y - centerY, it.x - centerX)
                 updateControllerPosition()
                 repaint()
             }
@@ -39,7 +38,7 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     private var centerX: Float = 0.0f
     private var centerY: Float = 0.0f
     private var radius: Float = 300.0f
-    private var angle: Float = 0.0f //in radium
+    private var angle: Float = 0.0f //in radian
 
     private val centerController: Controller
         get() = controllers[0]
@@ -50,8 +49,8 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     private fun updateControllerPosition() {
         centerController.position.set(centerX, centerY)
         radiusController.position.set(
-                centerX + radius * cos(radius),
-                centerY + radius * sin(radius)
+                centerX + radius * cos(angle),
+                centerY + radius * sin(angle)
         )
     }
 
@@ -90,16 +89,13 @@ class AddCircleObjectWorldCanvas(context: Context, attrs: AttributeSet)
     }
 
     override fun generateShapeInfo(): ShapeInfo {
-        val center = centerController.position.viewToWorld()
-        val radius = distance(center, radiusController.position.viewToWorld()).toDouble()
-
-        if (radius == 0.0)
+        if (radius == 0.0f)
             throw RuntimeException("Circle's radius must be bigger than 0.")
 
         return ShapeInfo(
-                CircleData(radius = radius).createShapeData(),
-                Vector2Data(center.x.toDouble(), center.y.toDouble()),
-                angle.toDouble()
+                CircleData(radius = viewToWorld(radius)).createShapeData(),
+                viewToWorld(centerX, centerY),
+                -angle.toDouble() //because y-axis is reversed.
         )
     }
 }

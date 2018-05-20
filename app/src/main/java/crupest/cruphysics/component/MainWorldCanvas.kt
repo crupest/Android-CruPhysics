@@ -68,8 +68,8 @@ class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanva
 
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {
-            val body = viewToWorld(x, y).run {
-                mainWorldDelegate.bodyHitTest(this.x.toDouble(), this.y.toDouble())
+            val body = viewToWorld(x, y).let {
+                mainWorldDelegate.bodyHitTest(it.x, it.y)
             }
 
             if (body != null) {

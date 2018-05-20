@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import crupest.cruphysics.component.IDrawWorldDelegate
 import crupest.cruphysics.physics.serialization.BodyData
 import crupest.cruphysics.physics.serialization.WorldData
+import crupest.cruphysics.utility.toDegrees
 
 class StaticWorldViewData(val worldData: WorldData) : IDrawWorldDelegate {
     private val bodyViewDataMap: Map<BodyData, BodyViewData> = worldData.bodies.associate {
@@ -16,7 +17,7 @@ class StaticWorldViewData(val worldData: WorldData) : IDrawWorldDelegate {
             canvas.save()
 
             canvas.translate(bodyData.position.x.toFloat(), bodyData.position.y.toFloat())
-            canvas.rotate(Math.toDegrees(bodyData.rotation).toFloat())
+            canvas.rotate(bodyData.rotation.toFloat().toDegrees())
 
             bodyData.shape.circleData?.also {
                 canvas.drawCircle(

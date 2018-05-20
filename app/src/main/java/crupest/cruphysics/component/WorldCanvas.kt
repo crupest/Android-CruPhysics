@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import crupest.cruphysics.physics.createWorldViewMatrix
+import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
@@ -33,7 +34,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
-                    created.set(true)
+                created.set(true)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -46,11 +47,12 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         })
     }
 
-    fun PointF.worldToView(): PointF = worldToView(this.x, this.y)
-    fun worldToView(x: Float, y: Float): PointF = viewMatrix.mapPoint(x, y)
-
-    fun PointF.viewToWorld(): PointF = viewToWorld(this.x, this.y)
-    fun viewToWorld(x: Float, y: Float): PointF = viewMatrix.invertedMatrix.mapPoint(x, y)
+    fun worldToView(radius: Double): Float = viewMatrix.mapRadius(radius.toFloat())
+    fun worldToView(x: Double, y: Double): PointF = viewMatrix.mapPoint(x.toFloat(), y.toFloat())
+    fun viewToWorld(radius: Float): Double = viewMatrix.invertedMatrix.mapRadius(radius).toDouble()
+    fun viewToWorld(x: Float, y: Float): Vector2Data = viewMatrix.invertedMatrix.mapPoint(x, y).let {
+        Vector2Data(it.x.toDouble(), it.y.toDouble())
+    }
 
     fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
         it.postScale(scale, scale, this.width / 2.0f, this.height / 2.0f)

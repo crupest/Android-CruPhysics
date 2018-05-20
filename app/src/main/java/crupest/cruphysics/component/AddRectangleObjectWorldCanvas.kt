@@ -5,11 +5,12 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.RectangleData
-import crupest.cruphysics.physics.serialization.ShapeData
-import crupest.cruphysics.physics.serialization.Vector2Data
 import crupest.cruphysics.physics.serialization.createShapeData
+import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
+import crupest.cruphysics.utility.toDegrees
+import kotlin.math.*
 
 /**
  * Created by crupest on 2017/11/17.
@@ -20,13 +21,23 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                centerX = it.position.x
-                centerY = it.position.y
+                centerX = it.x
+                centerY = it.y
                 updateControllerPosition()
                 repaint()
             },
             Controller {
-                //TODO: Calculate the foot from "position" to diagonal
+                fun Float.minAs0(): Float = max(this, 0.0f)
+
+                val halfDiagonal = distance(centerX, centerY, it.x, it.y)
+                val a = atan2(it.y - centerY, it.x - centerX) - angle
+                halfWidth = halfDiagonal * cos(a).minAs0()
+                halfHeight = halfDiagonal * sin(a).minAs0()
+                updateControllerPosition()
+                repaint()
+            },
+            Controller {
+                angle = atan2(it.y - centerY, it.x - centerX)
                 updateControllerPosition()
                 repaint()
             }
@@ -34,11 +45,11 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
 
     private var centerX: Float = 0.0f
     private var centerY: Float = 0.0f
-    private var rWidth: Float = 0.0f
-    private var rHeight: Float = 0.0f
-    private var angle: Float = 0.0f
+    private var halfWidth: Float = 200.0f
+    private var halfHeight: Float = 100.0f
+    private var angle: Float = 0.0f // in radian
 
-    private val centerController
+    private val positionController
         get() = controllers[0]
 
     private val sizeController
@@ -48,55 +59,68 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
         get() = controllers[2]
 
     private fun updateControllerPosition() {
+        positionController.position.set(centerX, centerY)
 
+        val a = angle + atan2(halfHeight, halfWidth)
+        val halfDiagonal = sqrt((halfWidth).pow(2) + (halfHeight).pow(2))
+
+        sizeController.position.set(centerX + halfDiagonal * cos(a), centerY + halfDiagonal * sin(a))
+
+        val l = halfWidth + 80
+        rotationController.position.set(centerX + l * cos(angle), centerY + l * sin(angle))
     }
 
     override fun onPaint(canvas: Canvas) {
         super.onPaint(canvas)
 
+        canvas.save()
+        canvas.rotate(angle.toDegrees(), centerX, centerY)
         canvas.drawRectangle(
-                centerController.position.x,
-                centerController.position.y,
-                sizeController.position.x,
-                sizeController.position.y,
+                centerX - halfWidth,
+                centerY - halfHeight,
+                centerX + halfWidth,
+                centerY + halfHeight,
                 objectPaint,
                 objectBorderPaint
         )
+        canvas.restore()
 
         drawControllers(canvas)
     }
 
     override fun initialize() {
-        val centerX = width.toFloat() / 2.0f
-        val centerY = height.toFloat() / 2.0f
+        centerX = width.toFloat() / 2.0f
+        centerY = height.toFloat() / 2.0f
 
-        centerController.position.set(centerX - 300.0f, centerY - 200.0f)
-        sizeController.position.set(centerX + 300.0f, centerY + 200.0f)
-
+        updateControllerPosition()
+        repaint()
     }
 
     override fun onViewMatrixChanged(matrix: Matrix) {
-        centerController.position.set(matrix.mapPoint(centerController.position))
-        sizeController.position.set(matrix.mapPoint(sizeController.position))
+        matrix.mapPoint(centerX, centerY).let {
+            centerX = it.x
+            centerY = it.y
+        }
+        halfWidth = matrix.mapRadius(halfWidth)
+        halfHeight = matrix.mapRadius(halfHeight)
+
+        updateControllerPosition()
+        repaint()
     }
 
-    override fun generateShapeInfo(): Pair<ShapeData, Vector2Data> {
-        val leftTop = centerController.position.viewToWorld()
-        val rightBottom = sizeController.position.viewToWorld()
-        val width = (rightBottom.x - leftTop.x).toDouble()
-        val height = (leftTop.y - rightBottom.y).toDouble()
-
-        if (width == 0.0)
+    override fun generateShapeInfo(): ShapeInfo {
+        if (halfWidth == 0.0f)
             throw RuntimeException("Rectangle's width must be bigger than 0.")
-        if (height == 0.0)
+        if (halfHeight == 0.0f)
             throw RuntimeException("Rectangle's height must be bigger than 0.")
 
-        return RectangleData(
-                width = width,
-                height = height
-        ).createShapeData() to Vector2Data(
-                x = (leftTop.x + rightBottom.x).toDouble() / 2.0,
-                y = (leftTop.y + rightBottom.y).toDouble() / 2.0
+        return ShapeInfo(
+                RectangleData(
+                        width = viewToWorld(halfWidth * 2.0f),
+                        height = viewToWorld(halfHeight * 2.0f)
+                ).createShapeData(),
+                viewToWorld(centerX, centerY),
+                -angle.toDouble() //because y-axis is reversed.
         )
     }
 }

@@ -1,9 +1,13 @@
 package crupest.cruphysics.physics
 
 import android.graphics.Matrix
+import crupest.cruphysics.utility.toDegrees
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
-import org.dyn4j.geometry.*
+import org.dyn4j.geometry.Circle
+import org.dyn4j.geometry.Rectangle
+import org.dyn4j.geometry.Shape
+import org.dyn4j.geometry.Transform
 
 /**
  * Created by crupest on 2017/11/17.
@@ -13,7 +17,7 @@ import org.dyn4j.geometry.*
 fun Transform.toMatrix(): Matrix {
     val matrix = Matrix()
     matrix.preTranslate(this.translationX.toFloat(), this.translationY.toFloat())
-    matrix.preRotate(Math.toDegrees(this.rotation).toFloat())
+    matrix.preRotate(this.rotation.toFloat().toDegrees())
     return matrix
 }
 

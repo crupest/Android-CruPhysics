@@ -8,7 +8,6 @@ import android.graphics.PointF
 import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
-import crupest.cruphysics.utility.copy
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.utility.strokePaint
@@ -20,7 +19,7 @@ import crupest.cruphysics.utility.strokePaint
 abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
     : WorldCanvas(context, attrs) {
 
-    protected class ControllerDraggedEventArgs(val position: PointF)
+    protected class ControllerDraggedEventArgs(val x: Float, val y: Float)
     protected class Controller(x: Float, y: Float,
                                val moveEventListener: (ControllerDraggedEventArgs) -> Unit) {
         constructor(draggedEventListener: (ControllerDraggedEventArgs) -> Unit)
@@ -75,11 +74,7 @@ abstract class AddObjectWorldCanvas(context: Context, attrs: AttributeSet)
         } else if (event.action == MotionEvent.ACTION_MOVE
                 || event.action == MotionEvent.ACTION_OUTSIDE) {
             if (draggedControllerIndex != -1) {
-                val oldPosition = draggedController.position.copy()
-                val newPosition = PointF(event.x, event.y)
-                draggedController.moveEventListener(ControllerDraggedEventArgs(
-                        newPosition
-                ))
+                draggedController.moveEventListener(ControllerDraggedEventArgs(event.x, event.y))
                 return true
             }
         } else if (event.action == MotionEvent.ACTION_UP) {
