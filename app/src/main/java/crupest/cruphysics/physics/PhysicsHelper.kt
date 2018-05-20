@@ -1,5 +1,6 @@
 package crupest.cruphysics.physics
 
+import android.graphics.Canvas
 import android.graphics.Matrix
 import crupest.cruphysics.utility.toDegrees
 import org.dyn4j.dynamics.Body
@@ -14,11 +15,12 @@ import org.dyn4j.geometry.Transform
  * Helper functions for physics engine.
  */
 
-fun Transform.toMatrix(): Matrix {
-    val matrix = Matrix()
-    matrix.preTranslate(this.translationX.toFloat(), this.translationY.toFloat())
-    matrix.preRotate(this.rotation.toFloat().toDegrees())
-    return matrix
+fun Canvas.withTransform(transform: Transform, block: (Canvas) -> Unit) {
+    val count = this.save()
+    this.translate(transform.translationX.toFloat(), transform.translationY.toFloat())
+    this.rotate(transform.rotation.toFloat().toDegrees())
+    block(this)
+    this.restoreToCount(count)
 }
 
 fun Body.checkAndGetFixture(): BodyFixture {
@@ -28,8 +30,10 @@ fun Body.checkAndGetFixture(): BodyFixture {
 }
 
 const val WORLD_VIEW_INIT_SCALE = 500.0f
-fun createWorldViewMatrix(): Matrix = Matrix().apply { preScale(
-        WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE) }
+fun createWorldViewMatrix(): Matrix = Matrix().apply {
+    preScale(WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE)
+}
+
 fun Matrix.resetWorldViewMatrix() {
     reset()
     preScale(WORLD_VIEW_INIT_SCALE, WORLD_VIEW_INIT_SCALE)
