@@ -31,6 +31,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     private var created: AtomicBoolean = AtomicBoolean(false)
 
+    private var init = false
+
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
@@ -140,10 +142,29 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         return super.onTouchEvent(event)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        if (!init) {
+            onInitialize()
+            init = true
+        }
+
+        onSizeChanged(w, h)
+    }
+
     /**
      *  @param matrix the matrix post-concat
      */
     protected open fun onViewMatrixChanged(matrix: Matrix) {
+
+    }
+
+    protected open fun onInitialize() {
+
+    }
+
+    protected open fun onSizeChanged(width: Int, height: Int) {
 
     }
 }

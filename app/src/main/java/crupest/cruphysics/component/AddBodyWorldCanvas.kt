@@ -35,7 +35,6 @@ abstract class AddBodyWorldCanvas(context: Context, attrs: AttributeSet)
     protected abstract val controllers: Array<Controller>
 
 
-    private var init = false
 
 
     protected val bodyPaint: Paint = fillPaint(Color.BLUE)
@@ -86,17 +85,9 @@ abstract class AddBodyWorldCanvas(context: Context, attrs: AttributeSet)
         return super.onTouchEvent(event)
     }
 
-    protected abstract fun initialize()
     abstract fun generateShapeInfo(): ShapeInfo
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
 
-        if (!init) {
-            initialize()
-            init = true
-        }
-    }
 
     @get: ColorInt
     @setparam:ColorInt

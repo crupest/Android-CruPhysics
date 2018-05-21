@@ -69,7 +69,7 @@ class AddCircleBodyWorldCanvas(context: Context, attrs: AttributeSet)
         drawControllers(canvas)
     }
 
-    override fun initialize() {
+    override fun onInitialize() {
         centerX = width.toFloat() / 2.0f
         centerY = height.toFloat() / 2.0f
 
