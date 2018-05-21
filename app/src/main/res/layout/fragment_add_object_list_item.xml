@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="crupest.cruphysics.fragment.AddObjectListItemFragment">
+    tools:context="crupest.cruphysics.fragment.AddBodyListItemFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -27,6 +27,6 @@
         android:layout_marginBottom="80dp"
         android:textColor="@android:color/black"
         android:textSize="28sp"
-        tools:text="@string/circle_object"/>
+        tools:text="@string/circle_body"/>
 
 </LinearLayout>

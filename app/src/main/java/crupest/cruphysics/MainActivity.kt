@@ -143,9 +143,9 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
         val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
         floatingButton.setOnClickListener {
-            val intent = Intent(this, AddObjectActivity::class.java)
-            intent.putExtra(AddObjectActivity.ARG_WORLD, world.toData().toJson())
-            intent.putExtra(AddObjectActivity.ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
+            val intent = Intent(this, AddBodyActivity::class.java)
+            intent.putExtra(AddBodyActivity.ARG_WORLD, world.toData().toJson())
+            intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
 
@@ -218,8 +218,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == ADD_OBJECT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val bodyData: BodyData = data!!.getStringExtra(AddObjectActivity.RESULT_BODY).fromJson()
-            val cameraData: CameraData = data.getStringExtra(AddObjectActivity.RESULT_CAMERA).fromJson()
+            val bodyData: BodyData = data!!.getStringExtra(AddBodyActivity.RESULT_BODY).fromJson()
+            val cameraData: CameraData = data.getStringExtra(AddBodyActivity.RESULT_CAMERA).fromJson()
 
             addBody(bodyData.fromData())
             cameraData.fromData(worldCanvas.viewMatrix)

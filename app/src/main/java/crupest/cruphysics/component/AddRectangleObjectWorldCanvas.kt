@@ -17,7 +17,7 @@ import kotlin.math.*
  * View component AddRectangleObjectWorldCanvas
  */
 class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
-    : AddObjectWorldCanvas(context, attrs) {
+    : AddBodyWorldCanvas(context, attrs) {
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
@@ -80,8 +80,8 @@ class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
                 centerY - halfHeight,
                 centerX + halfWidth,
                 centerY + halfHeight,
-                objectPaint,
-                objectBorderPaint
+                bodyPaint,
+                bodyBorderPaint
         )
         canvas.restore()
 

@@ -17,7 +17,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddObjectActivity" android:theme="@style/NoActionBarTheme" />
+        <activity android:name=".AddBodyActivity" android:theme="@style/NoActionBarTheme" />
         <activity android:name=".WorldSettingsActivity" android:theme="@style/NoActionBarTheme"/>
     </application>
 

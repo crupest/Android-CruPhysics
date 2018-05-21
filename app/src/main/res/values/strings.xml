@@ -3,12 +3,12 @@
     <string name="play">play</string>
     <string name="pause">pause</string>
 
-    <string name="circle_object">Circle object</string>
-    <string name="rectangle_object">Rectangle object</string>
+    <string name="circle_body">Circle body</string>
+    <string name="rectangle_body">Rectangle body</string>
 
     <string-array name="add_object_list">
-        <item>@string/circle_object</item>
-        <item>@string/rectangle_object</item>
+        <item>@string/circle_body</item>
+        <item>@string/rectangle_body</item>
     </string-array>
 
     <string name="back">Back</string>
