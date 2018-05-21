@@ -1,5 +1,6 @@
 package crupest.cruphysics
 
+import android.support.annotation.MenuRes
 import android.view.MenuItem
 
 /**
@@ -11,6 +12,7 @@ interface IOptionMenuActivity {
     /**
      * Get or set the resource id of the option menu.
      */
+    @get:MenuRes @setparam:MenuRes
     var optionMenu: Int
 
     /**
