@@ -6,16 +6,28 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PointF
+import android.text.Html
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import crupest.cruphysics.physics.createWorldViewMatrix
+import crupest.cruphysics.physics.resetWorldViewMatrix
+import crupest.cruphysics.physics.serialization.CameraData
 import crupest.cruphysics.physics.serialization.Vector2Data
+import crupest.cruphysics.physics.serialization.fromData
+import crupest.cruphysics.physics.serialization.toData
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
+import crupest.cruphysics.utility.strokePaint
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * Created by crupest on 2017/11/4.
@@ -25,9 +37,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
 
+    companion object {
+        const val scaleMarkWidth = 200
+    }
+
     lateinit var drawWorldDelegate: IDrawWorldDelegate
 
-    val viewMatrix: Matrix = createWorldViewMatrix()
+    private val viewMatrix: Matrix = Matrix()
+
+    private val textPaint = TextPaint().also {
+        it.color = Color.BLACK
+        it.isAntiAlias = true
+        it.textSize = 40.0f
+    }
+    private lateinit var scaleMarkText: StaticLayout
+    private var markLineLength: Float = 0.0f
+    private val markLinePaint = strokePaint(Color.BLACK, 3.0f)
 
     private var created: AtomicBoolean = AtomicBoolean(false)
 
@@ -47,6 +72,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                 created.set(false)
             }
         })
+
+        resetCamera()
     }
 
     fun worldToView(radius: Double): Float = viewMatrix.mapRadius(radius.toFloat())
@@ -54,6 +81,18 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     fun viewToWorld(radius: Float): Double = viewMatrix.invertedMatrix.mapRadius(radius).toDouble()
     fun viewToWorld(x: Float, y: Float): Vector2Data = viewMatrix.invertedMatrix.mapPoint(x, y).let {
         Vector2Data(it.x.toDouble(), it.y.toDouble())
+    }
+
+    fun setCamera(camera: CameraData) {
+        camera.fromData(viewMatrix)
+        recalculateScaleMark()
+    }
+
+    fun generateCameraData(): CameraData = viewMatrix.toData()
+
+    fun resetCamera() {
+        viewMatrix.resetWorldViewMatrix()
+        recalculateScaleMark()
     }
 
     fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
@@ -80,6 +119,24 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         canvas.save()
         canvas.concat(viewMatrix)
         drawWorldDelegate.draw(canvas)
+        canvas.restore()
+        drawScaleMark(canvas)
+    }
+
+    private fun drawScaleMark(canvas: Canvas) {
+        val markLeft = width - scaleMarkWidth - 50.0f
+        val markTop = 30.0f
+        val halfSideLength = 10.0f
+
+        canvas.save()
+        canvas.translate(markLeft, markTop)
+        scaleMarkText.draw(canvas)
+        canvas.translate(0.0f, scaleMarkText.height + halfSideLength + 5.0f)
+        val lineLeft = (scaleMarkWidth - markLineLength) / 2.0f
+        val lineRight = lineLeft + markLineLength
+        canvas.drawLine(lineLeft, 0.0f, lineRight, 0.0f, markLinePaint)
+        canvas.drawLine(lineLeft, -halfSideLength, lineLeft, halfSideLength, markLinePaint)
+        canvas.drawLine(lineRight, -halfSideLength, lineRight, halfSideLength, markLinePaint)
         canvas.restore()
     }
 
@@ -111,7 +168,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                             }
                         }
                         viewMatrix.postConcat(postMatrix)
-                        onViewMatrixChanged(postMatrix)
+                        onViewMatrixChangedInternal(postMatrix)
                         repaint()
                     }
                     2 -> {
@@ -126,7 +183,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                             postScale(scale, scale, width / 2.0f, height / 2.0f)
                         }
                         viewMatrix.postConcat(matrix)
-                        onViewMatrixChanged(matrix)
+                        onViewMatrixChangedInternal(matrix)
                         repaint()
                     }
                 }
@@ -151,6 +208,33 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         }
 
         onSizeChanged(w, h)
+    }
+
+    private fun recalculateScaleMark() {
+        val exponent = floor(log10(viewToWorld(scaleMarkWidth.toFloat()))).roundToInt()
+        markLineLength = worldToView(10.0.pow(exponent))
+
+        val html = "10<sup><small>$exponent</small></sup>m"
+
+        @Suppress("DEPRECATION")
+        val textSource = if (android.os.Build.VERSION.SDK_INT >= 24)
+            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+        else
+            Html.fromHtml(html)
+
+        scaleMarkText = StaticLayout(textSource,
+                textPaint,
+                scaleMarkWidth,
+                Layout.Alignment.ALIGN_CENTER,
+                1.0f,
+                0.0f,
+                false
+        )
+    }
+
+    private fun onViewMatrixChangedInternal(matrix: Matrix) {
+        recalculateScaleMark()
+        onViewMatrixChanged(matrix)
     }
 
     /**

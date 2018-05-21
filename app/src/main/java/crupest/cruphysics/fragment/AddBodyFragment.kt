@@ -15,7 +15,10 @@ import crupest.cruphysics.AddBodyActivity
 import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.R
 import crupest.cruphysics.component.AddBodyWorldCanvas
-import crupest.cruphysics.physics.serialization.*
+import crupest.cruphysics.physics.serialization.BODY_TYPE_DYNAMIC
+import crupest.cruphysics.physics.serialization.BODY_TYPE_STATIC
+import crupest.cruphysics.physics.serialization.BodyAppearanceData
+import crupest.cruphysics.physics.serialization.BodyData
 import crupest.cruphysics.utility.generateRandomColor
 import crupest.cruphysics.utility.showAlertDialog
 
@@ -62,7 +65,7 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
                     appearance = BodyAppearanceData(
                             color = worldCanvas.color
                     )
-            ), worldCanvas.viewMatrix.toData())
+            ), worldCanvas.generateCameraData())
         } catch (e: Exception) {
             showAlertDialog(context!!, e.message.orEmpty())
         }
@@ -113,7 +116,7 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         val activity = context as AddBodyActivity
-        worldCanvas.viewMatrix.set(activity.cameraData.fromData())
+        worldCanvas.setCamera(activity.cameraData)
         worldCanvas.drawWorldDelegate = activity.worldViewData
     }
 
@@ -141,6 +144,6 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
             activity.optionMenuItemSelectedListener = null
         }
 
-        (activity as AddBodyActivity).cameraData = worldCanvas.viewMatrix.toData()
+        (activity as AddBodyActivity).cameraData = worldCanvas.generateCameraData()
     }
 }

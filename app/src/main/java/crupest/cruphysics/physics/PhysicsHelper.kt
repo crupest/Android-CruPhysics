@@ -30,9 +30,6 @@ fun Body.checkAndGetFixture(): BodyFixture {
 }
 
 const val WORLD_VIEW_INIT_SCALE = 500.0f
-fun createWorldViewMatrix(): Matrix = Matrix().apply {
-    preScale(WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE)
-}
 
 fun Matrix.resetWorldViewMatrix() {
     reset()

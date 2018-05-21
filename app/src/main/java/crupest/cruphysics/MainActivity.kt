@@ -21,7 +21,6 @@ import com.squareup.picasso.Picasso
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.data.world.WorldRepository
-import crupest.cruphysics.physics.resetWorldViewMatrix
 import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
 import crupest.cruphysics.serialization.fromJson
@@ -145,7 +144,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         floatingButton.setOnClickListener {
             val intent = Intent(this, AddBodyActivity::class.java)
             intent.putExtra(AddBodyActivity.ARG_WORLD, world.toData().toJson())
-            intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
+            intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.generateCameraData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
 
@@ -162,7 +161,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
 
             world = worldData.fromData()
-            cameraData.fromData(worldCanvas.viewMatrix)
+            worldCanvas.setCamera(cameraData)
         }
 
         worldRepository.addCompleteEvent.addListener {
@@ -189,7 +188,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         super.onSaveInstanceState(outState)
 
         outState!!.putString(ARG_WORLD, world.toData().toJson())
-        outState.putString(ARG_CAMERA, worldCanvas.viewMatrix.toData().toJson())
+        outState.putString(ARG_CAMERA, worldCanvas.generateCameraData().toJson())
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -222,7 +221,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
             val cameraData: CameraData = data.getStringExtra(AddBodyActivity.RESULT_CAMERA).fromJson()
 
             addBody(bodyData.fromData())
-            cameraData.fromData(worldCanvas.viewMatrix)
+            worldCanvas.setCamera(cameraData)
             //Directly save without checking dirty.
             saveCurrentWorldToDatabase()
             worldCanvas.repaint()
@@ -240,7 +239,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         world = World()
         worldViewData = WorldViewData()
         worldCanvas.drawWorldDelegate = worldViewData
-        worldCanvas.viewMatrix.resetWorldViewMatrix()
+        worldCanvas.resetCamera()
 
         worldCanvas.repaint()
     }
@@ -295,7 +294,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     private fun serializeWorld(): String = ViewWorldData(
             world = world.toData(),
-            camera = worldCanvas.viewMatrix.toData()
+            camera = worldCanvas.generateCameraData()
     ).toJson()
 
     private fun generateThumbnail(): Bitmap =
@@ -306,7 +305,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         val viewWorldData: ViewWorldData = file.readText().fromJson()
 
         world = viewWorldData.world.fromData()
-        worldCanvas.viewMatrix.set(viewWorldData.camera.fromData())
+        worldCanvas.setCamera(viewWorldData.camera)
         createViewData()
         worldCanvas.repaint()
     }
