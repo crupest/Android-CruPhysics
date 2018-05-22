@@ -5,8 +5,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
+    android:foreground="?attr/selectableItemBackground"
     app:contentPadding="8dp"
-    app:cardBackgroundColor="#b4b4b4"
+    app:cardBackgroundColor="#e1e1e1"
     app:cardCornerRadius="5dp">
 
     <LinearLayout
@@ -23,7 +24,7 @@
         <ImageView
             android:id="@+id/world"
             android:layout_width="200dp"
-            android:layout_height="300dp"
+            android:layout_height="100dp"
             android:layout_gravity="center_horizontal"
             android:contentDescription="@string/world" />
 

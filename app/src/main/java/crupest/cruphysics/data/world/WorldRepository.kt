@@ -2,18 +2,32 @@ package crupest.cruphysics.data.world
 
 import android.content.Context
 import android.graphics.Bitmap
-import crupest.cruphysics.Event
 import crupest.cruphysics.IWorldRecordFileResolver
+import crupest.cruphysics.physics.serialization.CameraData
+import crupest.cruphysics.physics.serialization.WorldData
+import crupest.cruphysics.serialization.toJson
+import crupest.cruphysics.utility.nowLong
 import crupest.cruphysics.utility.sha1Hex
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
-class WorldRepository(context: Context, val fileResolver: IWorldRecordFileResolver) : AutoCloseable {
+class WorldRepository(context: Context, val fileResolver: IWorldRecordFileResolver) {
     private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
     private val cacheLock = Any()
     private lateinit var cache: List<WorldRecord>
+
+    private val stop = AtomicBoolean(false)
+    private val taskQueue: Queue<() -> Unit> = ConcurrentLinkedQueue()
+    private val workingThread: Thread = thread(start = true, name = "SavingWorldThread") {
+        while (true) {
+            if (stop.get() && taskQueue.isEmpty())
+                return@thread
+            taskQueue.poll()?.invoke()
+        }
+    }
 
     init {
         thread {
@@ -23,34 +37,23 @@ class WorldRepository(context: Context, val fileResolver: IWorldRecordFileResolv
         }.join()
     }
 
-    class AddCompleteEventArgs
-
-    val addCompleteEvent = Event<AddCompleteEventArgs>()
-
-    private class SavingTask(
-            val world: String,
-            val thumbnail: Bitmap
-    )
-
-    private val stop = AtomicBoolean(false)
-    private val savingTaskQueue: BlockingQueue<SavingTask> = LinkedBlockingQueue()
-    private val savingWorkingThread: Thread = thread(start = true, name = "SavingWorldThread") {
-        while (true) {
-            if (stop.get() && savingTaskQueue.isEmpty())
-                return@thread
-            doSaving(savingTaskQueue.take())
+    //events
+    open class UiNotifyEventArgs(private val latch: CountDownLatch) {
+        fun notifyDone() {
+            latch.countDown()
         }
     }
 
-    private fun doSaving(savingTask: SavingTask) {
-        //Save world.
-        val world = savingTask.world
-        val worldFileName = world.sha1Hex()
-        fileResolver.getWorldFile(worldFileName).writeText(world)
+    class AddCompleteEventArgs(latch: CountDownLatch) : UiNotifyEventArgs(latch)
+    class LatestCameraUpdateCompleteEventArgs(latch: CountDownLatch) : UiNotifyEventArgs(latch)
+    class TimestampUpdateCompleteEventArgs(latch: CountDownLatch, val oldPosition: Int) : UiNotifyEventArgs(latch)
 
+    var addCompleteListener: ((AddCompleteEventArgs) -> Unit)? = null
+    var latestCameraUpdateCompleteListener: ((LatestCameraUpdateCompleteEventArgs) -> Unit)? = null
+    var timestampUpdateCompleteListener: ((TimestampUpdateCompleteEventArgs) -> Unit)? = null
 
+    private fun generateThumbnailFile(thumbnail: Bitmap): String {
         //Save thumbnail.
-        val thumbnail = savingTask.thumbnail
         //create temp file
         val thumbnailTempFile = fileResolver.getThumbnailFile("temp")
         //compress and save to temp file
@@ -61,13 +64,13 @@ class WorldRepository(context: Context, val fileResolver: IWorldRecordFileResolv
         val thumbnailFileName = thumbnailTempFile.inputStream().use { it.sha1Hex() }
         thumbnailTempFile.renameTo(fileResolver.getThumbnailFile(thumbnailFileName))
 
-        dao.insert(WorldRecord(worldFile = worldFileName, thumbnailFile = thumbnailFileName))
+        return thumbnailFileName
+    }
 
-        synchronized(cacheLock) {
-            cache = dao.getRecords()
-        }
-
-        addCompleteEvent.raise(AddCompleteEventArgs())
+    private fun runAndWaitForUiThread(block: (CountDownLatch) -> Unit) {
+        val latch = CountDownLatch(1)
+        block(latch)
+        latch.await()
     }
 
     val recordCount: Int
@@ -75,11 +78,59 @@ class WorldRepository(context: Context, val fileResolver: IWorldRecordFileResolv
 
     fun getRecord(position: Int) = synchronized(cacheLock) { cache[position] }
 
-    fun addRecord(world: String, thumbnail: Bitmap) {
-        savingTaskQueue.put(SavingTask(world, thumbnail))
+    fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnail: Bitmap) {
+        taskQueue.offer {
+            dao.insert(WorldRecord(
+                    world = worldData.toJson(),
+                    camera = cameraData.toJson(),
+                    thumbnailFile = generateThumbnailFile(thumbnail))
+            )
+
+            synchronized(cacheLock) {
+                cache = dao.getRecords()
+            }
+
+            runAndWaitForUiThread {
+                addCompleteListener?.invoke(AddCompleteEventArgs(it))
+            }
+        }
     }
 
-    override fun close() {
+    fun updateLatestRecordCamera(camera: CameraData, thumbnail: Bitmap) {
+        taskQueue.offer {
+            synchronized(cacheLock) {
+                cache.firstOrNull()?.also {
+                    it.camera = camera.toJson()
+                    fileResolver.getThumbnailFile(it.thumbnailFile).delete()
+                    it.thumbnailFile = generateThumbnailFile(thumbnail)
+                    dao.update(it)
+                }
+            }
+
+            runAndWaitForUiThread {
+                latestCameraUpdateCompleteListener?.invoke(
+                        LatestCameraUpdateCompleteEventArgs(it))
+            }
+        }
+    }
+
+    fun updateTimestamp(position: Int) {
+        taskQueue.offer {
+            synchronized(cacheLock) {
+                val record = cache[position]
+                record.timestamp = nowLong()
+                dao.update(record)
+                cache = dao.getRecords()
+            }
+
+            runAndWaitForUiThread {
+                timestampUpdateCompleteListener?.invoke(TimestampUpdateCompleteEventArgs(it, position))
+            }
+        }
+    }
+
+    fun closeAndWait() {
         stop.set(true)
+        workingThread.join()
     }
 }

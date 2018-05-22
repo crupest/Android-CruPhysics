@@ -20,6 +20,7 @@ import android.widget.TextView
 import com.squareup.picasso.Picasso
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
+import crupest.cruphysics.data.world.WorldRecord
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
@@ -47,11 +48,10 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         const val ADD_OBJECT_REQUEST_CODE = 2000
 
 
-        const val WORLD_FILE_DIR_NAME = "worlds"
         const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
 
-        const val THUMBNAIL_WIDTH = 800
-        const val THUMBNAIL_HEIGHT = 1200
+        const val THUMBNAIL_WIDTH = 1000
+        const val THUMBNAIL_HEIGHT = 500
     }
 
     private inner class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
@@ -77,7 +77,11 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
                     .fit()
                     .into(holder.worldImageView)
             holder.rootView.setOnClickListener {
-                readWorldFromFile(getWorldFile(record.worldFile))
+                recoverFromRecord(record)
+                // You can't just use position here, because it may remain unchanged when the item
+                // is moved (because it won't rebind). So you always have to get the latest position.
+                // This has cost my 30 minutes.
+                worldRepository.updateTimestamp(holder.adapterPosition)
                 drawer.closeDrawers()
             }
         }
@@ -111,14 +115,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     private lateinit var worldViewData: WorldViewData
 
-    private var worldDirty: Boolean = false
-
     //Region: properties data
     private lateinit var worldRepository: WorldRepository
-
-    private val worldDir: File by lazy {
-        getDir(WORLD_FILE_DIR_NAME, MODE_PRIVATE)
-    }
 
     private val thumbnailDir: File by lazy {
         getDir(THUMBNAIL_FILE_DIR_NAME, MODE_PRIVATE)
@@ -155,33 +153,46 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
             if (worldRepository.recordCount == 0)
                 createNewWorld()
             else
-                readWorldFromFile(getWorldFile(worldRepository.getRecord(0).worldFile))
+                recoverFromRecord(worldRepository.getRecord(0))
         } else {
             val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
 
-            world = worldData.fromData()
-            worldCanvas.setCamera(cameraData)
+            recoverFromData(worldData, cameraData)
         }
 
-        worldRepository.addCompleteEvent.addListener {
+        worldRepository.addCompleteListener = {
             runOnUiThread {
                 historyAdapter.notifyItemInserted(0)
                 historyView.scrollToPosition(0)
+                it.notifyDone()
+            }
+        }
+        worldRepository.latestCameraUpdateCompleteListener = {
+            runOnUiThread {
+                historyAdapter.notifyItemChanged(0)
+                it.notifyDone()
+            }
+        }
+        worldRepository.timestampUpdateCompleteListener =  {
+            runOnUiThread {
+                historyAdapter.notifyItemMoved(it.oldPosition, 0)
+                historyView.scrollToPosition(0)
+                it.notifyDone()
             }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        pauseWorld()
+        if (!pauseWorld())
+            worldRepository.updateLatestRecordCamera(worldCanvas.generateCameraData(), generateThumbnail())
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        saveCurrentWorldIfDirty()
-        worldRepository.close()
+        worldRepository.closeAndWait()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -228,10 +239,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         }
     }
 
-    private fun createViewData() {
-        worldViewData = WorldViewData(world.bodies)
-        worldCanvas.drawWorldDelegate = worldViewData
-    }
 
     //Region: world
 
@@ -248,24 +255,24 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         optionMenu = if (newState) R.menu.main_menu_play else R.menu.main_menu_pause
     }
 
-    private fun runWorld() {
+    private fun runWorld(): Boolean =
         if (task == null) {
             task = setInterval(1.0 / 60.0) {
                 world.update(1.0 / 60.0)
                 worldCanvas.repaint()
             }
             onWorldStateChanged(true)
-        }
-    }
+            true
+        } else false
 
-    private fun pauseWorld() {
+    private fun pauseWorld() =
         if (task != null) {
             task!!.cancel()
             task = null
             onWorldStateChanged(false)
             saveCurrentWorldToDatabase()
-        }
-    }
+            true
+        } else false
 
     private fun addBody(body: Body) {
         world.addBody(body)
@@ -281,42 +288,32 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
     override fun bodyHitTest(x: Double, y: Double): Body? =
             world.bodies.firstOrNull { it.contains(Vector2(x, y)) }
 
-    override fun notifyWorldDirty() {
-        worldDirty = true
-    }
-
 
     //Region: serialization
 
-    override fun getWorldFile(fileName: String): File = worldDir.resolve(fileName)
-
     override fun getThumbnailFile(fileName: String): File = thumbnailDir.resolve(fileName)
-
-    private fun serializeWorld(): String = ViewWorldData(
-            world = world.toData(),
-            camera = worldCanvas.generateCameraData()
-    ).toJson()
 
     private fun generateThumbnail(): Bitmap =
             worldViewData.generateThumbnail(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
                     worldCanvas.getThumbnailViewMatrix(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, 0.5f))
 
-    private fun readWorldFromFile(file: File) {
-        val viewWorldData: ViewWorldData = file.readText().fromJson()
-
-        world = viewWorldData.world.fromData()
-        worldCanvas.setCamera(viewWorldData.camera)
-        createViewData()
+    private fun recoverFromData(worldData: WorldData, cameraData: CameraData) {
+        world = worldData.fromData()
+        worldCanvas.setCamera(cameraData)
+        worldViewData = WorldViewData(world.bodies)
+        worldCanvas.drawWorldDelegate = worldViewData
         worldCanvas.repaint()
     }
 
-    private fun saveCurrentWorldToDatabase() {
-        worldRepository.addRecord(serializeWorld(), generateThumbnail())
-        worldDirty = false
+    private fun recoverFromRecord(worldRecord: WorldRecord) {
+        recoverFromData(worldRecord.world.fromJson(), worldRecord.camera.fromJson())
     }
 
-    private fun saveCurrentWorldIfDirty() {
-        if (worldDirty)
-            saveCurrentWorldToDatabase()
+    private fun saveCurrentWorldToDatabase() {
+        worldRepository.addRecord(
+                world.toData(),
+                worldCanvas.generateCameraData(),
+                generateThumbnail()
+        )
     }
 }

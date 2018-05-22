@@ -1,8 +1,6 @@
 package crupest.cruphysics.data.world
 
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.Query
+import android.arch.persistence.room.*
 
 @Dao
 interface WorldRecordDao {
@@ -10,5 +8,8 @@ interface WorldRecordDao {
     fun getRecords(): List<WorldRecord>
 
     @Insert
-    fun insert(record: WorldRecord)
+    fun insert(vararg record: WorldRecord)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(vararg record: WorldRecord)
 }

@@ -55,3 +55,5 @@ fun generateRandomColor(): Int = Color.rgb(
 )
 
 fun Float.toDegrees(): Float = this * 180.0f / PI.toFloat()
+
+fun nowLong(): Long = Date().time
