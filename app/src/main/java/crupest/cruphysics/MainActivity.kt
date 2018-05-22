@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val record = worldRepository.getRecord(position)
             holder.timeTextView.text = DateFormat
-                    .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG)
+                    .getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(Date(record.timestamp))
             Picasso.with(this@MainActivity)
                     .load(getThumbnailFile(record.thumbnailFile))
