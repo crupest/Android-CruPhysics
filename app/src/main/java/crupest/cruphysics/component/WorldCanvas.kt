@@ -14,15 +14,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import crupest.cruphysics.physics.resetWorldViewMatrix
 import crupest.cruphysics.physics.serialization.CameraData
 import crupest.cruphysics.physics.serialization.Vector2Data
-import crupest.cruphysics.physics.serialization.fromData
-import crupest.cruphysics.physics.serialization.toData
-import crupest.cruphysics.utility.distance
-import crupest.cruphysics.utility.invertedMatrix
-import crupest.cruphysics.utility.mapPoint
-import crupest.cruphysics.utility.strokePaint
+import crupest.cruphysics.utility.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.floor
 import kotlin.math.log10
@@ -38,7 +32,42 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
 
     companion object {
-        const val scaleMarkWidth = 200
+        private const val scaleMarkWidth = 200
+
+
+        //Region: camera
+
+        private const val WORLD_VIEW_INIT_SCALE = 500.0f
+
+        private fun Matrix.resetAsCamera(centerX: Float, centerY: Float) {
+            this.reset()
+            this.postTranslate(centerX, centerY)
+            this.preScale(WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE)
+        }
+
+        private fun Matrix.toData(centerX: Float, centerY: Float): CameraData {
+            val copy = Matrix(this).also {
+                it.postTranslate(-centerX, -centerY)
+            }
+            val values = copy.getValues()
+            return CameraData(translation = Vector2Data(
+                    values[Matrix.MTRANS_X].toDouble(),
+                    values[Matrix.MTRANS_Y].toDouble()
+            ), scale = values[Matrix.MSCALE_X].toDouble())
+        }
+
+        private fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
+            matrix.reset()
+            matrix.preTranslate(
+                    this.translation.x.toFloat(),
+                    this.translation.y.toFloat()
+            )
+            matrix.preScale(
+                    this.scale.toFloat(),
+                    -this.scale.toFloat()
+            )
+            matrix.postTranslate(centerX, centerY)
+        }
     }
 
     lateinit var drawWorldDelegate: IDrawWorldDelegate
@@ -72,8 +101,6 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                 created.set(false)
             }
         })
-
-        resetCamera()
     }
 
     fun worldToView(radius: Double): Float = viewMatrix.mapRadius(radius.toFloat())
@@ -84,16 +111,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     fun setCamera(camera: CameraData) {
-        camera.fromData(viewMatrix)
+        camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         recalculateScaleMark()
     }
-
-    fun generateCameraData(): CameraData = viewMatrix.toData()
 
     fun resetCamera() {
-        viewMatrix.resetWorldViewMatrix()
+        viewMatrix.resetAsCamera(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         recalculateScaleMark()
     }
+
+    fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
 
     fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
         it.postScale(scale, scale, this.width / 2.0f, this.height / 2.0f)
@@ -206,6 +233,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             onInitialize()
             init = true
         }
+
+        viewMatrix.postTranslate(-oldw.toFloat() / 2.0f, -oldh.toFloat() / 2.0f)
+        viewMatrix.postTranslate(w.toFloat() / 2.0f, h.toFloat() / 2.0f)
 
         onSizeChanged(w, h)
     }

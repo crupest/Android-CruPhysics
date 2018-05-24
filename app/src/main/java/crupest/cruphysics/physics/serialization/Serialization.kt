@@ -1,11 +1,9 @@
 package crupest.cruphysics.physics.serialization
 
-import android.graphics.Matrix
 import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.physics.checkAndGetFixture
 import crupest.cruphysics.physics.cruUserData
 import crupest.cruphysics.physics.switchShapeR
-import crupest.cruphysics.utility.getValues
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.dynamics.World
@@ -15,37 +13,6 @@ import java.security.InvalidParameterException
 fun Vector2.toData(): Vector2Data = Vector2Data(this.x, this.y)
 
 fun Vector2Data.fromData(): Vector2 = Vector2(this.x, this.y)
-
-fun Matrix.toData(): CameraData {
-    val values = this.getValues()
-    return CameraData(translation = Vector2Data(
-            values[Matrix.MTRANS_X].toDouble(),
-            values[Matrix.MTRANS_Y].toDouble()
-    ), scale = values[Matrix.MSCALE_X].toDouble())
-}
-
-fun CameraData.fromData(): Matrix = Matrix().also {
-    it.preTranslate(
-            this.translation.x.toFloat(),
-            this.translation.y.toFloat()
-    )
-    it.preScale(
-            this.scale.toFloat(),
-            -this.scale.toFloat()
-    )
-}
-
-fun CameraData.fromData(matrix: Matrix) {
-    matrix.reset()
-    matrix.preTranslate(
-            this.translation.x.toFloat(),
-            this.translation.y.toFloat()
-    )
-    matrix.preScale(
-            this.scale.toFloat(),
-            -this.scale.toFloat()
-    )
-}
 
 fun MassType.serializeAsString(): String = when (this) {
     MassType.NORMAL -> BODY_TYPE_DYNAMIC

@@ -35,8 +35,6 @@ abstract class AddBodyWorldCanvas(context: Context, attrs: AttributeSet)
     protected abstract val controllers: Array<Controller>
 
 
-
-
     protected val bodyPaint: Paint = fillPaint(Color.BLUE)
     protected val bodyBorderPaint: Paint = strokePaint(Color.BLACK, 3.0f)
     private val controllerPaint: Paint = fillPaint(Color.WHITE)
@@ -86,8 +84,6 @@ abstract class AddBodyWorldCanvas(context: Context, attrs: AttributeSet)
     }
 
     abstract fun generateShapeInfo(): ShapeInfo
-
-
 
     @get: ColorInt
     @setparam:ColorInt

@@ -1,7 +1,6 @@
 package crupest.cruphysics.physics
 
 import android.graphics.Canvas
-import android.graphics.Matrix
 import crupest.cruphysics.utility.toDegrees
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
@@ -27,13 +26,6 @@ fun Body.checkAndGetFixture(): BodyFixture {
     if (this.fixtureCount != 1)
         throw IllegalStateException("The body has 0 or more than 1 fixture.")
     return this.getFixture(0)
-}
-
-const val WORLD_VIEW_INIT_SCALE = 500.0f
-
-fun Matrix.resetWorldViewMatrix() {
-    reset()
-    preScale(WORLD_VIEW_INIT_SCALE, WORLD_VIEW_INIT_SCALE)
 }
 
 val Body.cruUserData: BodyUserData

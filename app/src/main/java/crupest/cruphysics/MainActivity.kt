@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     override fun onPause() {
         super.onPause()
-        if (!pauseWorld())
+        if (!pauseWorld() && !world.isEmpty)
             worldRepository.updateLatestRecordCamera(worldCanvas.generateCameraData(), generateThumbnail())
     }
 

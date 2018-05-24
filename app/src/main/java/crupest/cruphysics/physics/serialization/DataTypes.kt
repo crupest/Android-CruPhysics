@@ -60,9 +60,3 @@ data class CameraData(
         var translation: Vector2Data = Vector2Data(),
         var scale: Double = 0.0
 )
-
-data class ViewWorldData(
-        var version: String = "0.1.0",
-        var world: WorldData = WorldData(),
-        var camera: CameraData = CameraData()
-)
