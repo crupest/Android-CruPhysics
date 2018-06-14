@@ -3,12 +3,14 @@ package crupest.cruphysics.fragment
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import crupest.cruphysics.AddBodyActivity
@@ -29,6 +31,28 @@ import crupest.cruphysics.utility.showAlertDialog
 
 
 abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
+
+    private inner class ShapePropertyAdapter(private val list: List<ShapeProperty>)
+        : RecyclerView.Adapter<ShapePropertyAdapter.ViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val rootView = LayoutInflater.from(context).inflate(R.layout.shape_property_item, parent, false)
+            return ViewHolder(rootView)
+        }
+
+        override fun getItemCount(): Int = list.size
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.labelTextView.text = list[position].name
+            holder.valueEditText.setOnFocusChangeListener { v, hasFocus ->  }
+            TODO("not implemented")
+        }
+
+        inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
+            val labelTextView: TextView = rootView.findViewById(R.id.label)
+            val valueEditText: EditText = rootView.findViewById(R.id.value)
+        }
+    }
 
     private lateinit var worldCanvas: AddBodyWorldCanvas
 
