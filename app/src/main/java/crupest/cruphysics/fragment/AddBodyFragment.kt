@@ -11,8 +11,6 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
-import com.flask.colorpicker.ColorPickerView
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import crupest.cruphysics.AddBodyActivity
 import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.R
@@ -23,6 +21,9 @@ import crupest.cruphysics.physics.serialization.BodyAppearanceData
 import crupest.cruphysics.physics.serialization.BodyData
 import crupest.cruphysics.utility.generateRandomColor
 import crupest.cruphysics.utility.showAlertDialog
+import me.priyesh.chroma.ChromaDialog
+import me.priyesh.chroma.ColorMode
+import me.priyesh.chroma.ColorSelectListener
 
 /**
  * Created by crupest on 2017/11/25.
@@ -44,7 +45,7 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.labelTextView.text = list[position].name
-            holder.valueEditText.setOnFocusChangeListener { v, hasFocus ->  }
+            holder.valueEditText.setOnFocusChangeListener { v, hasFocus -> }
             TODO("not implemented")
         }
 
@@ -113,20 +114,17 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
         colorBlock.background = ColorDrawable(initColor)
 
         colorBlock.setOnClickListener {
-            ColorPickerDialogBuilder
-                    .with(context)
-                    .setTitle("Choose color:")
+            ChromaDialog.Builder()
                     .initialColor(worldCanvas.color)
-                    .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                    .density(12)
-                    .setPositiveButton("ok") { _, selectedColor, _ ->
-                        worldCanvas.color = selectedColor
-                        colorBlock.background = ColorDrawable(selectedColor)
-                    }
-                    .setNegativeButton("cancel") { _, _ -> }
-                    .lightnessSliderOnly()
-                    .build()
-                    .show()
+                    .colorMode(ColorMode.RGB) // There's also ARGB and HSV
+                    .onColorSelected(object : ColorSelectListener {
+                        override fun onColorSelected(color: Int) {
+                            worldCanvas.color = color
+                            colorBlock.background = ColorDrawable(color)
+                        }
+                    })
+                    .create()
+                    .show(childFragmentManager, "ChromaDialog");
         }
 
         rootView.findViewById<EditText>(R.id.edit_density).setText("1.0")

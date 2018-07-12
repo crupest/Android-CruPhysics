@@ -1,3 +1,3 @@
 package crupest.cruphysics.fragment
 
-abstract class ShapeProperty(val name: String, val )
+abstract class ShapeProperty(val name: String)
