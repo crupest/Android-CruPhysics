@@ -132,8 +132,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         if (!created.get())
             return
 
-        val canvas = if (android.os.Build.VERSION.SDK_INT >= 26)
-            holder.lockHardwareCanvas() else holder.lockCanvas()
+        //!!! Do not use hardware acceleration at current stage because some drawing methods are
+        //!!! not supported especially when scaled.
+        val canvas = holder.lockCanvas()
 
         if (canvas != null)
             onPaint(canvas)
