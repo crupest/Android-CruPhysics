@@ -13,7 +13,7 @@ import crupest.cruphysics.utility.setTimeout
  * Created by crupest on 2017/11/26.
  * Class MainWorldCanvas.
  */
-class MainWorldCanvas(context: Context, attributeSet: AttributeSet) : WorldCanvas(context, attributeSet) {
+class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCanvas(context, attributeSet) {
 
     private var singleLongTouchTimerTask: ScheduleTask? = null
     private var singleLongTouchDownPosition: PointF? = null

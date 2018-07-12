@@ -7,10 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import crupest.cruphysics.AddBodyActivity
 import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.R
@@ -31,7 +28,7 @@ import me.priyesh.chroma.ColorSelectListener
  */
 
 
-abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
+abstract class AddBodyFragment : Fragment() {
 
     private inner class ShapePropertyAdapter(private val list: List<ShapeProperty>)
         : RecyclerView.Adapter<ShapePropertyAdapter.ViewHolder>() {
@@ -44,9 +41,31 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
         override fun getItemCount(): Int = list.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.labelTextView.text = list[position].name
-            holder.valueEditText.setOnFocusChangeListener { v, hasFocus -> }
-            TODO("not implemented")
+            val shapeProperty = list[position]
+            holder.labelTextView.text = shapeProperty.name
+
+            val valueEditText = holder.valueEditText
+
+            valueEditText.inputType = shapeProperty.inputType
+            valueEditText.setText(shapeProperty.currentValue)
+            valueEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    try {
+                        shapeProperty.validateAndSetValue(valueEditText.text.toString())
+                    } catch (e: ShapePropertyValidationException) {
+                        // If validation fails, show an alert dialog and set text as the fallback one.
+                        e.message?.also { showAlertDialog(context!!, it) }
+                        valueEditText.setText(e.fallbackText)
+                    }
+                }
+            }
+            shapeProperty.setValueChangedListener {
+                valueEditText.setText(it)
+            }
+        }
+
+        override fun onViewRecycled(holder: ViewHolder) {
+            list[holder.adapterPosition].setValueChangedListener(null)
         }
 
         inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
@@ -55,7 +74,11 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
         }
     }
 
+
+
     private lateinit var worldCanvas: AddBodyWorldCanvas
+
+    protected abstract fun createWorldCanvas(): AddBodyWorldCanvas
 
     private fun onOk() {
 
@@ -98,8 +121,12 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(layoutId, container, false)
-        worldCanvas = rootView.findViewById(R.id.world_canvas)
+        val rootView = inflater.inflate(R.layout.fragment_add_body, container, false)
+        worldCanvas = createWorldCanvas()
+        worldCanvas.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val worldCanvasLayout = rootView.findViewById<FrameLayout>(R.id.world_canvas_layout)
+        worldCanvasLayout.addView(worldCanvas)
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
         val adapter = ArrayAdapter(context, R.layout.object_type_spinner_item, R.id.content,
@@ -124,7 +151,7 @@ abstract class AddBodyFragment(private val layoutId: Int) : Fragment() {
                         }
                     })
                     .create()
-                    .show(childFragmentManager, "ChromaDialog");
+                    .show(childFragmentManager, "ChromaDialog")
         }
 
         rootView.findViewById<EditText>(R.id.edit_density).setText("1.0")

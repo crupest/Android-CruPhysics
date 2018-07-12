@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:columnCount="2"
+    android:useDefaultMargins="true"
+    tools:showIn="@layout/fragment_add_body">
+
+    <TextView
+        android:id="@+id/body_type_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:text="@string/type"
+        android:theme="@style/PropertyLabelTextViewStyle" />
+
+    <Spinner
+        android:id="@+id/body_type_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/label_density"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:labelFor="@id/edit_density"
+        android:text="@string/density"
+        android:theme="@style/PropertyLabelTextViewStyle" />
+
+    <EditText
+        android:id="@+id/edit_density"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="center"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:id="@+id/label_restitution"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:labelFor="@id/edit_restitution"
+        android:text="@string/restitution"
+        android:theme="@style/PropertyLabelTextViewStyle" />
+
+    <EditText
+        android:id="@+id/edit_restitution"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="center"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:id="@+id/label_friction"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:labelFor="@id/edit_friction"
+        android:text="@string/friction"
+        android:theme="@style/PropertyLabelTextViewStyle" />
+
+    <EditText
+        android:id="@+id/edit_friction"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="center"
+        android:inputType="numberDecimal" />
+
+
+    <TextView
+        android:id="@+id/label_color"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1"
+        android:layout_gravity="fill_horizontal"
+        android:text="@string/color"
+        android:theme="@style/PropertyLabelTextViewStyle" />
+
+    <View
+        android:id="@+id/color_block"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_columnWeight="1"
+        android:layout_gravity="center_horizontal" />
+</GridLayout>

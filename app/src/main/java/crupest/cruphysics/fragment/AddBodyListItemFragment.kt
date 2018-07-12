@@ -28,7 +28,7 @@ class AddBodyListItemFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_object_list_item, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_body_list_item, container, false)
 
         val nameText = rootView.findViewById<TextView>(R.id.name)
         val image = rootView.findViewById<ImageView>(R.id.image)

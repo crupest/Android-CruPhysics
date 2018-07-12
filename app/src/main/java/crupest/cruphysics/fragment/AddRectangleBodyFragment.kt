@@ -1,5 +1,8 @@
 package crupest.cruphysics.fragment
 
-import crupest.cruphysics.R
+import crupest.cruphysics.component.AddBodyWorldCanvas
+import crupest.cruphysics.component.AddRectangleObjectWorldCanvas
 
-class AddRectangleBodyFragment : AddBodyFragment(R.layout.fragment_add_rectangle_object)
+class AddRectangleBodyFragment : AddBodyFragment() {
+    override fun createWorldCanvas(): AddBodyWorldCanvas = AddRectangleObjectWorldCanvas(context, null)
+}

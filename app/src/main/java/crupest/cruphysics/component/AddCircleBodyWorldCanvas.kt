@@ -17,7 +17,7 @@ import kotlin.math.sin
  * Created by crupest on 2017/11/6.
  * View component [AddCircleBodyWorldCanvas].
  */
-class AddCircleBodyWorldCanvas(context: Context, attrs: AttributeSet)
+class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
     override val controllers: Array<Controller> = arrayOf(

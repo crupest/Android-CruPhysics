@@ -29,7 +29,7 @@ class AddBodyListFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_object_list, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_body_list, container, false)
 
         val viewPager = rootView.findViewById<ViewPager>(R.id.pager)
 

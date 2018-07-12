@@ -16,7 +16,7 @@ import kotlin.math.*
  * Created by crupest on 2017/11/17.
  * View component AddRectangleObjectWorldCanvas
  */
-class AddRectangleObjectWorldCanvas(context: Context, attrs: AttributeSet)
+class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
     override val controllers: Array<Controller> = arrayOf(
