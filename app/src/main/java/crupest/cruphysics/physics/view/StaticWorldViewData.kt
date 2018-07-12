@@ -6,7 +6,7 @@ import crupest.cruphysics.physics.serialization.BodyData
 import crupest.cruphysics.physics.serialization.WorldData
 import crupest.cruphysics.utility.toDegrees
 
-class StaticWorldViewData(val worldData: WorldData) : IDrawWorldDelegate {
+class StaticWorldViewData(worldData: WorldData) : IDrawWorldDelegate {
     private val bodyViewDataMap: Map<BodyData, BodyViewData> = worldData.bodies.associate {
         it to BodyViewData(color = it.appearance.color)
     }

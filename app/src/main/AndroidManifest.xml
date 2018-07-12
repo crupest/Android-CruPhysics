@@ -18,7 +18,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddBodyActivity" android:theme="@style/NoActionBarTheme" />
-        <activity android:name=".WorldSettingsActivity" android:theme="@style/NoActionBarTheme"/>
     </application>
 
 </manifest>

@@ -19,7 +19,7 @@ class AddBodyActivity : SingleFragmentActivity() {
         const val RESULT_CAMERA = "CAMERA"
     }
 
-    lateinit var worldData: WorldData
+    private lateinit var worldData: WorldData
     lateinit var worldViewData: StaticWorldViewData
     lateinit var cameraData: CameraData
 
