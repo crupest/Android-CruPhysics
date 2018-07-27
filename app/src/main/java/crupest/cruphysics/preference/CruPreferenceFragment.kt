@@ -6,22 +6,20 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import crupest.cruphysics.R
 import crupest.cruphysics.preference.valueview.ValidationException
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
+import crupest.cruphysics.utility.showAlertDialog
 
 
-class CruPreferenceFragment : Fragment() {
+abstract class CruPreferenceFragment : Fragment() {
 
-    private inner class PreferenceAdapter(private val list: List<PreferenceItem>)
-        : RecyclerView.Adapter<PreferenceAdapter.ViewHolder>() {
+    private inner class PreferenceAdapter : RecyclerView.Adapter<PreferenceAdapter.ViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val rootView = LayoutInflater.from(context).inflate(R.layout.shape_property_item, parent, false)
-            return ViewHolder(rootView)
-        }
+        override fun getItemViewType(position: Int): Int = preferenceList[position].viewType
+
+        //TODO!!!
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+                this.ViewHolder()
 
         override fun getItemCount(): Int = list.size
 
@@ -53,51 +51,21 @@ class CruPreferenceFragment : Fragment() {
             list[holder.adapterPosition].setValueChangedListener(null)
         }
 
-        inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
-            val labelTextView: TextView = rootView.findViewById(R.id.label)
-            val valueEditText: EditText = rootView.findViewById(R.id.value)
-        }
+        inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView)
     }
 
 
-    private lateinit var preferenceList: List<PreferenceItem>
+    private lateinit var preferenceList: List<IPreferenceItem>
+    private lateinit var adapter: PreferenceAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    protected abstract fun createPreferenceList(): List<IPreferenceItem>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_cru_preference, container, false)
-    }
-
-    companion object {
-
-        private const val ARG_PREFERENCE_LIST = "preference_list"
-
-        /**
-         * Create a [CruPreferenceFragment].
-         *
-         * @param preferenceList a list of classes of preference item, they must be subclasses of [PreferenceItem].
-         * @return A new instance of fragment [CruPreferenceFragment].
-         */
-        fun newInstance(vararg preferenceList: KClass<*>) = CruPreferenceFragment().apply {
-            arguments = Bundle().apply {
-                for (preferenceItem in preferenceList) {
-                    if (!preferenceItem.isSubclassOf(PreferenceItem::class))
-                        throw IllegalArgumentException(
-                                "The preference item class ${preferenceItem.qualifiedName} is not a subclass of PreferenceItem.")
-                }
-
-                putStringArray(ARG_PREFERENCE_LIST, preferenceList.map {
-                    it.qualifiedName
-                }.toTypedArray())
-            }
-        }
+        val view = inflater.inflate(R.layout.fragment_cru_preference, container, false) as RecyclerView
+        adapter = PreferenceAdapter(preferenceList)
+        view.adapter = adapter
+        return view
     }
 }

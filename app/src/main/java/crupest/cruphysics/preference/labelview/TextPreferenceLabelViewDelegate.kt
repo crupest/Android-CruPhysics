@@ -6,13 +6,22 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import crupest.cruphysics.preference.IViewDelegate
 
-open class TextPreferenceLabelViewDelegate(val name: String) : IPreferenceLabelViewDelegate {
-    final override fun createLabelView(context: Context): View {
+open class TextPreferenceLabelViewDelegate(val name: String) : IViewDelegate {
+    final override fun createView(context: Context): View {
         val view = TextView(context)
         view.text = name
         setTextViewStyle(view)
         return view
+    }
+
+    final override fun bindView(view: View) {
+
+    }
+
+    final override fun unbindView(view: View) {
+
     }
 
     protected open fun setTextViewStyle(textView: TextView) {

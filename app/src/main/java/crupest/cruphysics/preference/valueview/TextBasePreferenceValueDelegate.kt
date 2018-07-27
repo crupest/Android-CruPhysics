@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.View
 import android.widget.EditText
+import crupest.cruphysics.preference.IViewDelegate
 
 
 /**
@@ -19,20 +20,20 @@ import android.widget.EditText
 abstract class TextBasePreferenceValueDelegate<TValue>(
         val inputType: Int,
         val notifyTrigger: NotifyTrigger = NotifyTrigger.ON_LOST_FOCUS
-) : IPreferenceValueDelegate<TValue> {
+) : IViewDelegate {
 
     enum class NotifyTrigger {
         ON_LOST_FOCUS,
         ON_TEXT_CHANGED
     }
 
-    private lateinit var view: EditText
+    private var editView: EditText? = null
     private var valueChangedListener: ((TValue) -> Unit)? = null
     private var errorHandler: ((String) -> Unit)? = null
 
     private val textWatcher: TextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            onUpdateValue(view.text.toString())
+            onUpdateValue(s.toString())
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -44,7 +45,7 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
         }
     }
 
-    final override fun setValueChangedListener(listener: ((TValue) -> Unit)?) {
+    fun setValueChangedListener(listener: ((TValue) -> Unit)?) {
         valueChangedListener = listener
     }
 
@@ -60,19 +61,33 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
         errorHandler?.invoke(message)
     }
 
-    final override fun createValueView(context: Context): View {
-        view = EditText(context)
+    final override fun createView(context: Context): View {
+        val view = EditText(context)
         view.setText(getInitText())
         setEditTextStyle(view)
+        return view
+    }
+
+    final override fun bindView(view: View) {
+        check(editView == null)
+        editView = view as EditText
         when(notifyTrigger) {
-            NotifyTrigger.ON_LOST_FOCUS -> view.setOnFocusChangeListener { v, hasFocus ->
+            NotifyTrigger.ON_LOST_FOCUS -> view.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     onUpdateValue(view.text.toString())
                 }
             }
             NotifyTrigger.ON_TEXT_CHANGED -> view.addTextChangedListener(textWatcher)
         }
-        return view
+
+    }
+
+    final override fun unbindView(view: View) {
+        check(view as EditText == editView) // use "as" for smart cast
+        when(notifyTrigger) {
+            NotifyTrigger.ON_LOST_FOCUS -> view.onFocusChangeListener = null
+            NotifyTrigger.ON_TEXT_CHANGED -> view.removeTextChangedListener(textWatcher)
+        }
     }
 
     protected open fun setEditTextStyle(editText: EditText) {
@@ -89,11 +104,13 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
      *  method.
      */
     protected fun setCurrentText(text: String) {
-        if (notifyTrigger == NotifyTrigger.ON_TEXT_CHANGED)
-            view.removeTextChangedListener(textWatcher)
-        view.setText(text)
-        if (notifyTrigger == NotifyTrigger.ON_TEXT_CHANGED)
-            view.addTextChangedListener(textWatcher)
+        editView?.apply {
+            if (notifyTrigger == NotifyTrigger.ON_TEXT_CHANGED)
+                removeTextChangedListener(textWatcher)
+            setText(text)
+            if (notifyTrigger == NotifyTrigger.ON_TEXT_CHANGED)
+                addTextChangedListener(textWatcher)
+        }
     }
 
     /**
@@ -104,8 +121,8 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
     /**
      *  This function is call when the trigger condition is satisfied.
      *  For example, is [notifyTrigger] is set to [NotifyTrigger.ON_LOST_FOCUS],
-     *  then when [view] loses focus, this function will be called with current
-     *  text in [view].
+     *  then when [editView] loses focus, this function will be called with current
+     *  text in [editView].
      *  Call [raiseValueChanged] in this function if you set the value, or call
      *  [raiseError] and set the fallback text via [setCurrentText] when
      *  some errors happens like illegal input.
