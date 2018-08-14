@@ -1,5 +1,6 @@
 package crupest.cruphysics.preference
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
@@ -15,9 +16,8 @@ abstract class CruPreferenceFragment : Fragment() {
 
     private inner class PreferenceAdapter : RecyclerView.Adapter<PreferenceAdapter.ViewHolder>() {
 
-        override fun getItemViewType(position: Int): Int = preferenceList[position].viewType
+        override fun getItemViewType(position: Int): Int = preferenceList[position].typeId
 
-        //TODO!!!
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
                 this.ViewHolder()
 
@@ -55,16 +55,27 @@ abstract class CruPreferenceFragment : Fragment() {
     }
 
 
+    private lateinit var viewCreateMethodMap: Map<Int, (Context) -> View>
     private lateinit var preferenceList: List<IPreferenceItem>
     private lateinit var adapter: PreferenceAdapter
 
-    protected abstract fun createPreferenceList(): List<IPreferenceItem>
+    protected abstract fun onCreatePreferenceList(): List<IPreferenceItem>
+
+    private fun createPreferenceList() {
+        preferenceList = onCreatePreferenceList()
+
+        preferenceList.distinctBy {
+            it.typeId
+        }.associate {
+            it.typeId to it::createView
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_cru_preference, container, false) as RecyclerView
-        adapter = PreferenceAdapter(preferenceList)
+        adapter = PreferenceAdapter()
         view.adapter = adapter
         return view
     }

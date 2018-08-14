@@ -6,18 +6,26 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
+import crupest.cruphysics.preference.IViewCreator
 import crupest.cruphysics.preference.IViewDelegate
 
 open class TextPreferenceLabelViewDelegate(val name: String) : IViewDelegate {
-    final override fun createView(context: Context): View {
-        val view = TextView(context)
-        view.text = name
-        setTextViewStyle(view)
-        return view
+
+    companion object {
+        val commonViewCreator: IViewCreator = object : IViewCreator {
+            override fun createView(context: Context): View = TextView(context)
+        }
     }
 
-    final override fun bindView(view: View) {
+    final override val viewCreator: IViewCreator
+        get() = commonViewCreator
 
+    final override fun bindView(view: View) {
+        if (view !is TextView)
+            throw IllegalArgumentException("View is not a TextView.")
+
+        setTextViewStyle(view)
+        view.text = name
     }
 
     final override fun unbindView(view: View) {
