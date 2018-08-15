@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import crupest.cruphysics.R
-import crupest.cruphysics.preference.valueview.ValidationException
 import crupest.cruphysics.utility.showAlertDialog
 
 
@@ -18,8 +17,9 @@ abstract class CruPreferenceFragment : Fragment() {
 
         override fun getItemViewType(position: Int): Int = preferenceList[position].typeId
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-                this.ViewHolder()
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            LayoutInflater.from(context).inflate()
+        }
 
         override fun getItemCount(): Int = list.size
 

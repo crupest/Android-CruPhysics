@@ -1,11 +1,13 @@
 package crupest.cruphysics.preference.valueview
 
+import android.content.Context
 import android.text.InputType
 
 class DecimalPreferenceValueDelegate(
-        val signed: Boolean = true,
+        context: Context,
+        signed: Boolean = true,
         notifyTrigger: NotifyTrigger = NotifyTrigger.ON_LOST_FOCUS
-) : TextBasePreferenceValueDelegate<Double>(calculateInputType(signed), notifyTrigger) {
+) : TextBasePreferenceValueDelegate<Double>(context, calculateInputType(signed), notifyTrigger) {
 
     companion object {
         private fun calculateInputType(signed: Boolean) : Int {
@@ -16,5 +18,20 @@ class DecimalPreferenceValueDelegate(
         }
     }
 
+    private var number: Double = 0.0
 
+    override fun onRestoreText(): String = number.toString()
+
+    override fun onTextChanged(text: String) {
+            text.toDoubleOrNull()?.apply {
+                if (number != this) {
+                    number = this
+                    raiseValueChanged(number)
+                }
+            }
+    }
+
+    override fun setCurrentValue(value: Double) {
+        setCurrentText(value.toString())
+    }
 }

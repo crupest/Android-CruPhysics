@@ -13,26 +13,34 @@ import crupest.cruphysics.preference.IViewDelegate
 
 
 /**
- *  Base class of all [EditText] based preference. The delegate creates a
- *  [EditText] for user to input.
+ * Base class of all [EditText] based preference. The delegate creates a
+ * [EditText] for user to input.
  *
- *  Subclass should overwrite all the abstract methods and methods in
- *  [INotifyValue] to do specific work.
+ * Subclass should overwrite all the abstract methods and methods in
+ * [INotifyValue] to do specific work.
  *
- *  When the text is changed, this class will invoke [onTextChanged] according
- *  to [notifyTrigger] to notify subclass of updating the value with calling
- *  [raiseValueChanged] or throw an error and make a fallback text if the text
- *  is of bad format. The subclass should also implement [INotifyValue.setCurrentValue]
- *  which may call [setCurrentText] with proper transformation.
+ * When the text is changed, [onTextChanged] will be called according
+ * to [notifyTrigger] to notify subclass of updating the value with calling
+ * [raiseValueChanged].
  *
+ * If the input is of bad format, subclass could do nothing. When [EditText]
+ * loses focus, a call of [onRestoreText] will be called to amend the possible
+ * wrong input by restoring to saved state.
+ *
+ * Each time the view is rebound, [onRestoreText] will be called to restore the
+ * saved state.
+ *
+ * The subclass should also implement [INotifyValue.setCurrentValue]
+ * which may call [setCurrentText] with proper transformation.
  */
 abstract class TextBasePreferenceValueDelegate<TValue>(
+        val context: Context,
         val inputType: Int,
         val notifyTrigger: NotifyTrigger = NotifyTrigger.ON_LOST_FOCUS
 ) : IViewDelegate, INotifyValue<TValue> {
 
     companion object {
-        val commonViewCreator : IViewCreator = object : IViewCreator {
+        val commonViewCreator: IViewCreator = object : IViewCreator {
             override fun createView(context: Context): View = EditText(context)
         }
     }
@@ -68,22 +76,25 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
 
         view.inputType = inputType
         setEditTextStyle(view)
-        view.setText(getInitText())
+        view.setText(onRestoreText())
 
-        when(notifyTrigger) {
-            NotifyTrigger.ON_LOST_FOCUS -> view.setOnFocusChangeListener { _, hasFocus ->
-                if (!hasFocus) {
+        view.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) { // if lose focus
+                if (notifyTrigger == NotifyTrigger.ON_LOST_FOCUS)
                     onTextChanged(view.text.toString())
-                }
+
+                view.setText(onRestoreText())
             }
-            NotifyTrigger.ON_TEXT_CHANGED -> view.addTextChangedListener(textWatcher)
         }
 
+        if (notifyTrigger == NotifyTrigger.ON_TEXT_CHANGED) {
+            view.addTextChangedListener(textWatcher)
+        }
     }
 
     final override fun unbindView(view: View) {
         check(view as EditText == editView) // use "as" for smart cast
-        when(notifyTrigger) {
+        when (notifyTrigger) {
             NotifyTrigger.ON_LOST_FOCUS -> view.onFocusChangeListener = null
             NotifyTrigger.ON_TEXT_CHANGED -> view.removeTextChangedListener(textWatcher)
         }
@@ -93,7 +104,6 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
         editText.setTextColor(Color.BLACK)
         editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20.0f)
     }
-
 
     override fun setValueChangedListener(listener: ((TValue) -> Unit)?) {
         valueChangedListener = listener
@@ -105,12 +115,12 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
 
 
     /**
-     *  This function should been called when the value is modified external
-     *  so the visual text should be changed or when some error happened so
-     *  the visual text should be corrected.
-     *  Note that if [notifyTrigger] is set to [NotifyTrigger.ON_TEXT_CHANGED]
-     *  the [onTextChanged] won't be called when you change text through this
-     *  method.
+     * This function should been called when the value is modified external
+     * so the visual text should be changed.
+     *
+     * Note that if [notifyTrigger] is set to [NotifyTrigger.ON_TEXT_CHANGED]
+     * the [onTextChanged] won't be called when you change text through this
+     * method.
      */
     protected fun setCurrentText(text: String) {
         editView?.apply {
@@ -123,19 +133,24 @@ abstract class TextBasePreferenceValueDelegate<TValue>(
     }
 
     /**
-     *  Get the text that should be set when the [EditText] is bound.
-     *  TODO: Redesign the interface.
+     * Restore text from saved value.
+     *
+     * This is called when the [EditText] is bound first (set the default text) or again.
+     *
+     * This is also called when the [EditText] loses focus to amend the possible bad-format
+     * text. Note that when [notifyTrigger] is set to [NotifyTrigger.ON_LOST_FOCUS],
+     * [onTextChanged] is called before [onRestoreText].
      */
-    protected abstract fun getInitText(): String
+    protected abstract fun onRestoreText(): String
 
     /**
-     *  This function is call when the trigger condition is satisfied.
-     *  For example, if [notifyTrigger] is set to [NotifyTrigger.ON_LOST_FOCUS],
-     *  then when [editView] loses focus, this function will be called with current
-     *  text in [editView].
-     *  Call [raiseValueChanged] in this function if you set the value, or
-     *  set the fallback text via [setCurrentText] when some errors happens
-     *  like illegal input.
+     * This function is call when the trigger condition is satisfied.
+     *
+     * For example, if [notifyTrigger] is set to [NotifyTrigger.ON_LOST_FOCUS],
+     * then when [editView] loses focus, this function will be called with current
+     * text in [editView].
+     *
+     * Call [raiseValueChanged] in this function if you set the value.
      */
     protected abstract fun onTextChanged(text: String)
 }
