@@ -6,6 +6,8 @@ import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.CircleData
 import crupest.cruphysics.physics.serialization.createShapeData
+import crupest.cruphysics.preference.PreferenceAdapter
+import crupest.cruphysics.preference.ShapeFloatPreferenceItem
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
@@ -20,16 +22,47 @@ import kotlin.math.sin
 class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
+    private val propertyPreferenceList = listOf(
+            ShapeFloatPreferenceItem("CenterX:", { centerX }, {
+                centerX = it
+                updateControllerPosition()
+                true
+            }, signed = true),
+            ShapeFloatPreferenceItem("CenterY:", { centerY }, {
+                centerY = it
+                updateControllerPosition()
+                true
+            }, signed = true),
+            ShapeFloatPreferenceItem("Radius:", { radius }, {
+                if (it <= 0.0f)
+                    false
+                else {
+                    radius = it
+                    updateControllerPosition()
+                    true
+                }
+            }),
+            ShapeFloatPreferenceItem("Angle:", { angle }, {
+                angle = it
+                updateControllerPosition()
+                true
+            }, signed = true)
+    )
+
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
+                propertyPreferenceList[0].setCurrentValue(centerX)
+                propertyPreferenceList[1].setCurrentValue(centerY)
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 radius = distance(centerX, centerY, it.x, it.y)
                 angle = atan2(it.y - centerY, it.x - centerX)
+                propertyPreferenceList[2].setCurrentValue(radius)
+                propertyPreferenceList[3].setCurrentValue(angle)
                 updateControllerPosition()
                 repaint()
             }
@@ -98,4 +131,7 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
                 -angle.toDouble() //because y-axis is reversed.
         )
     }
+
+    override fun createPropertyAdapter(): PreferenceAdapter =
+            PreferenceAdapter(context, propertyPreferenceList)
 }

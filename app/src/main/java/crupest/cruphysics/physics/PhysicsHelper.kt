@@ -14,11 +14,11 @@ import org.dyn4j.geometry.Transform
  * Helper functions for physics engine.
  */
 
-fun Canvas.withTransform(transform: Transform, block: (Canvas) -> Unit) {
+fun Canvas.withTransform(transform: Transform, block: Canvas.() -> Unit) {
     val count = this.save()
     this.translate(transform.translationX.toFloat(), transform.translationY.toFloat())
     this.rotate(transform.rotation.toFloat().toDegrees())
-    block(this)
+    this.block()
     this.restoreToCount(count)
 }
 

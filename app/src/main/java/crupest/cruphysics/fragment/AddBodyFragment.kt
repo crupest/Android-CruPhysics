@@ -3,6 +3,7 @@ package crupest.cruphysics.fragment
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -74,11 +75,13 @@ abstract class AddBodyFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_add_body, container, false)
+
         worldCanvas = createWorldCanvas()
         worldCanvas.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        val worldCanvasLayout = rootView.findViewById<FrameLayout>(R.id.world_canvas_layout)
-        worldCanvasLayout.addView(worldCanvas)
+        rootView.findViewById<FrameLayout>(R.id.world_canvas_layout).addView(worldCanvas)
+
+        rootView.findViewById<RecyclerView>(R.id.shape_properties).adapter = worldCanvas.createPropertyAdapter()
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
         val adapter = ArrayAdapter(context, R.layout.object_type_spinner_item, R.id.content,

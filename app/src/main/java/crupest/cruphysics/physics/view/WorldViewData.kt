@@ -42,7 +42,7 @@ class WorldViewData() : IDrawWorldDelegate {
             canvas.withTransform(body.transform) {
                 shape.switchShape(
                         circleHandler = {
-                            canvas.drawCircle(
+                            drawCircle(
                                     it.center.x.toFloat(),
                                     it.center.y.toFloat(),
                                     it.radius.toFloat(),
@@ -52,7 +52,7 @@ class WorldViewData() : IDrawWorldDelegate {
                         rectangleHandler = {
                             val hw = it.width / 2.0
                             val hh = it.height / 2.0
-                            canvas.drawRect(
+                            drawRect(
                                     (it.center.x - hw).toFloat(),
                                     (it.center.y + hh).toFloat(),
                                     (it.center.x + hw).toFloat(),

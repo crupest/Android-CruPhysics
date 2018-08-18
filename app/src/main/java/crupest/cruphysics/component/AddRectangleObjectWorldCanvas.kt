@@ -6,6 +6,8 @@ import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.RectangleData
 import crupest.cruphysics.physics.serialization.createShapeData
+import crupest.cruphysics.preference.PreferenceAdapter
+import crupest.cruphysics.preference.ShapeFloatPreferenceItem
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
@@ -19,25 +21,65 @@ import kotlin.math.*
 class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
+    private val propertyPreferenceList = listOf(
+            ShapeFloatPreferenceItem("CenterX:", { centerX }, {
+                centerX = it
+                updateControllerPosition()
+                true
+            }, signed = true),
+            ShapeFloatPreferenceItem("CenterY:", { centerY }, {
+                centerY = it
+                updateControllerPosition()
+                true
+            }, signed = true),
+            ShapeFloatPreferenceItem("Width:", { halfWidth * 2 }, {
+                if (it <= 0.0f)
+                    false
+                else {
+                    halfWidth = it / 2.0f
+                    updateControllerPosition()
+                    true
+                }
+            }),
+            ShapeFloatPreferenceItem("Height:", { halfHeight * 2 }, {
+                if (it <= 0.0f)
+                    false
+                else {
+                    halfHeight = it / 2.0f
+                    updateControllerPosition()
+                    true
+                }
+            }),
+            ShapeFloatPreferenceItem("Angle:", { angle }, {
+                angle = it
+                updateControllerPosition()
+                true
+            }, signed = true)
+    )
+
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
+                propertyPreferenceList[0].setCurrentValue(centerX)
+                propertyPreferenceList[1].setCurrentValue(centerY)
                 updateControllerPosition()
                 repaint()
             },
             Controller {
-                fun Float.minAs0(): Float = max(this, 0.0f)
 
                 val halfDiagonal = distance(centerX, centerY, it.x, it.y)
                 val a = atan2(it.y - centerY, it.x - centerX) - angle
-                halfWidth = halfDiagonal * cos(a).minAs0()
-                halfHeight = halfDiagonal * sin(a).minAs0()
+                halfWidth = halfDiagonal * cos(a).coerceAtLeast(0.0f)
+                halfHeight = halfDiagonal * sin(a).coerceAtLeast(0.0f)
+                propertyPreferenceList[2].setCurrentValue(halfWidth * 2)
+                propertyPreferenceList[3].setCurrentValue(halfHeight * 2)
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 angle = atan2(it.y - centerY, it.x - centerX)
+                propertyPreferenceList[4].setCurrentValue(angle)
                 updateControllerPosition()
                 repaint()
             }
@@ -123,4 +165,7 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
                 -angle.toDouble() //because y-axis is reversed.
         )
     }
+
+    override fun createPropertyAdapter(): PreferenceAdapter = PreferenceAdapter(
+            context, propertyPreferenceList)
 }

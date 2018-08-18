@@ -8,6 +8,7 @@ import android.graphics.PointF
 import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
+import crupest.cruphysics.preference.PreferenceAdapter
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.utility.strokePaint
@@ -93,4 +94,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
             bodyPaint.color = value
             repaint()
         }
+
+
+    abstract fun createPropertyAdapter(): PreferenceAdapter
 }

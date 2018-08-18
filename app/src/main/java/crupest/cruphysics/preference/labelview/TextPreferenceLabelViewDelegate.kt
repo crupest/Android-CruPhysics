@@ -17,6 +17,8 @@ open class TextPreferenceLabelViewDelegate(val name: String) : IViewDelegate {
         }
     }
 
+    var setStyleListener: ((TextView) -> Unit)? = null
+
     final override val viewCreator: IViewCreator
         get() = commonViewCreator
 
@@ -25,6 +27,7 @@ open class TextPreferenceLabelViewDelegate(val name: String) : IViewDelegate {
             throw IllegalArgumentException("View is not a TextView.")
 
         setTextViewStyle(view)
+        setStyleListener?.invoke(view)
         view.text = name
     }
 
@@ -32,7 +35,7 @@ open class TextPreferenceLabelViewDelegate(val name: String) : IViewDelegate {
 
     }
 
-    protected open fun setTextViewStyle(textView: TextView) {
+    private fun setTextViewStyle(textView: TextView) {
         textView.gravity = Gravity.CENTER
         textView.setTextColor(Color.BLACK)
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20.0f)
