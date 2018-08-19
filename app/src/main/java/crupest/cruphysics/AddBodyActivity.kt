@@ -3,18 +3,19 @@ package crupest.cruphysics
 import android.content.Intent
 import android.os.Bundle
 import crupest.cruphysics.fragment.AddBodyShapeListFragment
-import crupest.cruphysics.physics.serialization.BodyData
-import crupest.cruphysics.physics.serialization.CameraData
-import crupest.cruphysics.physics.serialization.WorldData
+import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.StaticWorldViewData
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
+import crupest.cruphysics.utility.generateRandomColor
+
 
 class AddBodyActivity : SingleFragmentActivity() {
 
     companion object {
         const val ARG_WORLD = "WORLD"
         const val ARG_CAMERA = "CAMERA"
+        const val ARG_BODY = "ARG_BODY"
         const val RESULT_BODY = "BODY"
         const val RESULT_CAMERA = "CAMERA"
     }
@@ -22,6 +23,7 @@ class AddBodyActivity : SingleFragmentActivity() {
     private lateinit var worldData: WorldData
     lateinit var worldViewData: StaticWorldViewData
     lateinit var cameraData: CameraData
+    lateinit var resultBodyData: BodyData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +33,13 @@ class AddBodyActivity : SingleFragmentActivity() {
         if (savedInstanceState == null) {
             worldString = intent.extras.getString(ARG_WORLD)
             cameraString = intent.extras.getString(ARG_CAMERA)
+
+            resultBodyData = createInitBodyData()
         } else {
             worldString = savedInstanceState.getString(ARG_WORLD)
             cameraString = savedInstanceState.getString(ARG_CAMERA)
+
+            resultBodyData = savedInstanceState.getString(ARG_BODY).fromJson()
         }
 
         cameraData = cameraString.fromJson()
@@ -53,6 +59,7 @@ class AddBodyActivity : SingleFragmentActivity() {
 
         outState!!.putString(ARG_WORLD, worldData.toJson())
         outState.putString(ARG_CAMERA, cameraData.toJson())
+        outState.putString(ARG_BODY, resultBodyData.toJson())
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -60,10 +67,16 @@ class AddBodyActivity : SingleFragmentActivity() {
         return true
     }
 
-    fun setResultAndFinish(bodyData: BodyData, camera: CameraData) {
+    private fun createInitBodyData(): BodyData = BodyData(
+            density = 1.0,
+            restitution = 0.0,
+            friction = 0.2,
+            appearance = BodyAppearanceData(color = generateRandomColor()))
+
+    fun setResultAndFinish() {
         val result = Intent()
-        result.putExtra(AddBodyActivity.RESULT_BODY, bodyData.toJson())
-        result.putExtra(AddBodyActivity.RESULT_CAMERA, camera.toJson())
+        result.putExtra(AddBodyActivity.RESULT_BODY, resultBodyData.toJson())
+        result.putExtra(AddBodyActivity.RESULT_CAMERA, cameraData.toJson())
         setResult(RESULT_OK, result)
         finish()
     }

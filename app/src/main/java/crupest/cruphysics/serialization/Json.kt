@@ -20,7 +20,7 @@ object JsonParser {
     val moshi = createDefaultKotlinMoshi()
 }
 
-inline fun <reified T> T.toJson(): String =
+inline fun <reified T : Any> T.toJson(): String =
         JsonParser.moshi.adapter<T>(T::class.java).toJson(this)
 
 inline fun <reified T> String.fromJson(): T =
