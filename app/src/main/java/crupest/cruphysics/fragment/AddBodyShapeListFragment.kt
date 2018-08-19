@@ -69,8 +69,8 @@ class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_m
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
         override fun getCount(): Int = 2
         override fun getItem(position: Int): Fragment = when (position) {
-            0 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.circle_body), R.drawable.circle_object_sample)
-            1 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_body), R.drawable.rectangle_object_sample)
+            0 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.circle_body), R.drawable.circle_body_sample)
+            1 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_body), R.drawable.rectangle_body_sample)
             else -> throw RuntimeException("Out of range!")
         }
     }
