@@ -2,7 +2,7 @@ package crupest.cruphysics
 
 import android.content.Intent
 import android.os.Bundle
-import crupest.cruphysics.fragment.AddBodyListFragment
+import crupest.cruphysics.fragment.AddBodyShapeListFragment
 import crupest.cruphysics.physics.serialization.BodyData
 import crupest.cruphysics.physics.serialization.CameraData
 import crupest.cruphysics.physics.serialization.WorldData
@@ -44,7 +44,7 @@ class AddBodyActivity : SingleFragmentActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
 
-        navigateToFragment(AddBodyListFragment(), addToBackStack = false)
+        navigateToFragment(AddBodyShapeListFragment(), addToBackStack = false)
     }
 
 

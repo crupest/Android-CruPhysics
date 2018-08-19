@@ -1,0 +1,101 @@
+package crupest.cruphysics.fragment
+
+
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.ViewPager
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+
+import crupest.cruphysics.R
+import crupest.cruphysics.SingleFragmentActivity
+
+
+class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_menu) {
+
+    class AddBodyShapeListItemFragment : Fragment() {
+
+        private lateinit var name: String
+        private var imageSrc: Int = 0
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            if (arguments != null) {
+                name = arguments!!.getString(ARG_NAME)
+                imageSrc = arguments!!.getInt(ARG_IMAGE_SRC)
+            }
+        }
+
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                                  savedInstanceState: Bundle?): View? {
+            val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list_item, container, false)
+
+            val nameText = rootView.findViewById<TextView>(R.id.name)
+            val image = rootView.findViewById<ImageView>(R.id.image)
+
+            nameText.text = name
+            image.contentDescription = name
+
+            if (imageSrc == 0)
+                image.visibility = View.GONE
+            else
+                image.setImageResource(imageSrc)
+
+            return rootView
+        }
+
+        companion object {
+            private const val ARG_NAME = "Name"
+            private const val ARG_IMAGE_SRC = "ImageSrc"
+
+            fun newInstance(name: String, imageSrc: Int = 0): AddBodyShapeListItemFragment {
+                val fragment = AddBodyShapeListItemFragment()
+                val args = Bundle()
+                args.putString(ARG_NAME, name)
+                args.putInt(ARG_IMAGE_SRC, imageSrc)
+                fragment.arguments = args
+                return fragment
+            }
+        }
+    }
+
+    private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
+        override fun getCount(): Int = 2
+        override fun getItem(position: Int): Fragment = when (position) {
+            0 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.circle_body), R.drawable.circle_object_sample)
+            1 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_body), R.drawable.rectangle_object_sample)
+            else -> throw RuntimeException("Out of range!")
+        }
+    }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list, container, false)
+
+        val viewPager = rootView.findViewById<ViewPager>(R.id.pager)
+
+        val adapter = MyAdapter(childFragmentManager)
+        viewPager.adapter = adapter
+
+        return rootView
+    }
+
+    override fun onOptionMenuItemSelected(menuItem: MenuItem): Boolean =
+            if (menuItem.itemId == R.id.next) {
+                val a = context as SingleFragmentActivity
+                val pager = view!!.findViewById<ViewPager>(R.id.pager)
+                when (pager.currentItem) {
+                    0 -> a.navigateToFragment(AddCircleBodyCanvasFragment())
+                    1 -> a.navigateToFragment(AddRectangleBodyCanvasFragment())
+                }
+                true
+            } else false
+}

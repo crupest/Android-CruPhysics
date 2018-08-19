@@ -2,14 +2,16 @@ package crupest.cruphysics.fragment
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.Spinner
 import crupest.cruphysics.AddBodyActivity
-import crupest.cruphysics.IOptionMenuActivity
 import crupest.cruphysics.R
 import crupest.cruphysics.component.AddBodyWorldCanvas
 import crupest.cruphysics.physics.serialization.BODY_TYPE_DYNAMIC
@@ -24,11 +26,11 @@ import me.priyesh.chroma.ColorSelectListener
 
 /**
  * Created by crupest on 2017/11/25.
- * Class AddBodyFragment.
+ * Class [AddBodyCanvasFragment].
  */
 
 
-abstract class AddBodyFragment : Fragment() {
+abstract class AddBodyCanvasFragment : OptionMenuFragment(menuResource = R.menu.add_object_menu) {
     private lateinit var worldCanvas: AddBodyWorldCanvas
 
     protected abstract fun createWorldCanvas(): AddBodyWorldCanvas
@@ -74,7 +76,7 @@ abstract class AddBodyFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_body, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_body_canvas, container, false)
 
         worldCanvas = createWorldCanvas()
         worldCanvas.layoutParams = ViewGroup.LayoutParams(
@@ -124,30 +126,14 @@ abstract class AddBodyFragment : Fragment() {
         worldCanvas.drawWorldDelegate = activity.worldViewData
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val activity = context
-        if (activity is IOptionMenuActivity) {
-            activity.optionMenu = R.menu.add_object_menu
-            activity.optionMenuItemSelectedListener = {
-                if (it.itemId == R.id.ok) {
-                    onOk()
-                    true
-                } else false
-            }
-        }
-    }
+    override fun onOptionMenuItemSelected(menuItem: MenuItem): Boolean =
+            if (menuItem.itemId == R.id.ok) {
+                onOk()
+                true
+            } else false
 
     override fun onPause() {
         super.onPause()
-
-        val activity = context
-        if (activity is IOptionMenuActivity) {
-            activity.optionMenu = 0
-            activity.optionMenuItemSelectedListener = null
-        }
-
         (activity as AddBodyActivity).cameraData = worldCanvas.generateCameraData()
     }
 }

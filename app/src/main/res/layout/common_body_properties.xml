@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:columnCount="2"
     android:useDefaultMargins="true"
-    tools:showIn="@layout/fragment_add_body">
+    tools:showIn="@layout/fragment_add_body_canvas">
 
     <TextView
         android:id="@+id/body_type_label"
