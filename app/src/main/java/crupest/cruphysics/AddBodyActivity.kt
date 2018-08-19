@@ -68,6 +68,7 @@ class AddBodyActivity : SingleFragmentActivity() {
     }
 
     private fun createInitBodyData(): BodyData = BodyData(
+            type = BODY_TYPE_STATIC,
             density = 1.0,
             restitution = 0.0,
             friction = 0.2,

@@ -40,7 +40,7 @@ const val BODY_TYPE_DYNAMIC = "dynamic"
 
 data class BodyData(
         var shape: ShapeData = ShapeData(),
-        var type: String = "static",
+        var type: String = BODY_TYPE_STATIC,
         var position: Vector2Data = Vector2Data(),
         var rotation: Double = 0.0,
         @field:Json(name = "linear_velocity") var linearVelocity: Vector2Data = Vector2Data(),
