@@ -35,6 +35,8 @@ class AddBodyActivity : SingleFragmentActivity() {
             cameraString = intent.extras.getString(ARG_CAMERA)
 
             resultBodyData = createInitBodyData()
+
+            navigateToFragment(AddBodyShapeListFragment(), addToBackStack = false)
         } else {
             worldString = savedInstanceState.getString(ARG_WORLD)
             cameraString = savedInstanceState.getString(ARG_CAMERA)
@@ -49,8 +51,6 @@ class AddBodyActivity : SingleFragmentActivity() {
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
-
-        navigateToFragment(AddBodyShapeListFragment(), addToBackStack = false)
     }
 
 
@@ -72,7 +72,8 @@ class AddBodyActivity : SingleFragmentActivity() {
             density = 1.0,
             restitution = 0.0,
             friction = 0.2,
-            appearance = BodyAppearanceData(color = generateRandomColor()))
+            appearance = BodyAppearanceData(color = generateRandomColor())
+    )
 
     fun setResultAndFinish() {
         val result = Intent()
