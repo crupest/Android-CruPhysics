@@ -6,4 +6,11 @@
     android:layout_height="match_parent"
     tools:context="crupest.cruphysics.fragment.AddCircleBodyCanvasFragment">
 
+    <LinearLayout
+        android:id="@+id/property_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:orientation="vertical" />
+
 </FrameLayout>

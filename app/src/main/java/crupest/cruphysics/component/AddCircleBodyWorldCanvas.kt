@@ -5,15 +5,15 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.CircleData
+import crupest.cruphysics.physics.serialization.SHAPE_TYPE_CIRCLE
 import crupest.cruphysics.physics.serialization.createShapeData
-import crupest.cruphysics.preference.PreferenceAdapter
-import crupest.cruphysics.preference.ShapeFloatPreferenceItem
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.reflect.KMutableProperty0
 
 /**
  * Created by crupest on 2017/11/6.
@@ -22,47 +22,43 @@ import kotlin.math.sin
 class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
-    private val propertyPreferenceList = listOf(
-            ShapeFloatPreferenceItem("CenterX:", { centerX }, {
-                centerX = it
-                updateControllerPosition()
-                true
-            }, signed = true),
-            ShapeFloatPreferenceItem("CenterY:", { centerY }, {
-                centerY = it
-                updateControllerPosition()
-                true
-            }, signed = true),
-            ShapeFloatPreferenceItem("Radius:", { radius }, {
-                if (it <= 0.0f)
-                    false
-                else {
-                    radius = it
-                    updateControllerPosition()
-                    true
-                }
-            }),
-            ShapeFloatPreferenceItem("Angle:", { angle }, {
-                angle = it
-                updateControllerPosition()
-                true
-            }, signed = true)
+    private fun createPropertyDelegate(property: KMutableProperty0<Float>,
+                                       biggerThan0: Boolean = false): ShapePropertyItemViewDelegate {
+        return ShapePropertyItemViewDelegate(
+                property.name.capitalize()+":",
+                { property.get() },
+                {
+                    if (biggerThan0 && it <= 0.0) false else {
+                        property.set(it)
+                        updateControllerPosition()
+                        true
+                    }
+                },
+                signed = !biggerThan0
+        )
+    }
+
+    override val propertyViewDelegates = listOf(
+            createPropertyDelegate(this::centerX),
+            createPropertyDelegate(this::centerY),
+            createPropertyDelegate(this::radius, biggerThan0 = true),
+            createPropertyDelegate(this::angle)
     )
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
-                propertyPreferenceList[0].setCurrentValue(centerX)
-                propertyPreferenceList[1].setCurrentValue(centerY)
+                propertyViewDelegates[0].setCurrentValue(centerX)
+                propertyViewDelegates[1].setCurrentValue(centerY)
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 radius = distance(centerX, centerY, it.x, it.y)
                 angle = atan2(it.y - centerY, it.x - centerX)
-                propertyPreferenceList[2].setCurrentValue(radius)
-                propertyPreferenceList[3].setCurrentValue(angle)
+                propertyViewDelegates[2].setCurrentValue(radius)
+                propertyViewDelegates[3].setCurrentValue(angle)
                 updateControllerPosition()
                 repaint()
             }
@@ -132,6 +128,15 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         )
     }
 
-    override fun createPropertyAdapter(): PreferenceAdapter =
-            PreferenceAdapter(context, propertyPreferenceList)
+    override fun restoreShapeInfo(info: ShapeInfo) {
+        require(info.shapeData.type != SHAPE_TYPE_CIRCLE)
+        requireNotNull(info.shapeData.circleData)
+        require(info.shapeData.circleData!!.radius != 0.0)
+
+        centerX = worldToView(info.position.x)
+        centerY = worldToView(info.position.y)
+        radius = worldToView(info.shapeData.circleData!!.radius)
+        angle = -info.rotation.toFloat()
+        updateControllerPosition()
+    }
 }

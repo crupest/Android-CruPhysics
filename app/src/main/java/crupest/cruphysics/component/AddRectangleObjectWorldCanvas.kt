@@ -5,14 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import crupest.cruphysics.physics.serialization.RectangleData
+import crupest.cruphysics.physics.serialization.SHAPE_TYPE_RECTANGLE
 import crupest.cruphysics.physics.serialization.createShapeData
-import crupest.cruphysics.preference.PreferenceAdapter
-import crupest.cruphysics.preference.ShapeFloatPreferenceItem
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.utility.toDegrees
 import kotlin.math.*
+import kotlin.reflect.KMutableProperty0
 
 /**
  * Created by crupest on 2017/11/17.
@@ -21,48 +21,37 @@ import kotlin.math.*
 class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
-    private val propertyPreferenceList = listOf(
-            ShapeFloatPreferenceItem("CenterX:", { centerX }, {
-                centerX = it
-                updateControllerPosition()
-                true
-            }, signed = true),
-            ShapeFloatPreferenceItem("CenterY:", { centerY }, {
-                centerY = it
-                updateControllerPosition()
-                true
-            }, signed = true),
-            ShapeFloatPreferenceItem("Width:", { halfWidth * 2 }, {
-                if (it <= 0.0f)
-                    false
-                else {
-                    halfWidth = it / 2.0f
-                    updateControllerPosition()
-                    true
-                }
-            }),
-            ShapeFloatPreferenceItem("Height:", { halfHeight * 2 }, {
-                if (it <= 0.0f)
-                    false
-                else {
-                    halfHeight = it / 2.0f
-                    updateControllerPosition()
-                    true
-                }
-            }),
-            ShapeFloatPreferenceItem("Angle:", { angle }, {
-                angle = it
-                updateControllerPosition()
-                true
-            }, signed = true)
+    private fun createPropertyDelegate(property: KMutableProperty0<Float>,
+                                       name: String? = null,
+                                       biggerThan0: Boolean = false): ShapePropertyItemViewDelegate {
+        return ShapePropertyItemViewDelegate(
+                name ?: property.name.capitalize()+":",
+                { property.get() },
+                {
+                    if (biggerThan0 && it <= 0.0) false else {
+                        property.set(it)
+                        updateControllerPosition()
+                        true
+                    }
+                },
+                signed = !biggerThan0
+        )
+    }
+
+    override val propertyViewDelegates = listOf(
+            createPropertyDelegate(this::centerX),
+            createPropertyDelegate(this::centerY),
+            createPropertyDelegate(this::myWidth, "Width:", true),
+            createPropertyDelegate(this::myHeight, "Height:", true),
+            createPropertyDelegate(this::angle)
     )
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
-                propertyPreferenceList[0].setCurrentValue(centerX)
-                propertyPreferenceList[1].setCurrentValue(centerY)
+                propertyViewDelegates[0].setCurrentValue(centerX)
+                propertyViewDelegates[1].setCurrentValue(centerY)
                 updateControllerPosition()
                 repaint()
             },
@@ -72,14 +61,14 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
                 val a = atan2(it.y - centerY, it.x - centerX) - angle
                 halfWidth = halfDiagonal * cos(a).coerceAtLeast(0.0f)
                 halfHeight = halfDiagonal * sin(a).coerceAtLeast(0.0f)
-                propertyPreferenceList[2].setCurrentValue(halfWidth * 2)
-                propertyPreferenceList[3].setCurrentValue(halfHeight * 2)
+                propertyViewDelegates[2].setCurrentValue(halfWidth * 2)
+                propertyViewDelegates[3].setCurrentValue(halfHeight * 2)
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 angle = atan2(it.y - centerY, it.x - centerX)
-                propertyPreferenceList[4].setCurrentValue(angle)
+                propertyViewDelegates[4].setCurrentValue(angle)
                 updateControllerPosition()
                 repaint()
             }
@@ -90,6 +79,18 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     private var halfWidth: Float = 200.0f
     private var halfHeight: Float = 100.0f
     private var angle: Float = 0.0f // in radian
+
+    private var myWidth: Float
+    get() = halfWidth * 2
+    set(value) {
+        halfWidth = value / 2.0f
+    }
+
+    private var myHeight: Float
+    get() = halfHeight * 2
+    set(value) {
+        halfHeight = value / 2.0f
+    }
 
     private val positionController
         get() = controllers[0]
@@ -166,6 +167,18 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
         )
     }
 
-    override fun createPropertyAdapter(): PreferenceAdapter = PreferenceAdapter(
-            context, propertyPreferenceList)
+    override fun restoreShapeInfo(info: ShapeInfo) {
+        require(info.shapeData.type == SHAPE_TYPE_RECTANGLE)
+        requireNotNull(info.shapeData.rectangleData)
+        require(info.shapeData.rectangleData!!.width != 0.0)
+        require(info.shapeData.rectangleData!!.height != 0.0)
+
+        centerX = worldToView(info.position.x)
+        centerY = worldToView(info.position.y)
+        halfWidth = worldToView(info.shapeData.rectangleData!!.width / 2)
+        halfHeight = worldToView(info.shapeData.rectangleData!!.height /2)
+        angle = -info.rotation.toFloat()
+        updateControllerPosition()
+    }
+
 }
