@@ -4,9 +4,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
-import crupest.cruphysics.physics.serialization.RectangleData
-import crupest.cruphysics.physics.serialization.SHAPE_TYPE_RECTANGLE
-import crupest.cruphysics.physics.serialization.createShapeData
+import crupest.cruphysics.serialization.data.ShapeInfo
+import crupest.cruphysics.serialization.data.RectangleData
+import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
+import crupest.cruphysics.serialization.data.createShapeData
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint

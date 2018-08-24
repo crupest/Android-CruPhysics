@@ -8,6 +8,7 @@ import android.graphics.PointF
 import android.support.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
+import crupest.cruphysics.serialization.data.ShapeInfo
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.utility.strokePaint

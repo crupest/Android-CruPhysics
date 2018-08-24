@@ -2,8 +2,8 @@ package crupest.cruphysics.physics.view
 
 import android.graphics.Canvas
 import crupest.cruphysics.component.IDrawWorldDelegate
-import crupest.cruphysics.physics.serialization.BodyData
-import crupest.cruphysics.physics.serialization.WorldData
+import crupest.cruphysics.serialization.data.BodyData
+import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.utility.toDegrees
 
 class StaticWorldViewData(worldData: WorldData) : IDrawWorldDelegate {

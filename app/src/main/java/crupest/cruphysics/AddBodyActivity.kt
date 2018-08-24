@@ -3,8 +3,8 @@ package crupest.cruphysics
 import android.content.Intent
 import android.os.Bundle
 import crupest.cruphysics.fragment.AddBodyShapeListFragment
-import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.StaticWorldViewData
+import crupest.cruphysics.serialization.data.*
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.generateRandomColor
@@ -23,7 +23,6 @@ class AddBodyActivity : SingleFragmentActivity() {
     private lateinit var worldData: WorldData
     lateinit var worldViewData: StaticWorldViewData
     lateinit var cameraData: CameraData
-    lateinit var resultBodyData: BodyData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

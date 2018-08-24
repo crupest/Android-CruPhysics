@@ -3,8 +3,8 @@ package crupest.cruphysics.data.world
 import android.content.Context
 import android.graphics.Bitmap
 import crupest.cruphysics.IWorldRecordFileResolver
-import crupest.cruphysics.physics.serialization.CameraData
-import crupest.cruphysics.physics.serialization.WorldData
+import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.nowLong
 import crupest.cruphysics.utility.sha1Hex

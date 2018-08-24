@@ -14,8 +14,8 @@ import android.widget.EditText
 import android.widget.Spinner
 import crupest.cruphysics.AddBodyActivity
 import crupest.cruphysics.R
-import crupest.cruphysics.physics.serialization.BODY_TYPE_DYNAMIC
-import crupest.cruphysics.physics.serialization.BODY_TYPE_STATIC
+import crupest.cruphysics.serialization.data.BODY_TYPE_DYNAMIC
+import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
 import crupest.cruphysics.utility.showAlertDialog
 import me.priyesh.chroma.ChromaDialog
 import me.priyesh.chroma.ColorMode

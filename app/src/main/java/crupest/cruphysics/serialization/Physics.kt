@@ -1,9 +1,10 @@
-package crupest.cruphysics.physics.serialization
+package crupest.cruphysics.serialization
 
 import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.physics.checkAndGetFixture
 import crupest.cruphysics.physics.cruUserData
 import crupest.cruphysics.physics.switchShapeR
+import crupest.cruphysics.serialization.data.*
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.BodyFixture
 import org.dyn4j.dynamics.World
@@ -50,17 +51,26 @@ fun Shape.toData(): ShapeData = this.switchShapeR(
 
 
 fun ShapeData.fromData(): Convex {
-    this.rectangleData?.apply {
-        return Rectangle(this.width, this.height).also {
-            it.translate(this.center.x, this.center.y)
+    when (this.type) {
+        SHAPE_TYPE_CIRCLE -> {
+            requireNotNull(this.circleData)
+            this.circleData!!.run {
+                return Circle(this.radius).also {
+                    it.translate(this.center.x, this.center.y)
+                }
+            }
+
         }
-    }
-    this.circleData?.apply {
-        return Circle(this.radius).also {
-            it.translate(this.center.x, this.center.y)
+        SHAPE_TYPE_RECTANGLE -> {
+            requireNotNull(this.rectangleData)
+            this.rectangleData!!.run {
+                return Rectangle(this.width, this.height).also {
+                    it.translate(this.center.x, this.center.y)
+                }
+            }
         }
+        else -> throw IllegalArgumentException("Invalid ShapeData object.")
     }
-    throw IllegalArgumentException("Invalid ShapeData object.")
 }
 
 fun Body.toData(): BodyData {

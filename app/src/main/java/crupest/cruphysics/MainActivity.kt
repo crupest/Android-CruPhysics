@@ -20,11 +20,15 @@ import android.widget.TextView
 import com.squareup.picasso.Picasso
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
+import crupest.cruphysics.serialization.data.BodyData
+import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.data.world.WorldRecord
 import crupest.cruphysics.data.world.WorldRepository
-import crupest.cruphysics.physics.serialization.*
 import crupest.cruphysics.physics.view.WorldViewData
+import crupest.cruphysics.serialization.fromData
 import crupest.cruphysics.serialization.fromJson
+import crupest.cruphysics.serialization.toData
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.setInterval

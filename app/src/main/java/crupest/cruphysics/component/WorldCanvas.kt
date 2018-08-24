@@ -14,8 +14,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import crupest.cruphysics.physics.serialization.CameraData
-import crupest.cruphysics.physics.serialization.Vector2Data
+import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.floor
