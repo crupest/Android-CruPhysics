@@ -7,7 +7,6 @@ import crupest.cruphysics.physics.view.StaticWorldViewData
 import crupest.cruphysics.serialization.data.*
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
-import crupest.cruphysics.utility.generateRandomColor
 
 
 class AddBodyActivity : SingleFragmentActivity() {
@@ -15,7 +14,9 @@ class AddBodyActivity : SingleFragmentActivity() {
     companion object {
         const val ARG_WORLD = "WORLD"
         const val ARG_CAMERA = "CAMERA"
-        const val ARG_BODY = "ARG_BODY"
+        private const val ARG_SHAPE_TYPE = "ARG_SHAPE_TYPE"
+        private const val ARG_SHAPE_INFO_MAP = "ARG_SHAPE_INFO_MAP"
+        private const val ARG_BODY_PROPERTY = "ARG_BODY_PROPERTY"
         const val RESULT_BODY = "BODY"
         const val RESULT_CAMERA = "CAMERA"
     }
@@ -23,6 +24,10 @@ class AddBodyActivity : SingleFragmentActivity() {
     private lateinit var worldData: WorldData
     lateinit var worldViewData: StaticWorldViewData
     lateinit var cameraData: CameraData
+
+    lateinit var shapeType: String
+    lateinit var shapeInfoMap: MutableMap<String, ShapeInfo>
+    lateinit var bodyProperty: BodyProperty
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,14 +38,17 @@ class AddBodyActivity : SingleFragmentActivity() {
             worldString = intent.extras.getString(ARG_WORLD)
             cameraString = intent.extras.getString(ARG_CAMERA)
 
-            resultBodyData = createInitBodyData()
+            shapeType = SHAPE_TYPE_CIRCLE
+            shapeInfoMap = mutableMapOf()
+            bodyProperty = BodyProperty()
 
             navigateToFragment(AddBodyShapeListFragment(), addToBackStack = false)
         } else {
             worldString = savedInstanceState.getString(ARG_WORLD)
             cameraString = savedInstanceState.getString(ARG_CAMERA)
-
-            resultBodyData = savedInstanceState.getString(ARG_BODY).fromJson()
+            shapeType = savedInstanceState.getString(ARG_SHAPE_TYPE)
+            shapeInfoMap = savedInstanceState.getString(ARG_SHAPE_INFO_MAP).fromJson()
+            bodyProperty = savedInstanceState.getString(ARG_BODY_PROPERTY).fromJson()
         }
 
         cameraData = cameraString.fromJson()
@@ -58,7 +66,9 @@ class AddBodyActivity : SingleFragmentActivity() {
 
         outState!!.putString(ARG_WORLD, worldData.toJson())
         outState.putString(ARG_CAMERA, cameraData.toJson())
-        outState.putString(ARG_BODY, resultBodyData.toJson())
+        outState.putString(ARG_SHAPE_TYPE, shapeType)
+        outState.putString(ARG_SHAPE_INFO_MAP, shapeInfoMap.toJson())
+        outState.putString(ARG_BODY_PROPERTY, bodyProperty.toJson())
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -66,17 +76,19 @@ class AddBodyActivity : SingleFragmentActivity() {
         return true
     }
 
-    private fun createInitBodyData(): BodyData = BodyData(
-            type = BODY_TYPE_STATIC,
-            density = 1.0,
-            restitution = 0.0,
-            friction = 0.2,
-            appearance = BodyAppearanceData(color = generateRandomColor())
-    )
-
     fun setResultAndFinish() {
         val result = Intent()
-        result.putExtra(AddBodyActivity.RESULT_BODY, resultBodyData.toJson())
+        val shapeInfo = shapeInfoMap[shapeType] ?: throw IllegalStateException("Invalid shape type.")
+        result.putExtra(AddBodyActivity.RESULT_BODY, BodyData(
+                shape = shapeInfo.shapeData,
+                type = bodyProperty.type,
+                position = shapeInfo.position,
+                rotation = shapeInfo.rotation,
+                density = bodyProperty.density,
+                restitution = bodyProperty.restitution,
+                friction = bodyProperty.friction,
+                appearance = BodyAppearanceData(bodyProperty.color)
+        ).toJson())
         result.putExtra(AddBodyActivity.RESULT_CAMERA, cameraData.toJson())
         setResult(RESULT_OK, result)
         finish()

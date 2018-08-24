@@ -23,15 +23,24 @@ import kotlin.reflect.KMutableProperty0
 class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
-    private fun createPropertyDelegate(property: KMutableProperty0<Float>,
+    private fun createPropertyDelegate(property: KMutableProperty0<Double>,
+                                       name: String? = null,
                                        biggerThan0: Boolean = false): ShapePropertyItemViewDelegate {
+        fun getCalculatedName(): String {
+            val pn = property.name
+            if (pn.startsWith("world", ignoreCase = true))
+                return pn.substring(5).capitalize() + ":"
+            return pn.capitalize() + ":"
+        }
+
         return ShapePropertyItemViewDelegate(
-                property.name.capitalize()+":",
+                name ?: getCalculatedName(),
                 { property.get() },
                 {
                     if (biggerThan0 && it <= 0.0) false else {
                         property.set(it)
                         updateControllerPosition()
+                        repaint()
                         true
                     }
                 },
@@ -40,26 +49,26 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override val propertyViewDelegates = listOf(
-            createPropertyDelegate(this::centerX),
-            createPropertyDelegate(this::centerY),
-            createPropertyDelegate(this::radius, biggerThan0 = true),
-            createPropertyDelegate(this::angle)
+            createPropertyDelegate(this::worldCenterX),
+            createPropertyDelegate(this::worldCenterY),
+            createPropertyDelegate(this::worldRadius, biggerThan0 = true),
+            createPropertyDelegate(this::worldAngle)
     )
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
-                propertyViewDelegates[0].setCurrentValue(centerX)
-                propertyViewDelegates[1].setCurrentValue(centerY)
+                propertyViewDelegates[0].restoreText()
+                propertyViewDelegates[1].restoreText()
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 radius = distance(centerX, centerY, it.x, it.y)
                 angle = atan2(it.y - centerY, it.x - centerX)
-                propertyViewDelegates[2].setCurrentValue(radius)
-                propertyViewDelegates[3].setCurrentValue(angle)
+                propertyViewDelegates[2].restoreText()
+                propertyViewDelegates[3].restoreText()
                 updateControllerPosition()
                 repaint()
             }
@@ -69,6 +78,30 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     private var centerY: Float = 0.0f
     private var radius: Float = 300.0f
     private var angle: Float = 0.0f //in radian
+
+    private var worldCenterX: Double
+        get() = viewToWorld(centerX, 0.0f).x
+        set(value) {
+            centerX = worldToView(value, 0.0).x
+        }
+
+    private var worldCenterY: Double
+        get() = viewToWorld(0.0f, centerY).y
+        set(value) {
+            centerY = worldToView(0.0, value).y
+        }
+
+    private var worldRadius: Double
+        get() = viewToWorld(radius)
+        set(value) {
+            radius = worldToView(value)
+        }
+
+    private var worldAngle: Double
+        get() = angle.toDouble()
+        set(value) {
+            angle = value.toFloat()
+        }
 
     private val centerController: Controller
         get() = controllers[0]
@@ -130,7 +163,7 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun restoreShapeInfo(info: ShapeInfo) {
-        require(info.shapeData.type != SHAPE_TYPE_CIRCLE)
+        require(info.shapeData.type == SHAPE_TYPE_CIRCLE)
         requireNotNull(info.shapeData.circleData)
         require(info.shapeData.circleData!!.radius != 0.0)
 
@@ -139,5 +172,9 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         radius = worldToView(info.shapeData.circleData!!.radius)
         angle = -info.rotation.toFloat()
         updateControllerPosition()
+    }
+
+    override fun onSetCamera() {
+        propertyViewDelegates.forEach { it.restoreText() }
     }
 }

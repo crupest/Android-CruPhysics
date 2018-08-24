@@ -38,20 +38,25 @@ abstract class AddBodyCanvasFragment : OptionMenuFragment(menuResource = R.menu.
         return rootView
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onResume() {
+        super.onResume()
 
-        val activity = context as AddBodyActivity
-        worldCanvas.setCamera(activity.cameraData)
-        worldCanvas.drawWorldDelegate = activity.worldViewData
+        val a = context as AddBodyActivity
+        worldCanvas.setCamera(a.cameraData)
+        worldCanvas.drawWorldDelegate = a.worldViewData
 
-        activity.resultBodyData.shape.type = shapeType
-        //TODO: ShapeInfo restore.
+        a.shapeType = shapeType
+        a.shapeInfoMap[shapeType]?.apply {
+            worldCanvas.restoreShapeInfo(this)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        (activity as AddBodyActivity).cameraData = worldCanvas.generateCameraData()
+
+        val a = context as AddBodyActivity
+        a.cameraData = worldCanvas.generateCameraData()
+        a.shapeInfoMap[shapeType] = worldCanvas.generateShapeInfo()
     }
 
     override fun onDestroyView() {

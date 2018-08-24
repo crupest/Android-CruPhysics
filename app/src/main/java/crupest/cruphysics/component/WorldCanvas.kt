@@ -113,11 +113,13 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     fun setCamera(camera: CameraData) {
         camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         recalculateScaleMark()
+        onSetCamera()
     }
 
     fun resetCamera() {
         viewMatrix.resetAsCamera(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         recalculateScaleMark()
+        onSetCamera()
     }
 
     fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
@@ -272,6 +274,10 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
      *  @param matrix the matrix post-concat
      */
     protected open fun onViewMatrixChanged(matrix: Matrix) {
+
+    }
+
+    protected open fun onSetCamera() {
 
     }
 

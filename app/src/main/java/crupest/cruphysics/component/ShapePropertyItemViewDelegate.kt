@@ -1,6 +1,5 @@
 package crupest.cruphysics.component
 
-import android.content.Context
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -13,8 +12,8 @@ import crupest.cruphysics.R
 
 class ShapePropertyItemViewDelegate(
         val name: String,
-        private val onRestore: () -> Float,
-        private val onValueChanged: (Float) -> Boolean,
+        private val onRestore: () -> Double,
+        private val onValueChanged: (Double) -> Boolean,
         val signed: Boolean = false
 ): IViewDelegate {
 
@@ -44,18 +43,21 @@ class ShapePropertyItemViewDelegate(
             return result
         }
 
-        val rootView = inflater.inflate(R.layout.shape_property_item, parent)
+        val rootView = inflater.inflate(R.layout.shape_property_item, parent, false)
 
         rootView.findViewById<TextView>(R.id.label).text = name
 
 
         val view = rootView.findViewById<EditText>(R.id.value)
+
+        valueView = view
+
         view.inputType = calculateInputType()
 
         view.setText(onRestore().toString())
 
         view.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus && error) setCurrentValue(onRestore())
+            if (!hasFocus && error) restoreText()
         }
 
         view.addTextChangedListener(textWatcher)
@@ -70,17 +72,17 @@ class ShapePropertyItemViewDelegate(
     }
 
     private fun onTextChanged(text: String): Boolean {
-        val number = text.toFloatOrNull()
+        val number = text.toDoubleOrNull()
         return if (number == null)
             false
         else
             onValueChanged(number)
     }
 
-    fun setCurrentValue(value: Float) {
+    fun restoreText() {
         valueView?.apply {
             removeTextChangedListener(textWatcher)
-            setText(value.toString())
+            setText(onRestore().toString())
             addTextChangedListener(textWatcher)
         }
     }

@@ -43,11 +43,11 @@ class BodyPropertyFragment : OptionMenuFragment(R.menu.check_menu) {
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
 
-        typeSpinner.setSelection(when (a.resultBodyData.type) {
+        typeSpinner.setSelection(when (a.bodyProperty.type) {
             BODY_TYPE_STATIC -> 0
             BODY_TYPE_DYNAMIC -> 1
             else -> throw IllegalStateException("Unknown body type.")
-        }, false)
+        })
 
         typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -56,7 +56,7 @@ class BodyPropertyFragment : OptionMenuFragment(R.menu.check_menu) {
                     1 -> BODY_TYPE_DYNAMIC
                     else -> null
                 }?.run {
-                    a.resultBodyData.type = this
+                    a.bodyProperty.type = this
                 }
             }
 
@@ -85,13 +85,13 @@ class BodyPropertyFragment : OptionMenuFragment(R.menu.check_menu) {
             })
         }
 
-        initEditText(R.id.edit_density, a.resultBodyData::density) { it > 0 }
-        initEditText(R.id.edit_restitution, a.resultBodyData::restitution) { it >= 0 }
-        initEditText(R.id.edit_friction, a.resultBodyData::friction) { it >= 0 }
+        initEditText(R.id.edit_density, a.bodyProperty::density) { it > 0 }
+        initEditText(R.id.edit_restitution, a.bodyProperty::restitution) { it >= 0 }
+        initEditText(R.id.edit_friction, a.bodyProperty::friction) { it >= 0 }
 
         val colorBlock: View = rootView.findViewById(R.id.color_block)
 
-        colorBlock.background = ColorDrawable(a.resultBodyData.appearance.color)
+        colorBlock.background = ColorDrawable(a.bodyProperty.color)
 
         colorBlock.setOnClickListener {
             ChromaDialog.Builder()
@@ -100,7 +100,7 @@ class BodyPropertyFragment : OptionMenuFragment(R.menu.check_menu) {
                     .onColorSelected(object : ColorSelectListener {
                         override fun onColorSelected(color: Int) {
                             colorBlock.background = ColorDrawable(color)
-                            a.resultBodyData.appearance.color = color
+                            a.bodyProperty.color = color
                         }
                     })
                     .create()

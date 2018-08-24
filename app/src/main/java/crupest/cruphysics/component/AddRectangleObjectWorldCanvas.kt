@@ -22,16 +22,24 @@ import kotlin.reflect.KMutableProperty0
 class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     : AddBodyWorldCanvas(context, attrs) {
 
-    private fun createPropertyDelegate(property: KMutableProperty0<Float>,
+    private fun createPropertyDelegate(property: KMutableProperty0<Double>,
                                        name: String? = null,
                                        biggerThan0: Boolean = false): ShapePropertyItemViewDelegate {
+        fun getCalculatedName(): String {
+            val pn = property.name
+            if (pn.startsWith("world", ignoreCase = true))
+                return pn.substring(5).capitalize() + ":"
+            return pn.capitalize() + ":"
+        }
+
         return ShapePropertyItemViewDelegate(
-                name ?: property.name.capitalize()+":",
+                name ?: getCalculatedName(),
                 { property.get() },
                 {
                     if (biggerThan0 && it <= 0.0) false else {
                         property.set(it)
                         updateControllerPosition()
+                        repaint()
                         true
                     }
                 },
@@ -40,19 +48,19 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override val propertyViewDelegates = listOf(
-            createPropertyDelegate(this::centerX),
-            createPropertyDelegate(this::centerY),
-            createPropertyDelegate(this::myWidth, "Width:", true),
-            createPropertyDelegate(this::myHeight, "Height:", true),
-            createPropertyDelegate(this::angle)
+            createPropertyDelegate(this::worldCenterX),
+            createPropertyDelegate(this::worldCenterY),
+            createPropertyDelegate(this::worldWidth, biggerThan0 = true),
+            createPropertyDelegate(this::worldHeight, biggerThan0 = true),
+            createPropertyDelegate(this::worldAngle)
     )
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
                 centerX = it.x
                 centerY = it.y
-                propertyViewDelegates[0].setCurrentValue(centerX)
-                propertyViewDelegates[1].setCurrentValue(centerY)
+                propertyViewDelegates[0].restoreText()
+                propertyViewDelegates[1].restoreText()
                 updateControllerPosition()
                 repaint()
             },
@@ -62,14 +70,14 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
                 val a = atan2(it.y - centerY, it.x - centerX) - angle
                 halfWidth = halfDiagonal * cos(a).coerceAtLeast(0.0f)
                 halfHeight = halfDiagonal * sin(a).coerceAtLeast(0.0f)
-                propertyViewDelegates[2].setCurrentValue(halfWidth * 2)
-                propertyViewDelegates[3].setCurrentValue(halfHeight * 2)
+                propertyViewDelegates[2].restoreText()
+                propertyViewDelegates[3].restoreText()
                 updateControllerPosition()
                 repaint()
             },
             Controller {
                 angle = atan2(it.y - centerY, it.x - centerX)
-                propertyViewDelegates[4].setCurrentValue(angle)
+                propertyViewDelegates[4].restoreText()
                 updateControllerPosition()
                 repaint()
             }
@@ -81,17 +89,35 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     private var halfHeight: Float = 100.0f
     private var angle: Float = 0.0f // in radian
 
-    private var myWidth: Float
-    get() = halfWidth * 2
+    private var worldCenterX: Double
+        get() = viewToWorld(centerX, 0.0f).x
+        set(value) {
+            centerX = worldToView(value, 0.0).x
+        }
+
+    private var worldCenterY: Double
+        get() = viewToWorld(0.0f, centerY).y
+        set(value) {
+            centerY = worldToView(0.0, value).y
+        }
+
+    private var worldWidth: Double
+    get() = viewToWorld(halfWidth) * 2
     set(value) {
-        halfWidth = value / 2.0f
+        halfWidth = worldToView(value / 2.0f)
     }
 
-    private var myHeight: Float
-    get() = halfHeight * 2
+    private var worldHeight: Double
+    get() = viewToWorld(halfHeight) * 2
     set(value) {
-        halfHeight = value / 2.0f
+        halfHeight = worldToView(value / 2.0f)
     }
+
+    private var worldAngle: Double
+        get() = angle.toDouble()
+        set(value) {
+            angle = value.toFloat()
+        }
 
     private val positionController
         get() = controllers[0]
@@ -160,8 +186,8 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
 
         return ShapeInfo(
                 RectangleData(
-                        width = viewToWorld(halfWidth * 2.0f),
-                        height = viewToWorld(halfHeight * 2.0f)
+                        width = worldWidth,
+                        height = worldHeight
                 ).createShapeData(),
                 viewToWorld(centerX, centerY),
                 -angle.toDouble() //because y-axis is reversed.
@@ -182,4 +208,7 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
         updateControllerPosition()
     }
 
+    override fun onSetCamera() {
+        propertyViewDelegates.forEach { it.restoreText() }
+    }
 }
