@@ -6,10 +6,10 @@ import android.arch.persistence.room.*
 interface WorldRecordDao {
     @Query("SELECT * FROM world_record ORDER BY timestamp DESC")
     fun getRecords(): List<WorldRecordEntity>
-/*
+
     @Query("SELECT * FROM world_record ORDER BY timestamp DESC LIMIT 1")
-    fun getLatestRecord(): WorldRecordEntity
-*/
+    fun getLatestRecord(): WorldRecordEntity?
+
     @Insert
     fun insert(vararg record: WorldRecordEntity)
 

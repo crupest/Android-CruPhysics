@@ -19,12 +19,24 @@
             android:theme="@style/ToolBarStyle"
             app:titleTextColor="#FFFFFFFF" />
 
-        <crupest.cruphysics.component.MainWorldCanvas
-            android:id="@+id/world_canvas"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/tool_bar" />
+            android:layout_below="@+id/tool_bar">
 
+            <ProgressBar
+                android:id="@+id/main_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <crupest.cruphysics.component.MainWorldCanvas
+                android:id="@+id/world_canvas"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/add_floating_button"
@@ -33,7 +45,8 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_margin="10dp"
-            app:srcCompat="@drawable/ic_add_white_24dp" />
+            app:srcCompat="@drawable/ic_add_white_24dp"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
@@ -52,10 +65,24 @@
             android:textColor="#FF000000"
             android:textSize="20sp" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/history"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/history_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/history_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
     </LinearLayout>
 

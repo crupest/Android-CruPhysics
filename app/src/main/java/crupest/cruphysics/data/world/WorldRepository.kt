@@ -12,10 +12,13 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
-class WorldRepository(context: Context) {
+class WorldRepository(context: Context,
+                      onFinishReadLatestListener: ((WorldRecordEntity?) -> Unit)?,
+                      onFinishReadAllListener: () -> Unit
+) {
     private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
     private val cacheLock = Any()
-    private lateinit var cache: List<WorldRecordEntity>
+    private val cache: MutableList<WorldRecordEntity> = mutableListOf()
 
     private val stop = AtomicBoolean(false)
     private val taskQueue: Queue<() -> Unit> = ConcurrentLinkedQueue()
@@ -28,11 +31,18 @@ class WorldRepository(context: Context) {
     }
 
     init {
-        thread {
-            synchronized(cacheLock) {
-                cache = dao.getRecords()
+        if (onFinishReadLatestListener != null)
+            taskQueue.offer {
+                onFinishReadLatestListener.invoke(dao.getLatestRecord())
             }
-        }.join()
+
+        taskQueue.offer {
+            val records = dao.getRecords()
+            synchronized(cacheLock) {
+                cache.addAll(records)
+            }
+            onFinishReadAllListener()
+        }
     }
 
     //events
@@ -54,16 +64,18 @@ class WorldRepository(context: Context) {
     fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnail: Bitmap) {
         taskQueue.offer {
 
-
-            dao.insert(WorldRecordEntity(
+            val record = WorldRecordEntity(
+                    timestamp = nowLong(),
                     world = worldData.toJson(),
                     camera = cameraData.toJson(),
                     thumbnail = compressThumbnail(thumbnail)
-            ))
+            )
 
             synchronized(cacheLock) {
-                cache = dao.getRecords()
+                cache.add(0, record)
             }
+
+            dao.insert(record)
 
             addCompleteListener?.invoke()
         }
@@ -72,11 +84,11 @@ class WorldRepository(context: Context) {
     fun updateLatestRecordCamera(camera: CameraData, thumbnail: Bitmap) {
         taskQueue.offer {
             synchronized(cacheLock) {
-                cache.firstOrNull()?.also {
-                    it.camera = camera.toJson()
-                    it.thumbnail = compressThumbnail(thumbnail)
-                    dao.update(it)
-                }
+                cache.firstOrNull()
+            }?.also {
+                it.camera = camera.toJson()
+                it.thumbnail = compressThumbnail(thumbnail)
+                dao.update(it)
             }
 
             latestCameraUpdateCompleteListener?.invoke()
@@ -85,12 +97,15 @@ class WorldRepository(context: Context) {
 
     fun updateTimestamp(position: Int) {
         taskQueue.offer {
-            synchronized(cacheLock) {
-                val record = cache[position]
-                record.timestamp = nowLong()
-                dao.update(record)
-                cache = dao.getRecords()
+
+            val record = synchronized(cacheLock) {
+                val r = cache.removeAt(position)
+                cache.add(0, r)
+                r
             }
+
+            record.timestamp = nowLong()
+            dao.update(record)
 
             timestampUpdateCompleteListener?.invoke(position)
         }

@@ -11,11 +11,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.CardView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import crupest.cruphysics.component.IMainWorldDelegate
@@ -31,6 +29,7 @@ import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toData
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
+import crupest.cruphysics.utility.removeSelf
 import crupest.cruphysics.utility.setInterval
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
@@ -92,7 +91,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     //Region: properties ui
 
     private lateinit var worldCanvas: MainWorldCanvas
-    private lateinit var historyAdapter: HistoryAdapter
     private lateinit var drawer: DrawerLayout
 
     @get:MenuRes
@@ -123,55 +121,61 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.tool_bar))
 
-        worldRepository = WorldRepository(applicationContext)
-
-        drawer = findViewById(R.id.drawer)
-
-        val historyView: RecyclerView = findViewById(R.id.history)
-        historyView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        historyAdapter = HistoryAdapter()
-        historyView.adapter = historyAdapter
-
-        val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
-        floatingButton.setOnClickListener {
-            val intent = Intent(this, AddBodyActivity::class.java)
-            intent.putExtra(AddBodyActivity.ARG_WORLD, world.toData().toJson())
-            intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.generateCameraData().toJson())
-            startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
-        }
 
         worldCanvas = findViewById(R.id.world_canvas)
         worldCanvas.mainWorldDelegate = this
 
-        if (savedInstanceState == null) {
-            if (worldRepository.recordCount == 0)
-                createNewWorld()
-            else
-                recoverFromRecord(worldRepository.getRecord(0))
-        } else {
+        worldRepository = WorldRepository(applicationContext, { record: WorldRecordEntity? ->
+            runOnUiThread {
+                initUI()
+
+                if (record == null)
+                    createNewWorld()
+                else
+                    recoverFromRecord(record)
+            }
+            // only do this when not restoring
+        }.takeIf { savedInstanceState == null }) {
+            runOnUiThread {
+                findViewById<ProgressBar>(R.id.history_progress_bar).removeSelf()
+
+                val historyView = findViewById<RecyclerView>(R.id.history_view)
+                historyView.layoutManager = LinearLayoutManager(
+                        this, LinearLayoutManager.VERTICAL, false)
+                val historyAdapter = HistoryAdapter()
+                historyView.adapter = historyAdapter
+                historyView.visibility = View.VISIBLE
+
+                worldRepository.addCompleteListener = {
+                    runOnUiThread {
+                        historyAdapter.notifyItemInserted(0)
+                        historyView.scrollToPosition(0)
+                    }
+                }
+                worldRepository.latestCameraUpdateCompleteListener = {
+                    runOnUiThread {
+                        historyAdapter.notifyItemChanged(0)
+                    }
+                }
+                worldRepository.timestampUpdateCompleteListener = {
+                    runOnUiThread {
+                        historyAdapter.notifyItemMoved(it, 0)
+                        historyView.scrollToPosition(0)
+                    }
+                }
+            }
+        }
+
+        if (savedInstanceState != null) {
+            initUI()
+
             val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
             val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
 
             recoverFromData(worldData, cameraData)
         }
 
-        worldRepository.addCompleteListener = {
-            runOnUiThread {
-                historyAdapter.notifyItemInserted(0)
-                historyView.scrollToPosition(0)
-            }
-        }
-        worldRepository.latestCameraUpdateCompleteListener = {
-            runOnUiThread {
-                historyAdapter.notifyItemChanged(0)
-            }
-        }
-        worldRepository.timestampUpdateCompleteListener = {
-            runOnUiThread {
-                historyAdapter.notifyItemMoved(it, 0)
-                historyView.scrollToPosition(0)
-            }
-        }
+        drawer = findViewById(R.id.drawer)
     }
 
     override fun onPause() {
@@ -230,6 +234,21 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         }
     }
 
+    //call this after getting the first world data.
+    private fun initUI() {
+        findViewById<ProgressBar>(R.id.main_progress_bar).removeSelf()
+
+        val floatingButton = findViewById<FloatingActionButton>(R.id.add_floating_button)
+        floatingButton.setOnClickListener {
+            val intent = Intent(this, AddBodyActivity::class.java)
+            intent.putExtra(AddBodyActivity.ARG_WORLD, world.toData().toJson())
+            intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.generateCameraData().toJson())
+            startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
+        }
+        floatingButton.visibility = View.VISIBLE
+
+        worldCanvas.visibility = View.VISIBLE
+    }
 
     //Region: world
 

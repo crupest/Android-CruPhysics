@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PointF
+import android.view.View
+import android.view.ViewGroup
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.pow
@@ -57,3 +59,7 @@ fun generateRandomColor(): Int = Color.rgb(
 fun Float.toDegrees(): Float = this * 180.0f / PI.toFloat()
 
 fun nowLong(): Long = Date().time
+
+fun View.removeSelf() {
+    (this.parent as ViewGroup).removeView(this)
+}

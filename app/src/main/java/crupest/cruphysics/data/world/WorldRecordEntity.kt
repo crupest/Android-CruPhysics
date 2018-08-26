@@ -7,8 +7,7 @@ import crupest.cruphysics.utility.nowLong
 
 @Entity(tableName = "world_record")
 class WorldRecordEntity(
-        @PrimaryKey(autoGenerate = true) var id: Int = 0,
-        @ColumnInfo(name = "timestamp") var timestamp: Long = nowLong(),
+        @PrimaryKey @ColumnInfo(name = "timestamp") var timestamp: Long = nowLong(),
         @ColumnInfo(name = "world") var world: String = "",
         @ColumnInfo(name = "camera") var camera: String = "",
         @ColumnInfo(name = "thumbnail") var thumbnail: ByteArray = byteArrayOf()
