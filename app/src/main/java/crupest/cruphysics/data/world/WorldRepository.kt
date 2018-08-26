@@ -9,7 +9,6 @@ import crupest.cruphysics.utility.nowLong
 import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
@@ -37,30 +36,14 @@ class WorldRepository(context: Context) {
     }
 
     //events
-    open class UiNotifyEventArgs(private val latch: CountDownLatch) {
-        fun notifyDone() {
-            latch.countDown()
-        }
-    }
-
-    class AddCompleteEventArgs(latch: CountDownLatch) : UiNotifyEventArgs(latch)
-    class LatestCameraUpdateCompleteEventArgs(latch: CountDownLatch) : UiNotifyEventArgs(latch)
-    class TimestampUpdateCompleteEventArgs(latch: CountDownLatch, val oldPosition: Int) : UiNotifyEventArgs(latch)
-
-    var addCompleteListener: ((AddCompleteEventArgs) -> Unit)? = null
-    var latestCameraUpdateCompleteListener: ((LatestCameraUpdateCompleteEventArgs) -> Unit)? = null
-    var timestampUpdateCompleteListener: ((TimestampUpdateCompleteEventArgs) -> Unit)? = null
+    var addCompleteListener: (() -> Unit)? = null
+    var latestCameraUpdateCompleteListener: (() -> Unit)? = null
+    var timestampUpdateCompleteListener: ((Int) -> Unit)? = null
 
     private fun compressThumbnail(thumbnail: Bitmap): ByteArray {
         return ByteArrayOutputStream().also {
             thumbnail.compress(Bitmap.CompressFormat.PNG, 100, it)
         }.toByteArray()
-    }
-
-    private fun runAndWaitForUiThread(block: (CountDownLatch) -> Unit) {
-        val latch = CountDownLatch(1)
-        block(latch)
-        latch.await()
     }
 
     val recordCount: Int
@@ -82,9 +65,7 @@ class WorldRepository(context: Context) {
                 cache = dao.getRecords()
             }
 
-            runAndWaitForUiThread {
-                addCompleteListener?.invoke(AddCompleteEventArgs(it))
-            }
+            addCompleteListener?.invoke()
         }
     }
 
@@ -98,10 +79,7 @@ class WorldRepository(context: Context) {
                 }
             }
 
-            runAndWaitForUiThread {
-                latestCameraUpdateCompleteListener?.invoke(
-                        LatestCameraUpdateCompleteEventArgs(it))
-            }
+            latestCameraUpdateCompleteListener?.invoke()
         }
     }
 
@@ -114,9 +92,7 @@ class WorldRepository(context: Context) {
                 cache = dao.getRecords()
             }
 
-            runAndWaitForUiThread {
-                timestampUpdateCompleteListener?.invoke(TimestampUpdateCompleteEventArgs(it, position))
-            }
+            timestampUpdateCompleteListener?.invoke(position)
         }
     }
 

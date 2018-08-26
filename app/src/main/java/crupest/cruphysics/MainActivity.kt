@@ -20,12 +20,12 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
-import crupest.cruphysics.serialization.data.BodyData
-import crupest.cruphysics.serialization.data.CameraData
-import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.physics.view.WorldViewData
+import crupest.cruphysics.serialization.data.BodyData
+import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.fromData
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toData
@@ -35,7 +35,6 @@ import crupest.cruphysics.utility.setInterval
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
-import java.io.File
 import java.text.DateFormat
 import java.util.*
 
@@ -50,9 +49,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         const val ARG_WORLD = "WORLD"
         const val ARG_CAMERA = "CAMERA"
         const val ADD_OBJECT_REQUEST_CODE = 2000
-
-
-        const val THUMBNAIL_FILE_DIR_NAME = "thumbnails"
 
         const val THUMBNAIL_WIDTH = 1000
         const val THUMBNAIL_HEIGHT = 500
@@ -163,20 +159,17 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             runOnUiThread {
                 historyAdapter.notifyItemInserted(0)
                 historyView.scrollToPosition(0)
-                it.notifyDone()
             }
         }
         worldRepository.latestCameraUpdateCompleteListener = {
             runOnUiThread {
                 historyAdapter.notifyItemChanged(0)
-                it.notifyDone()
             }
         }
         worldRepository.timestampUpdateCompleteListener = {
             runOnUiThread {
-                historyAdapter.notifyItemMoved(it.oldPosition, 0)
+                historyAdapter.notifyItemMoved(it, 0)
                 historyView.scrollToPosition(0)
-                it.notifyDone()
             }
         }
     }
