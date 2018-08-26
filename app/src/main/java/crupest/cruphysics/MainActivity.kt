@@ -17,13 +17,13 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.serialization.data.BodyData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
-import crupest.cruphysics.data.world.WorldRecord
+import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.physics.view.WorldViewData
 import crupest.cruphysics.serialization.fromData
@@ -44,7 +44,7 @@ import java.util.*
  * Activity class [MainActivity].
  * Represents the main activity.
  */
-class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileResolver {
+class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     companion object {
         const val ARG_WORLD = "WORLD"
@@ -76,10 +76,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(Date(record.timestamp))
-            Picasso.with(this@MainActivity)
-                    .load(getThumbnailFile(record.thumbnailFile))
-                    .fit()
-                    .into(holder.worldImageView)
+            Glide.with(this@MainActivity).load(record.thumbnail).into(holder.worldImageView)
             holder.rootView.setOnClickListener {
                 recoverFromRecord(record)
                 // You can't just use position here, because it may remain unchanged when the item
@@ -122,9 +119,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
     //Region: properties data
     private lateinit var worldRepository: WorldRepository
 
-    private val thumbnailDir: File by lazy {
-        getDir(THUMBNAIL_FILE_DIR_NAME, MODE_PRIVATE)
-    }
 
     //Region: methods ui
 
@@ -133,7 +127,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.tool_bar))
 
-        worldRepository = WorldRepository(applicationContext, this)
+        worldRepository = WorldRepository(applicationContext)
 
         drawer = findViewById(R.id.drawer)
 
@@ -178,7 +172,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
                 it.notifyDone()
             }
         }
-        worldRepository.timestampUpdateCompleteListener =  {
+        worldRepository.timestampUpdateCompleteListener = {
             runOnUiThread {
                 historyAdapter.notifyItemMoved(it.oldPosition, 0)
                 historyView.scrollToPosition(0)
@@ -260,23 +254,23 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
     }
 
     private fun runWorld(): Boolean =
-        if (task == null) {
-            task = setInterval(1.0 / 60.0) {
-                world.update(1.0 / 60.0)
-                worldCanvas.repaint()
-            }
-            onWorldStateChanged(true)
-            true
-        } else false
+            if (task == null) {
+                task = setInterval(1.0 / 60.0) {
+                    world.update(1.0 / 60.0)
+                    worldCanvas.repaint()
+                }
+                onWorldStateChanged(true)
+                true
+            } else false
 
     private fun pauseWorld() =
-        if (task != null) {
-            task!!.cancel()
-            task = null
-            onWorldStateChanged(false)
-            saveCurrentWorldToDatabase()
-            true
-        } else false
+            if (task != null) {
+                task!!.cancel()
+                task = null
+                onWorldStateChanged(false)
+                saveCurrentWorldToDatabase()
+                true
+            } else false
 
     private fun addBody(body: Body) {
         world.addBody(body)
@@ -295,8 +289,6 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
 
     //Region: serialization
 
-    override fun getThumbnailFile(fileName: String): File = thumbnailDir.resolve(fileName)
-
     private fun generateThumbnail(): Bitmap =
             worldViewData.generateThumbnail(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT,
                     worldCanvas.getThumbnailViewMatrix(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, 0.5f))
@@ -309,7 +301,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate, IWorldRecordFileRe
         worldCanvas.repaint()
     }
 
-    private fun recoverFromRecord(worldRecord: WorldRecord) {
+    private fun recoverFromRecord(worldRecord: WorldRecordEntity) {
         recoverFromData(worldRecord.world.fromJson(), worldRecord.camera.fromJson())
     }
 

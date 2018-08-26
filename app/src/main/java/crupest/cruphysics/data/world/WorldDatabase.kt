@@ -5,7 +5,7 @@ import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 
-@Database(entities = [WorldRecord::class], version = 1)
+@Database(entities = [WorldRecordEntity::class], version = 1)
 abstract class WorldDatabase : RoomDatabase() {
     abstract fun worldRecordDao(): WorldRecordDao
 

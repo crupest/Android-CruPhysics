@@ -5,11 +5,14 @@ import android.arch.persistence.room.*
 @Dao
 interface WorldRecordDao {
     @Query("SELECT * FROM world_record ORDER BY timestamp DESC")
-    fun getRecords(): List<WorldRecord>
-
+    fun getRecords(): List<WorldRecordEntity>
+/*
+    @Query("SELECT * FROM world_record ORDER BY timestamp DESC LIMIT 1")
+    fun getLatestRecord(): WorldRecordEntity
+*/
     @Insert
-    fun insert(vararg record: WorldRecord)
+    fun insert(vararg record: WorldRecordEntity)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun update(vararg record: WorldRecord)
+    fun update(vararg record: WorldRecordEntity)
 }
