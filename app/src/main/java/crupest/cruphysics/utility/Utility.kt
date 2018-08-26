@@ -57,10 +57,3 @@ fun generateRandomColor(): Int = Color.rgb(
 fun Float.toDegrees(): Float = this * 180.0f / PI.toFloat()
 
 fun nowLong(): Long = Date().time
-
-inline fun <T> T.checkState(errorMessage: String, test: (T) -> Boolean): T {
-    if (test(this))
-        return this
-    else
-        throw IllegalStateException(errorMessage)
-}

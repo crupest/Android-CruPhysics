@@ -57,16 +57,16 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                centerX = it.x
-                centerY = it.y
+                viewCenterX = it.x
+                viewCenterY = it.y
                 propertyViewDelegates[0].restoreText()
                 propertyViewDelegates[1].restoreText()
                 updateControllerPosition()
                 repaint()
             },
             Controller {
-                radius = distance(centerX, centerY, it.x, it.y)
-                angle = atan2(it.y - centerY, it.x - centerX)
+                viewRadius = distance(viewCenterX, viewCenterY, it.x, it.y)
+                viewAngle = atan2(it.y - viewCenterY, it.x - viewCenterX)
                 propertyViewDelegates[2].restoreText()
                 propertyViewDelegates[3].restoreText()
                 updateControllerPosition()
@@ -74,33 +74,33 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
             }
     )
 
-    private var centerX: Float = 0.0f
-    private var centerY: Float = 0.0f
-    private var radius: Float = 300.0f
-    private var angle: Float = 0.0f //in radian
+    private var viewCenterX: Float = 0.0f
+    private var viewCenterY: Float = 0.0f
+    private var viewRadius: Float = 300.0f
+    private var viewAngle: Float = 0.0f //in radian
 
     private var worldCenterX: Double
-        get() = viewToWorld(centerX, 0.0f).x
+        get() = viewToWorld(viewCenterX, 0.0f).x
         set(value) {
-            centerX = worldToView(value, 0.0).x
+            viewCenterX = worldToView(value, 0.0).x
         }
 
     private var worldCenterY: Double
-        get() = viewToWorld(0.0f, centerY).y
+        get() = viewToWorld(0.0f, viewCenterY).y
         set(value) {
-            centerY = worldToView(0.0, value).y
+            viewCenterY = worldToView(0.0, value).y
         }
 
     private var worldRadius: Double
-        get() = viewToWorld(radius)
+        get() = viewToWorld(viewRadius)
         set(value) {
-            radius = worldToView(value)
+            viewRadius = worldToView(value)
         }
 
     private var worldAngle: Double
-        get() = angle.toDouble()
+        get() = -viewAngle.toDouble()
         set(value) {
-            angle = value.toFloat()
+            viewAngle = -value.toFloat()
         }
 
     private val centerController: Controller
@@ -110,10 +110,10 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         get() = controllers[1]
 
     private fun updateControllerPosition() {
-        centerController.position.set(centerX, centerY)
+        centerController.position.set(viewCenterX, viewCenterY)
         radiusController.position.set(
-                centerX + radius * cos(angle),
-                centerY + radius * sin(angle)
+                viewCenterX + viewRadius * cos(viewAngle),
+                viewCenterY + viewRadius * sin(viewAngle)
         )
     }
 
@@ -122,9 +122,9 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
 
         //Don't need to rotate.
         canvas.drawCircle(
-                centerX,
-                centerY,
-                radius,
+                viewCenterX,
+                viewCenterY,
+                viewRadius,
                 bodyPaint,
                 bodyBorderPaint
         )
@@ -133,32 +133,32 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        centerX = width.toFloat() / 2.0f
-        centerY = height.toFloat() / 2.0f
+        viewCenterX = width.toFloat() / 2.0f
+        viewCenterY = height.toFloat() / 2.0f
 
         updateControllerPosition()
         repaint()
     }
 
     override fun onViewMatrixChanged(matrix: Matrix) {
-        val newCenter = matrix.mapPoint(centerX, centerY)
-        centerX = newCenter.x
-        centerY = newCenter.y
+        val newCenter = matrix.mapPoint(viewCenterX, viewCenterY)
+        viewCenterX = newCenter.x
+        viewCenterY = newCenter.y
 
-        radius = matrix.mapRadius(radius)
+        viewRadius = matrix.mapRadius(viewRadius)
 
         updateControllerPosition()
         repaint()
     }
 
     override fun generateShapeInfo(): ShapeInfo {
-        if (radius == 0.0f)
+        if (viewRadius == 0.0f)
             throw RuntimeException("Circle's radius must be bigger than 0.")
 
         return ShapeInfo(
-                CircleData(radius = viewToWorld(radius)).createShapeData(),
-                viewToWorld(centerX, centerY),
-                -angle.toDouble() //because y-axis is reversed.
+                CircleData(radius = viewToWorld(viewRadius)).createShapeData(),
+                viewToWorld(viewCenterX, viewCenterY),
+                -viewAngle.toDouble() //because y-axis is reversed.
         )
     }
 
@@ -167,10 +167,10 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         requireNotNull(info.shapeData.circleData)
         require(info.shapeData.circleData!!.radius != 0.0)
 
-        centerX = worldToView(info.position.x)
-        centerY = worldToView(info.position.y)
-        radius = worldToView(info.shapeData.circleData!!.radius)
-        angle = -info.rotation.toFloat()
+        worldCenterX = info.position.x
+        worldCenterY = info.position.y
+        worldRadius = info.shapeData.circleData!!.radius
+        worldAngle= info.rotation
         updateControllerPosition()
     }
 

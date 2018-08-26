@@ -4,10 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
-import crupest.cruphysics.serialization.data.ShapeInfo
-import crupest.cruphysics.serialization.data.RectangleData
-import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
-import crupest.cruphysics.serialization.data.createShapeData
+import crupest.cruphysics.serialization.data.*
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
@@ -57,8 +54,8 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
-                centerX = it.x
-                centerY = it.y
+                viewCenterX = it.x
+                viewCenterY = it.y
                 propertyViewDelegates[0].restoreText()
                 propertyViewDelegates[1].restoreText()
                 updateControllerPosition()
@@ -66,57 +63,57 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
             },
             Controller {
 
-                val halfDiagonal = distance(centerX, centerY, it.x, it.y)
-                val a = atan2(it.y - centerY, it.x - centerX) - angle
-                halfWidth = halfDiagonal * cos(a).coerceAtLeast(0.0f)
-                halfHeight = halfDiagonal * sin(a).coerceAtLeast(0.0f)
+                val halfDiagonal = distance(viewCenterX, viewCenterY, it.x, it.y)
+                val a = atan2(it.y - viewCenterY, it.x - viewCenterX) - viewAngle
+                viewHalfWidth = halfDiagonal * cos(a).coerceAtLeast(0.0f)
+                viewHalfHeight = halfDiagonal * sin(a).coerceAtLeast(0.0f)
                 propertyViewDelegates[2].restoreText()
                 propertyViewDelegates[3].restoreText()
                 updateControllerPosition()
                 repaint()
             },
             Controller {
-                angle = atan2(it.y - centerY, it.x - centerX)
+                viewAngle = atan2(it.y - viewCenterY, it.x - viewCenterX)
                 propertyViewDelegates[4].restoreText()
                 updateControllerPosition()
                 repaint()
             }
     )
 
-    private var centerX: Float = 0.0f
-    private var centerY: Float = 0.0f
-    private var halfWidth: Float = 200.0f
-    private var halfHeight: Float = 100.0f
-    private var angle: Float = 0.0f // in radian
+    private var viewCenterX: Float = 0.0f
+    private var viewCenterY: Float = 0.0f
+    private var viewHalfWidth: Float = 200.0f
+    private var viewHalfHeight: Float = 100.0f
+    private var viewAngle: Float = 0.0f // in radian
 
     private var worldCenterX: Double
-        get() = viewToWorld(centerX, 0.0f).x
+        get() = viewToWorld(viewCenterX, 0.0f).x
         set(value) {
-            centerX = worldToView(value, 0.0).x
+            viewCenterX = worldToView(value, 0.0).x
         }
 
     private var worldCenterY: Double
-        get() = viewToWorld(0.0f, centerY).y
+        get() = viewToWorld(0.0f, viewCenterY).y
         set(value) {
-            centerY = worldToView(0.0, value).y
+            viewCenterY = worldToView(0.0, value).y
         }
 
     private var worldWidth: Double
-    get() = viewToWorld(halfWidth) * 2
+    get() = viewToWorld(viewHalfWidth) * 2
     set(value) {
-        halfWidth = worldToView(value / 2.0f)
+        viewHalfWidth = worldToView(value / 2.0f)
     }
 
     private var worldHeight: Double
-    get() = viewToWorld(halfHeight) * 2
+    get() = viewToWorld(viewHalfHeight) * 2
     set(value) {
-        halfHeight = worldToView(value / 2.0f)
+        viewHalfHeight = worldToView(value / 2.0f)
     }
 
     private var worldAngle: Double
-        get() = angle.toDouble()
+        get() = -viewAngle.toDouble()
         set(value) {
-            angle = value.toFloat()
+            viewAngle = -value.toFloat()
         }
 
     private val positionController
@@ -129,27 +126,27 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
         get() = controllers[2]
 
     private fun updateControllerPosition() {
-        positionController.position.set(centerX, centerY)
+        positionController.position.set(viewCenterX, viewCenterY)
 
-        val a = angle + atan2(halfHeight, halfWidth)
-        val halfDiagonal = sqrt((halfWidth).pow(2) + (halfHeight).pow(2))
+        val a = viewAngle + atan2(viewHalfHeight, viewHalfWidth)
+        val halfDiagonal = sqrt((viewHalfWidth).pow(2) + (viewHalfHeight).pow(2))
 
-        sizeController.position.set(centerX + halfDiagonal * cos(a), centerY + halfDiagonal * sin(a))
+        sizeController.position.set(viewCenterX + halfDiagonal * cos(a), viewCenterY + halfDiagonal * sin(a))
 
-        val l = halfWidth + 80
-        rotationController.position.set(centerX + l * cos(angle), centerY + l * sin(angle))
+        val l = viewHalfWidth + 80
+        rotationController.position.set(viewCenterX + l * cos(viewAngle), viewCenterY + l * sin(viewAngle))
     }
 
     override fun onPaint(canvas: Canvas) {
         super.onPaint(canvas)
 
         canvas.save()
-        canvas.rotate(angle.toDegrees(), centerX, centerY)
+        canvas.rotate(viewAngle.toDegrees(), viewCenterX, viewCenterY)
         canvas.drawRectangle(
-                centerX - halfWidth,
-                centerY - halfHeight,
-                centerX + halfWidth,
-                centerY + halfHeight,
+                viewCenterX - viewHalfWidth,
+                viewCenterY - viewHalfHeight,
+                viewCenterX + viewHalfWidth,
+                viewCenterY + viewHalfHeight,
                 bodyPaint,
                 bodyBorderPaint
         )
@@ -159,29 +156,29 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        centerX = width.toFloat() / 2.0f
-        centerY = height.toFloat() / 2.0f
+        viewCenterX = width.toFloat() / 2.0f
+        viewCenterY = height.toFloat() / 2.0f
 
         updateControllerPosition()
         repaint()
     }
 
     override fun onViewMatrixChanged(matrix: Matrix) {
-        matrix.mapPoint(centerX, centerY).let {
-            centerX = it.x
-            centerY = it.y
+        matrix.mapPoint(viewCenterX, viewCenterY).let {
+            viewCenterX = it.x
+            viewCenterY = it.y
         }
-        halfWidth = matrix.mapRadius(halfWidth)
-        halfHeight = matrix.mapRadius(halfHeight)
+        viewHalfWidth = matrix.mapRadius(viewHalfWidth)
+        viewHalfHeight = matrix.mapRadius(viewHalfHeight)
 
         updateControllerPosition()
         repaint()
     }
 
     override fun generateShapeInfo(): ShapeInfo {
-        if (halfWidth == 0.0f)
+        if (viewHalfWidth == 0.0f)
             throw RuntimeException("Rectangle's width must be bigger than 0.")
-        if (halfHeight == 0.0f)
+        if (viewHalfHeight == 0.0f)
             throw RuntimeException("Rectangle's height must be bigger than 0.")
 
         return ShapeInfo(
@@ -189,8 +186,8 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
                         width = worldWidth,
                         height = worldHeight
                 ).createShapeData(),
-                viewToWorld(centerX, centerY),
-                -angle.toDouble() //because y-axis is reversed.
+                Vector2Data(worldCenterX, worldCenterY),
+                worldAngle
         )
     }
 
@@ -200,11 +197,11 @@ class AddRectangleObjectWorldCanvas(context: Context?, attrs: AttributeSet?)
         require(info.shapeData.rectangleData!!.width != 0.0)
         require(info.shapeData.rectangleData!!.height != 0.0)
 
-        centerX = worldToView(info.position.x)
-        centerY = worldToView(info.position.y)
-        halfWidth = worldToView(info.shapeData.rectangleData!!.width / 2)
-        halfHeight = worldToView(info.shapeData.rectangleData!!.height /2)
-        angle = -info.rotation.toFloat()
+        worldCenterX = info.position.x
+        worldCenterY = info.position.y
+        worldWidth = info.shapeData.rectangleData!!.width
+        worldHeight = info.shapeData.rectangleData!!.height
+        worldAngle = info.rotation
         updateControllerPosition()
     }
 
