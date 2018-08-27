@@ -45,12 +45,14 @@ import java.util.*
 class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     companion object {
-        const val ARG_WORLD = "WORLD"
-        const val ARG_CAMERA = "CAMERA"
-        const val ADD_OBJECT_REQUEST_CODE = 2000
+        //Constants for saving state
+        private const val ARG_WORLD = "WORLD"
+        private const val ARG_CAMERA = "CAMERA"
 
-        const val THUMBNAIL_WIDTH = 1000
-        const val THUMBNAIL_HEIGHT = 500
+        private const val ADD_OBJECT_REQUEST_CODE = 2000
+
+        private const val THUMBNAIL_WIDTH = 1000
+        private const val THUMBNAIL_HEIGHT = 500
     }
 
     private inner class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
@@ -160,6 +162,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
                 worldRepository.timestampUpdateCompleteListener = {
                     runOnUiThread {
                         historyAdapter.notifyItemMoved(it, 0)
+                        historyAdapter.notifyItemChanged(0)
                         historyView.scrollToPosition(0)
                     }
                 }
