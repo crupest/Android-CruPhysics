@@ -73,7 +73,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
 
             if (body != null) {
                 CruPopupMenu(context, listOf(
-                        "Delete" to { _ ->
+                        "Delete" to {
                             mainWorldDelegate.removeBody(body)
                         }
                 )).show(this, x.toInt(), y.toInt())

@@ -61,15 +61,15 @@ class WorldRepository(context: Context,
 
     fun getRecord(position: Int) = synchronized(cacheLock) { cache[position] }
 
-    fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnail: Bitmap) {
+    fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnailBitmap: Bitmap) {
         taskQueue.offer {
 
-            val record = WorldRecordEntity(
-                    timestamp = nowLong(),
-                    world = worldData.toJson(),
-                    camera = cameraData.toJson(),
-                    thumbnail = compressThumbnail(thumbnail)
-            )
+            val record = WorldRecordEntity().apply {
+                timestamp = nowLong()
+                world = worldData.toJson()
+                camera = cameraData.toJson()
+                thumbnail = compressThumbnail(thumbnailBitmap)
+            }
 
             synchronized(cacheLock) {
                 cache.add(0, record)

@@ -15,13 +15,10 @@ import crupest.cruphysics.R
 
 @SuppressLint("InflateParams", "RtlHardcoded")
 class CruPopupMenu(context: Context,
-                   private val menuItemAndHandler: List<Pair<String, (MenuItem) -> Unit>>,
+                   menuItemAndHandler: List<Pair<String, () -> Unit>>,
                    width: Int = 500) {
-    class MenuItem(val menu: CruPopupMenu, val position: Int, val text: String)
 
     private val popupWindow: PopupWindow
-
-    val menuItems: List<String> = menuItemAndHandler.map { it.first }
 
     init {
         val layoutInflater = LayoutInflater.from(context)
@@ -32,7 +29,7 @@ class CruPopupMenu(context: Context,
                 context,
                 R.layout.menu_item,
                 R.id.content,
-                menuItems
+                menuItemAndHandler.map { it.first }
         )
         list.adapter = adapter
 
@@ -49,7 +46,7 @@ class CruPopupMenu(context: Context,
         }
 
         list.setOnItemClickListener { _, _, position, _ ->
-            menuItemAndHandler[position].second(MenuItem(this, position, menuItems[position]))
+            menuItemAndHandler[position].second.invoke()
             popupWindow.dismiss()
         }
     }
