@@ -7,10 +7,9 @@ import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.nowLong
 import java.io.ByteArrayOutputStream
-import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class WorldRepository(context: Context,
                       onFinishReadLatestListener: ((WorldRecordEntity?) -> Unit)?,
@@ -20,23 +19,15 @@ class WorldRepository(context: Context,
     private val cacheLock = Any()
     private val cache: MutableList<WorldRecordEntity> = mutableListOf()
 
-    private val stop = AtomicBoolean(false)
-    private val taskQueue: Queue<() -> Unit> = ConcurrentLinkedQueue()
-    private val workingThread: Thread = thread(start = true, name = "SavingWorldThread") {
-        while (true) {
-            if (stop.get() && taskQueue.isEmpty())
-                return@thread
-            taskQueue.poll()?.invoke()
-        }
-    }
+    private val workingExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     init {
         if (onFinishReadLatestListener != null)
-            taskQueue.offer {
+            workingExecutor.submit {
                 onFinishReadLatestListener.invoke(dao.getLatestRecord())
             }
 
-        taskQueue.offer {
+        workingExecutor.submit {
             val records = dao.getRecords()
             synchronized(cacheLock) {
                 cache.addAll(records)
@@ -62,7 +53,7 @@ class WorldRepository(context: Context,
     fun getRecord(position: Int) = synchronized(cacheLock) { cache[position] }
 
     fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnailBitmap: Bitmap) {
-        taskQueue.offer {
+        workingExecutor.submit {
 
             val record = WorldRecordEntity().apply {
                 timestamp = nowLong()
@@ -82,7 +73,7 @@ class WorldRepository(context: Context,
     }
 
     fun updateLatestRecordCamera(camera: CameraData, thumbnail: Bitmap) {
-        taskQueue.offer {
+        workingExecutor.submit {
             synchronized(cacheLock) {
                 cache.firstOrNull()
             }?.also {
@@ -96,7 +87,7 @@ class WorldRepository(context: Context,
     }
 
     fun updateTimestamp(position: Int) {
-        taskQueue.offer {
+        workingExecutor.submit {
 
             val record = synchronized(cacheLock) {
                 val r = cache.removeAt(position)
@@ -112,7 +103,7 @@ class WorldRepository(context: Context,
     }
 
     fun closeAndWait() {
-        stop.set(true)
-        workingThread.join()
+        workingExecutor.shutdown()
+        workingExecutor.awaitTermination(1, TimeUnit.MINUTES)
     }
 }

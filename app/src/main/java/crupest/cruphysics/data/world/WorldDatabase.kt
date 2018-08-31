@@ -13,15 +13,13 @@ abstract class WorldDatabase : RoomDatabase() {
         private const val DATABASE_NAME = "world_database"
         private var instance: WorldDatabase? = null
 
-        fun getInstance(context: Context): WorldDatabase {
-            if (instance == null)
-                synchronized(this) {
-                    if (instance == null)
-                        instance = Room
-                                .databaseBuilder(context, WorldDatabase::class.java, DATABASE_NAME)
-                                .build()
+        fun getInstance(context: Context): WorldDatabase =
+                instance ?: synchronized(this) {
+                    instance ?: buildDatabase(context).also { instance = it }
                 }
-            return instance!!
+
+        private fun buildDatabase(context: Context): WorldDatabase {
+            return Room.databaseBuilder(context, WorldDatabase::class.java, DATABASE_NAME).build()
         }
     }
 }
