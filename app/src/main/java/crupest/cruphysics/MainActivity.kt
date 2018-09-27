@@ -172,8 +172,8 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
         if (savedInstanceState != null) {
             initUI()
 
-            val worldData: WorldData = savedInstanceState.getString(ARG_WORLD).fromJson()
-            val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA).fromJson()
+            val worldData: WorldData = savedInstanceState.getString(ARG_WORLD)!!.fromJson()
+            val cameraData: CameraData = savedInstanceState.getString(ARG_CAMERA)!!.fromJson()
 
             recoverFromData(worldData, cameraData)
         }
