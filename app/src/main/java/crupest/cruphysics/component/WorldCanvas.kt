@@ -255,14 +255,18 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         else
             Html.fromHtml(html)
 
-        scaleMarkText = StaticLayout(textSource,
+        @Suppress("DEPRECATION")
+        scaleMarkText = if (android.os.Build.VERSION.SDK_INT < 23) StaticLayout(textSource,
                 textPaint,
                 scaleMarkWidth,
                 Layout.Alignment.ALIGN_CENTER,
                 1.0f,
                 0.0f,
                 false
-        )
+        ) else StaticLayout.Builder.obtain(textSource, 0, textSource.length, textPaint, scaleMarkWidth)
+                .setAlignment(Layout.Alignment.ALIGN_CENTER)
+                .setLineSpacing(0.0f, 1.0f)
+                .setIncludePad(false).build()
     }
 
     private fun onViewMatrixChangedInternal(matrix: Matrix) {

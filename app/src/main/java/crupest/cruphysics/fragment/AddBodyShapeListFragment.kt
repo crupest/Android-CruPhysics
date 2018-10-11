@@ -28,7 +28,7 @@ class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_m
             super.onCreate(savedInstanceState)
 
             if (arguments != null) {
-                name = arguments!!.getString(ARG_NAME)
+                name = arguments!!.getString(ARG_NAME)!!
                 imageSrc = arguments!!.getInt(ARG_IMAGE_SRC)
             }
         }

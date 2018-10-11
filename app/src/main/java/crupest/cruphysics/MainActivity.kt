@@ -95,9 +95,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     private lateinit var worldCanvas: MainWorldCanvas
     private lateinit var drawer: DrawerLayout
 
-    @get:MenuRes
-    @setparam:MenuRes
-    @field:MenuRes
+    @MenuRes
     private var optionMenu: Int = R.menu.main_menu_pause
         set(value) {
             field = value

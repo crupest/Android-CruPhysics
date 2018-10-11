@@ -35,8 +35,8 @@ class AddBodyActivity : SingleFragmentActivity() {
         val worldString: String
         val cameraString: String
         if (savedInstanceState == null) {
-            worldString = intent.extras.getString(ARG_WORLD)
-            cameraString = intent.extras.getString(ARG_CAMERA)
+            worldString = intent.extras!!.getString(ARG_WORLD)!!
+            cameraString = intent.extras!!.getString(ARG_CAMERA)!!
 
             shapeType = SHAPE_TYPE_CIRCLE
             shapeInfoMap = mutableMapOf()
@@ -44,11 +44,11 @@ class AddBodyActivity : SingleFragmentActivity() {
 
             navigateToFragment(AddBodyShapeListFragment(), addToBackStack = false)
         } else {
-            worldString = savedInstanceState.getString(ARG_WORLD)
-            cameraString = savedInstanceState.getString(ARG_CAMERA)
-            shapeType = savedInstanceState.getString(ARG_SHAPE_TYPE)
-            shapeInfoMap = savedInstanceState.getString(ARG_SHAPE_INFO_MAP).fromJson()
-            bodyProperty = savedInstanceState.getString(ARG_BODY_PROPERTY).fromJson()
+            worldString = savedInstanceState.getString(ARG_WORLD)!!
+            cameraString = savedInstanceState.getString(ARG_CAMERA)!!
+            shapeType = savedInstanceState.getString(ARG_SHAPE_TYPE)!!
+            shapeInfoMap = savedInstanceState.getString(ARG_SHAPE_INFO_MAP)!!.fromJson()
+            bodyProperty = savedInstanceState.getString(ARG_BODY_PROPERTY)!!.fromJson()
         }
 
         cameraData = cameraString.fromJson()
