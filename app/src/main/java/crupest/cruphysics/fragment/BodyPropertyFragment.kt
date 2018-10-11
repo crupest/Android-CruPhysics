@@ -28,7 +28,7 @@ class BodyPropertyFragment : OptionMenuFragment(R.menu.check_menu) {
         val rootView = inflater.inflate(R.layout.fragment_body_property, container, false)
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
-        val adapter = ArrayAdapter(context, R.layout.object_type_spinner_item, R.id.content,
+        val adapter = ArrayAdapter(context!!, R.layout.object_type_spinner_item, R.id.content,
                 context!!.resources.getStringArray(R.array.object_type_list))
         typeSpinner.adapter = adapter
 
