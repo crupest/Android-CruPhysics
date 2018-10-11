@@ -11,7 +11,8 @@ build:
   script:
     - ./gradlew assembleDebug
   tags:
-    - android
+    - linux
+    - docker
   artifacts:
     paths:
       - app/build/outputs/
