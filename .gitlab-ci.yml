@@ -1,0 +1,17 @@
+image: runmymind/docker-android-sdk:alpine-standalone
+
+stages:
+  - build
+
+before_script:
+  - chmod +x ./gradlew
+
+build:
+  stage: build
+  script:
+    - ./gradlew assembleDebug
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - app/build/outputs/
