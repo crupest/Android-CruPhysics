@@ -1,4 +1,4 @@
-image: docker-android-sdk:alpine-standalone
+image: runmymind/docker-android-sdk:alpine-standalone
 
 stages:
   - build
