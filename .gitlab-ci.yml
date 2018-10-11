@@ -8,6 +8,8 @@ build:
   stage: build
   script:
     - ./gradlew assembleDebug
+  tags:
+    - android
   artifacts:
     paths:
       - app/build/outputs/
