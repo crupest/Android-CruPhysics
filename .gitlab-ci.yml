@@ -7,7 +7,7 @@ before_script:
 build:
   stage: build
   script:
-    - ./gradlew assembleDebug --stacktrace --debug
+    - ./gradlew assembleDebug
   tags:
     - android
   artifacts:
