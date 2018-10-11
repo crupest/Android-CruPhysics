@@ -7,7 +7,7 @@ before_script:
 build:
   stage: build
   script:
-    - ./gradlew assembleDebug
+    - ./gradlew assembleDebug -Dkotlin.compiler.execution.strategy="in-process"
   tags:
     - android
   artifacts:
