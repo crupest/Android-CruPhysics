@@ -1,6 +1,6 @@
 package crupest.cruphysics.serialization.data
 
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

@@ -4,18 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.annotation.MenuRes
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.CardView
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.MenuRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.data.world.WorldRecordEntity
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
                 val historyView = findViewById<RecyclerView>(R.id.history_view)
                 historyView.layoutManager = LinearLayoutManager(
-                        this, LinearLayoutManager.VERTICAL, false)
+                        this, RecyclerView.VERTICAL, false)
                 val historyAdapter = HistoryAdapter()
                 historyView.adapter = historyAdapter
                 historyView.visibility = View.VISIBLE
@@ -246,7 +246,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
             intent.putExtra(AddBodyActivity.ARG_CAMERA, worldCanvas.generateCameraData().toJson())
             startActivityForResult(intent, ADD_OBJECT_REQUEST_CODE)
         }
-        floatingButton.visibility = View.VISIBLE
+        floatingButton.show()
 
         worldCanvas.visibility = View.VISIBLE
     }

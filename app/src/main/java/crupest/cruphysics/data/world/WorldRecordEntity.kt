@@ -1,8 +1,8 @@
 package crupest.cruphysics.data.world
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import crupest.cruphysics.utility.nowLong
 
 @Entity(tableName = "world_record")

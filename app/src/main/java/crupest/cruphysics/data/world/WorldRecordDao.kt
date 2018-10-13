@@ -1,6 +1,6 @@
 package crupest.cruphysics.data.world
 
-import android.arch.persistence.room.*
+import androidx.room.*
 
 @Dao
 interface WorldRecordDao {

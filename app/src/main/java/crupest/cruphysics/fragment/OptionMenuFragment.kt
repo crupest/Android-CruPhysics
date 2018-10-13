@@ -1,8 +1,8 @@
 package crupest.cruphysics.fragment
 
-import android.support.annotation.MenuRes
-import android.support.v4.app.Fragment
 import android.view.MenuItem
+import androidx.annotation.MenuRes
+import androidx.fragment.app.Fragment
 import crupest.cruphysics.IOptionMenuActivity
 
 abstract class OptionMenuFragment(@MenuRes val menuResource: Int) : Fragment() {
