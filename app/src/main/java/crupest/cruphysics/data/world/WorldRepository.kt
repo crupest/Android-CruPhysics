@@ -11,35 +11,20 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class WorldRepository(context: Context,
-                      onFinishReadLatestListener: ((WorldRecordEntity?) -> Unit)?,
-                      onFinishReadAllListener: () -> Unit
+class WorldRepository(
+        context: Context,
+        onFinishReadLatestListener: ((WorldRecordEntity?) -> Unit)
 ) {
-    private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
-    private val cacheLock = Any()
-    private val cache: MutableList<WorldRecordEntity> = mutableListOf()
 
     private val workingExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    init {
-        if (onFinishReadLatestListener != null)
-            workingExecutor.submit {
-                onFinishReadLatestListener.invoke(dao.getLatestRecord())
-            }
+    val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
 
+    init {
         workingExecutor.submit {
-            val records = dao.getRecords()
-            synchronized(cacheLock) {
-                cache.addAll(records)
-            }
-            onFinishReadAllListener()
+            onFinishReadLatestListener.invoke(dao.getLatestRecord())
         }
     }
-
-    //events
-    var addCompleteListener: (() -> Unit)? = null
-    var latestCameraUpdateCompleteListener: (() -> Unit)? = null
-    var timestampUpdateCompleteListener: ((Int) -> Unit)? = null
 
     private fun compressThumbnail(thumbnail: Bitmap): ByteArray {
         return ByteArrayOutputStream().also {
@@ -47,58 +32,33 @@ class WorldRepository(context: Context,
         }.toByteArray()
     }
 
-    val recordCount: Int
-        get() = synchronized(cacheLock) { cache.size }
-
-    fun getRecord(position: Int) = synchronized(cacheLock) { cache[position] }
-
     fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnailBitmap: Bitmap) {
         workingExecutor.submit {
-
             val record = WorldRecordEntity().apply {
                 timestamp = nowLong()
                 world = worldData.toJson()
                 camera = cameraData.toJson()
                 thumbnail = compressThumbnail(thumbnailBitmap)
             }
-
-            synchronized(cacheLock) {
-                cache.add(0, record)
-            }
-
             dao.insert(record)
-
-            addCompleteListener?.invoke()
         }
     }
 
     fun updateLatestRecordCamera(camera: CameraData, thumbnail: Bitmap) {
         workingExecutor.submit {
-            synchronized(cacheLock) {
-                cache.firstOrNull()
-            }?.also {
-                it.camera = camera.toJson()
-                it.thumbnail = compressThumbnail(thumbnail)
-                dao.update(it)
-            }
+            dao.getLatestRecord()?.apply {
+                this.camera = camera.toJson()
+                this.thumbnail = compressThumbnail(thumbnail)
+                dao.update(this)
 
-            latestCameraUpdateCompleteListener?.invoke()
+            }
         }
     }
 
-    fun updateTimestamp(position: Int) {
+    fun updateTimestamp(record: WorldRecordEntity) {
         workingExecutor.submit {
-
-            val record = synchronized(cacheLock) {
-                val r = cache.removeAt(position)
-                cache.add(0, r)
-                r
-            }
-
             record.timestamp = nowLong()
             dao.update(record)
-
-            timestampUpdateCompleteListener?.invoke(position)
         }
     }
 

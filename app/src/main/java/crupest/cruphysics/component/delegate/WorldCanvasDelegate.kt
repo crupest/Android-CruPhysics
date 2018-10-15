@@ -1,20 +1,15 @@
-package crupest.cruphysics.physics.view
+package crupest.cruphysics.component.delegate
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Matrix
-import crupest.cruphysics.physics.checkAndGetFixture
-import crupest.cruphysics.physics.cruUserData
-import crupest.cruphysics.physics.switchShape
-import crupest.cruphysics.physics.withTransform
+import androidx.core.graphics.applyCanvas
+import crupest.cruphysics.physics.*
+import crupest.cruphysics.physics.view.BodyViewData
+import crupest.cruphysics.serialization.data.CameraData
 import org.dyn4j.dynamics.Body
 
-class WorldViewDelegate() {
-    constructor(bodies: Iterable<Body>) : this() {
-        for (body in bodies)
-            registerBody(body)
-    }
+class WorldCanvasDelegate {
 
     private val bodyViewDataMap: MutableMap<Body, BodyViewData> = mutableMapOf()
 
@@ -64,13 +59,11 @@ class WorldViewDelegate() {
         }
     }
 
-    fun generateThumbnail(width: Int, height: Int, viewMatrix: Matrix): Bitmap {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        Canvas(bitmap).also {
-            it.drawColor(Color.WHITE)
-            it.concat(viewMatrix)
-            draw(it)
-        }
-        return bitmap
-    }
+    fun generateThumbnail(width: Int, height: Int, camera: CameraData): Bitmap =
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).applyCanvas {
+                drawColor(Color.WHITE)
+                concat(camera.fromData(
+                        width.toFloat() / 2.0f, height.toFloat() / 2.0f))
+                draw(this)
+            }
 }

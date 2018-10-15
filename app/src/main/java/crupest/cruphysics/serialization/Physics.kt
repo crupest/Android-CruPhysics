@@ -117,9 +117,9 @@ fun World.toData(): WorldData = WorldData(
         gravity = this.gravity.toData()
 )
 
-fun WorldData.fromData(): World = World().also {
-    it.gravity = this.gravity.fromData()
-    for (bodyData in this.bodies) {
-        it.addBody(bodyData.fromData())
+fun WorldData.fromData(world: World) {
+    world.gravity = this.gravity.fromData()
+    this.bodies.forEach {
+        world.addBody(it.fromData())
     }
 }

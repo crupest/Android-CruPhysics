@@ -1,0 +1,48 @@
+package crupest.cruphysics.physics
+
+import android.graphics.Matrix
+import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.Vector2Data
+import crupest.cruphysics.utility.getValues
+
+
+fun Matrix.toData(centerX: Float, centerY: Float): CameraData {
+    // unalign center
+    val copy = Matrix(this).also {
+        it.postTranslate(-centerX, -centerY)
+    }
+    val values = copy.getValues()
+    return CameraData(translation = Vector2Data(
+            values[Matrix.MTRANS_X].toDouble(),
+            values[Matrix.MTRANS_Y].toDouble()
+    ), scale = values[Matrix.MSCALE_X].toDouble())
+}
+
+fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
+    matrix.reset()
+    matrix.preTranslate(
+            this.translation.x.toFloat(),
+            this.translation.y.toFloat()
+    )
+    matrix.preScale(
+            this.scale.toFloat(),
+            -this.scale.toFloat()
+    )
+    //align center
+    matrix.postTranslate(centerX, centerY)
+}
+
+fun CameraData.fromData(centerX: Float, centerY: Float): Matrix {
+    val matrix = Matrix()
+    matrix.preTranslate(
+            this.translation.x.toFloat(),
+            this.translation.y.toFloat()
+    )
+    matrix.preScale(
+            this.scale.toFloat(),
+            -this.scale.toFloat()
+    )
+    //align center
+    matrix.postTranslate(centerX, centerY)
+    return matrix
+}

@@ -6,7 +6,7 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import crupest.cruphysics.utility.ScheduleTask
-import crupest.cruphysics.utility.hitTestSquare
+import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.setTimeout
 
 /**
@@ -18,7 +18,6 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
     private var singleLongTouchTimerTask: ScheduleTask? = null
     private var singleLongTouchDownPosition: PointF? = null
 
-    lateinit var mainWorldDelegate: IMainWorldDelegate
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -40,7 +39,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
             MotionEvent.ACTION_MOVE -> {
                 val position = singleLongTouchDownPosition
                 if (position != null) {
-                    if (!hitTestSquare(event.x, event.y, position.x, position.y, 40.0f)) {
+                    if (distance(event.x, event.y, position.x, position.y) > 40.0f) {
                         singleLongTouchTimerTask?.cancel()
                         singleLongTouchTimerTask = null
                         singleLongTouchDownPosition = null
@@ -67,16 +66,20 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
 
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {
-            val body = viewToWorld(x, y).let {
-                mainWorldDelegate.bodyHitTest(it.x, it.y)
-            }
+            val viewModel = mainViewModel
 
-            if (body != null) {
-                CruPopupMenu(context, listOf(
-                        "Delete" to {
-                            mainWorldDelegate.removeBody(body)
-                        }
-                )).show(this, x.toInt(), y.toInt())
+            if (viewModel != null) {
+                val body = viewToWorld(x, y).let {
+                    viewModel.bodyHitTest(it.x, it.y)
+                }
+
+                if (body != null) {
+                    CruPopupMenu(context, listOf(
+                            "Delete" to {
+                                viewModel.removeBody(body)
+                            }
+                    )).show(this, x.toInt(), y.toInt())
+                }
             }
         }
     }

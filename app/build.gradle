@@ -43,6 +43,8 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.google.android.material:material:1.0.0"
 
+    implementation "androidx.core:core-ktx:1.0.0"
+
     def lifecycle_version = "2.0.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
@@ -50,6 +52,13 @@ dependencies {
     def room_version = "2.1.0-alpha01"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+
+    def paging_version = "2.1.0-alpha01"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+
+    def nav_version = "1.0.0-alpha06"
+    implementation "android.arch.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "android.arch.navigation:navigation-ui-ktx:$nav_version"
 
 
     testImplementation 'junit:junit:4.12'

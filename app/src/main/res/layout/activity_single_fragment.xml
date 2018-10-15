@@ -11,16 +11,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        app:titleTextColor="#FFFFFFFF"
-        android:theme="@style/ToolBarStyle">
+        android:theme="@style/ToolBarStyle"
+        app:titleTextColor="#FFFFFFFF">
 
     </androidx.appcompat.widget.Toolbar>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/main_fragment_container"
+    <fragment
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tool_bar" />
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph" />
 
 </RelativeLayout>

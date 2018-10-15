@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 
 /**
  * An activity with a single page fragment.
@@ -46,4 +47,6 @@ abstract class SingleFragmentActivity : AppCompatActivity(), IOptionMenuActivity
             transaction.addToBackStack(null)
         transaction.commit()
     }
+
+    override fun onSupportNavigateUp(): Boolean = findNavController(R.id.nav_host_fragment).navigateUp()
 }

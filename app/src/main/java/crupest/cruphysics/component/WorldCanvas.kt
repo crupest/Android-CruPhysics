@@ -2,31 +2,26 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.PointF
-import android.text.Html
-import android.text.Layout
-import android.text.StaticLayout
-import android.text.TextPaint
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
+import androidx.core.graphics.withMatrix
+import androidx.core.graphics.withTranslation
+import androidx.lifecycle.*
+import crupest.cruphysics.component.delegate.ScaleMarkDelegate
+import crupest.cruphysics.component.delegate.WorldCanvasDelegate
+import crupest.cruphysics.physics.fromData
+import crupest.cruphysics.physics.toData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
-import crupest.cruphysics.utility.*
+import crupest.cruphysics.utility.distance
+import crupest.cruphysics.utility.invertedMatrix
+import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.MainViewModel
 import crupest.cruphysics.viewmodel.checkAndSetValue
-import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /**
  * Created by crupest on 2017/11/4.
@@ -36,60 +31,21 @@ import kotlin.math.roundToInt
 open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
 
-    companion object {
-        private const val scaleMarkWidth = 200
-
-
-        //Region: camera
-
-        private fun Matrix.toData(centerX: Float, centerY: Float): CameraData {
-            val copy = Matrix(this).also {
-                it.postTranslate(-centerX, -centerY)
-            }
-            val values = copy.getValues()
-            return CameraData(translation = Vector2Data(
-                    values[Matrix.MTRANS_X].toDouble(),
-                    values[Matrix.MTRANS_Y].toDouble()
-            ), scale = values[Matrix.MSCALE_X].toDouble())
-        }
-
-        private fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
-            matrix.reset()
-            matrix.preTranslate(
-                    this.translation.x.toFloat(),
-                    this.translation.y.toFloat()
-            )
-            matrix.preScale(
-                    this.scale.toFloat(),
-                    -this.scale.toFloat()
-            )
-            matrix.postTranslate(centerX, centerY)
-        }
-    }
-
     protected var mainViewModel: MainViewModel? = null
         private set
 
+    private val worldCanvasDelegate = WorldCanvasDelegate()
+    private val scaleMarkDelegate = ScaleMarkDelegate()
 
     private val viewMatrix: Matrix = Matrix()
 
-    private val textPaint = TextPaint().also {
-        it.color = Color.BLACK
-        it.isAntiAlias = true
-        it.textSize = 40.0f
-    }
-    private lateinit var scaleMarkText: StaticLayout
-    private var markLineLength: Float = 0.0f
-    private val markLinePaint = strokePaint(Color.BLACK, 3.0f)
-
-    private var created: AtomicBoolean = AtomicBoolean(false)
-
+    private var surfaceCreated: AtomicBoolean = AtomicBoolean(false)
     private var init = false
 
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
-                created.set(true)
+                surfaceCreated.set(true)
             }
 
             override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -97,7 +53,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder?) {
-                created.set(false)
+                surfaceCreated.set(false)
             }
         })
     }
@@ -111,20 +67,15 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     private fun setCamera(camera: CameraData) {
         camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
-        recalculateScaleMark()
         onCameraChangedCore(viewMatrix)
     }
 
     private fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
 
-    fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
-        it.postScale(scale, scale, this.width / 2.0f, this.height / 2.0f)
-        //align center
-        it.postTranslate((width - this.width) / 2.0f, (height - this.height) / 2.0f)
-    }
+    fun generateThumbnail(width: Int, height: Int, camera: CameraData): Bitmap = worldCanvasDelegate.generateThumbnail(width, height, camera)
 
     fun repaint() {
-        if (!created.get())
+        if (!surfaceCreated.get())
             return
 
         //!!! Do not use hardware acceleration at current stage because some drawing methods are
@@ -139,28 +90,12 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     protected open fun onPaint(canvas: Canvas) {
         canvas.drawColor(Color.WHITE)
-        canvas.save()
-        canvas.concat(viewMatrix)
-        drawWorldDelegate.draw(canvas)
-        canvas.restore()
-        drawScaleMark(canvas)
-    }
-
-    private fun drawScaleMark(canvas: Canvas) {
-        val markLeft = width - scaleMarkWidth - 50.0f
-        val markTop = 30.0f
-        val halfSideLength = 10.0f
-
-        canvas.save()
-        canvas.translate(markLeft, markTop)
-        scaleMarkText.draw(canvas)
-        canvas.translate(0.0f, scaleMarkText.height + halfSideLength + 5.0f)
-        val lineLeft = (scaleMarkWidth - markLineLength) / 2.0f
-        val lineRight = lineLeft + markLineLength
-        canvas.drawLine(lineLeft, 0.0f, lineRight, 0.0f, markLinePaint)
-        canvas.drawLine(lineLeft, -halfSideLength, lineLeft, halfSideLength, markLinePaint)
-        canvas.drawLine(lineRight, -halfSideLength, lineRight, halfSideLength, markLinePaint)
-        canvas.restore()
+        canvas.withMatrix(viewMatrix) {
+            worldCanvasDelegate.draw(canvas)
+        }
+        canvas.withTranslation(width - scaleMarkDelegate.expectWidth - 50.0f, 50.0f) {
+            scaleMarkDelegate.draw(canvas)
+        }
     }
 
     private val previousPointerPositionMap = mutableMapOf<Int, PointF>()
@@ -236,34 +171,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         onSizeChanged(w, h)
     }
 
-    private fun recalculateScaleMark() {
-        val exponent = floor(log10(viewToWorld(scaleMarkWidth.toFloat()))).roundToInt()
-        markLineLength = worldToView(10.0.pow(exponent))
-
-        val html = "10<sup><small>$exponent</small></sup>m"
-
-        @Suppress("DEPRECATION")
-        val textSource = if (android.os.Build.VERSION.SDK_INT >= 24)
-            Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
-        else
-            Html.fromHtml(html)
-
-        @Suppress("DEPRECATION")
-        scaleMarkText = if (android.os.Build.VERSION.SDK_INT < 23) StaticLayout(textSource,
-                textPaint,
-                scaleMarkWidth,
-                Layout.Alignment.ALIGN_CENTER,
-                1.0f,
-                0.0f,
-                false
-        ) else StaticLayout.Builder.obtain(textSource, 0, textSource.length, textPaint, scaleMarkWidth)
-                .setAlignment(Layout.Alignment.ALIGN_CENTER)
-                .setLineSpacing(0.0f, 1.0f)
-                .setIncludePad(false).build()
-    }
 
     private fun onViewMatrixChangedCore(matrixPostConcat: Matrix) {
-        recalculateScaleMark()
         onViewMatrixPostConcat(matrixPostConcat)
         onCameraChangedCore(viewMatrix)
     }
@@ -278,6 +187,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     private fun onCameraChangedCore(newMatrix: Matrix) {
         onCameraChanged(newMatrix)
+        scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
         mainViewModel?.camera?.checkAndSetValue(generateCameraData())
     }
 
@@ -299,8 +209,31 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
         mainViewModel = viewModel
 
+        viewModel.camera.value?.also {
+            setCamera(it)
+        }
+
         viewModel.camera.observe(lifecycleOwner, Observer {
             setCamera(it)
+            repaint()
         })
+
+        viewModel.registerBodyListChangedListener(lifecycleOwner) { eventArgs ->
+            eventArgs.addCollection?.forEach {
+                worldCanvasDelegate.registerBody(it)
+            }
+
+            eventArgs.removeCollection?.forEach {
+                worldCanvasDelegate.unregisterBody(it)
+            }
+
+            repaint()
+        }
+
+        viewModel.registerWorldStepListener(lifecycleOwner) {
+            repaint()
+        }
+
+        repaint()
     }
 }
