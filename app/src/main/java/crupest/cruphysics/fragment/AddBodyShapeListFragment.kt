@@ -17,7 +17,7 @@ import crupest.cruphysics.R
 import crupest.cruphysics.SingleFragmentActivity
 
 
-class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_menu) {
+class AddBodyShapeListFragment : OptionMenuFragment() {
 
     class AddBodyShapeListItemFragment : Fragment() {
 
@@ -64,6 +64,10 @@ class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_m
                 return fragment
             }
         }
+    }
+
+    init {
+        optionMenuRes = R.menu.next_menu
     }
 
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {

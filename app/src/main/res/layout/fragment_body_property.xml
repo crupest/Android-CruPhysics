@@ -18,8 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
-            android:text="@string/type"
-            android:theme="@style/PropertyLabelTextViewStyle" />
+            android:text="@string/type" />
 
         <Spinner
             android:id="@+id/body_type_spinner"
@@ -35,8 +34,7 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_density"
-            android:text="@string/density"
-            android:theme="@style/PropertyLabelTextViewStyle" />
+            android:text="@string/density" />
 
         <EditText
             android:id="@+id/edit_density"
@@ -54,8 +52,7 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_restitution"
-            android:text="@string/restitution"
-            android:theme="@style/PropertyLabelTextViewStyle" />
+            android:text="@string/restitution" />
 
         <EditText
             android:id="@+id/edit_restitution"
@@ -73,8 +70,7 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_friction"
-            android:text="@string/friction"
-            android:theme="@style/PropertyLabelTextViewStyle" />
+            android:text="@string/friction" />
 
         <EditText
             android:id="@+id/edit_friction"
@@ -92,8 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
-            android:text="@string/color"
-            android:theme="@style/PropertyLabelTextViewStyle" />
+            android:text="@string/color" />
 
         <View
             android:id="@+id/color_block"

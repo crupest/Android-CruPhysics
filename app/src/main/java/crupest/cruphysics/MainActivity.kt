@@ -20,7 +20,7 @@ import crupest.cruphysics.component.IMainWorldDelegate
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.data.world.WorldRepository
-import crupest.cruphysics.physics.view.WorldViewData
+import crupest.cruphysics.physics.view.WorldViewDelegate
 import crupest.cruphysics.serialization.data.BodyData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     private lateinit var world: World
     private var task: ScheduleTask? = null
 
-    private lateinit var worldViewData: WorldViewData
+    private lateinit var worldViewData: WorldViewDelegate
 
     //Region: properties data
     private lateinit var worldRepository: WorldRepository
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
 
     private fun createNewWorld() {
         world = World()
-        worldViewData = WorldViewData()
+        worldViewData = WorldViewDelegate()
         worldCanvas.drawWorldDelegate = worldViewData
         worldCanvas.resetCamera()
 
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity(), IMainWorldDelegate {
     private fun recoverFromData(worldData: WorldData, cameraData: CameraData) {
         world = worldData.fromData()
         worldCanvas.setCamera(cameraData)
-        worldViewData = WorldViewData(world.bodies)
+        worldViewData = WorldViewDelegate(world.bodies)
         worldCanvas.drawWorldDelegate = worldViewData
         worldCanvas.repaint()
     }

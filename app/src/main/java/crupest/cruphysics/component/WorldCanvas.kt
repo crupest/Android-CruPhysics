@@ -14,9 +14,14 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.*
+import crupest.cruphysics.viewmodel.MainViewModel
+import crupest.cruphysics.viewmodel.checkAndSetValue
+import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.floor
 import kotlin.math.log10
@@ -36,14 +41,6 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
 
         //Region: camera
-
-        private const val WORLD_VIEW_INIT_SCALE = 500.0f
-
-        private fun Matrix.resetAsCamera(centerX: Float, centerY: Float) {
-            this.reset()
-            this.postTranslate(centerX, centerY)
-            this.preScale(WORLD_VIEW_INIT_SCALE, -WORLD_VIEW_INIT_SCALE)
-        }
 
         private fun Matrix.toData(centerX: Float, centerY: Float): CameraData {
             val copy = Matrix(this).also {
@@ -70,7 +67,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         }
     }
 
-    lateinit var drawWorldDelegate: IDrawWorldDelegate
+    protected var mainViewModel: MainViewModel? = null
+        private set
+
 
     private val viewMatrix: Matrix = Matrix()
 
@@ -110,19 +109,13 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         Vector2Data(it.x.toDouble(), it.y.toDouble())
     }
 
-    fun setCamera(camera: CameraData) {
+    private fun setCamera(camera: CameraData) {
         camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         recalculateScaleMark()
-        onSetCamera()
+        onCameraChangedCore(viewMatrix)
     }
 
-    fun resetCamera() {
-        viewMatrix.resetAsCamera(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
-        recalculateScaleMark()
-        onSetCamera()
-    }
-
-    fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
+    private fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
 
     fun getThumbnailViewMatrix(width: Int, height: Int, scale: Float) = Matrix(viewMatrix).also {
         it.postScale(scale, scale, this.width / 2.0f, this.height / 2.0f)
@@ -198,7 +191,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                             }
                         }
                         viewMatrix.postConcat(postMatrix)
-                        onViewMatrixChangedInternal(postMatrix)
+                        onViewMatrixChangedCore(postMatrix)
                         repaint()
                     }
                     2 -> {
@@ -213,7 +206,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                             postScale(scale, scale, width / 2.0f, height / 2.0f)
                         }
                         viewMatrix.postConcat(matrix)
-                        onViewMatrixChangedInternal(matrix)
+                        onViewMatrixChangedCore(matrix)
                         repaint()
                     }
                 }
@@ -269,19 +262,26 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                 .setIncludePad(false).build()
     }
 
-    private fun onViewMatrixChangedInternal(matrix: Matrix) {
+    private fun onViewMatrixChangedCore(matrixPostConcat: Matrix) {
         recalculateScaleMark()
-        onViewMatrixChanged(matrix)
+        onViewMatrixPostConcat(matrixPostConcat)
+        onCameraChangedCore(viewMatrix)
     }
 
     /**
-     *  @param matrix the matrix post-concat
+     *  Called when user operates and a view matrix is post concat.
+     *  @param matrixPostConcat the matrix post-concat
      */
-    protected open fun onViewMatrixChanged(matrix: Matrix) {
+    protected open fun onViewMatrixPostConcat(matrixPostConcat: Matrix) {
 
     }
 
-    protected open fun onSetCamera() {
+    private fun onCameraChangedCore(newMatrix: Matrix) {
+        onCameraChanged(newMatrix)
+        mainViewModel?.camera?.checkAndSetValue(generateCameraData())
+    }
+
+    protected open fun onCameraChanged(newMatrix: Matrix) {
 
     }
 
@@ -291,5 +291,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     protected open fun onSizeChanged(width: Int, height: Int) {
 
+    }
+
+    fun bindViewModel(viewModel: MainViewModel, lifecycleOwner: LifecycleOwner) {
+        if (mainViewModel == null)
+            throw IllegalStateException("A view model is already bound.")
+
+        mainViewModel = viewModel
+
+        viewModel.camera.observe(lifecycleOwner, Observer {
+            setCamera(it)
+        })
     }
 }

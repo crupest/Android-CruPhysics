@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/world_canvas_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="crupest.cruphysics.fragment.AddCircleBodyCanvasFragment">
+
+    <crupest.cruphysics.component.AddCircleBodyWorldCanvas
+        android:id="@+id/world_canvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAutofill="noExcludeDescendants"
+        android:orientation="vertical"
+        tools:targetApi="O">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/center_x_value"
+                android:text="@string/center_x_label"
+                android:theme="@style/shapePropertyLabelStyle" />
+
+            <EditText
+                android:id="@+id/center_x_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal|numberSigned"
+                android:theme="@style/shapePropertyValueStyle"
+                tools:text="0.0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/center_y_value"
+                android:text="@string/center_y_label"
+                android:theme="@style/shapePropertyLabelStyle" />
+
+            <EditText
+                android:id="@+id/center_y_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal|numberSigned"
+                android:theme="@style/shapePropertyValueStyle"
+                tools:text="0.0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/radius_value"
+                android:text="@string/radius_label"
+                android:theme="@style/shapePropertyLabelStyle" />
+
+            <EditText
+                android:id="@+id/radius_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:theme="@style/shapePropertyValueStyle"
+                tools:text="0.0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/angle_value"
+                android:text="@string/angle_label"
+                android:theme="@style/shapePropertyLabelStyle" />
+
+            <EditText
+                android:id="@+id/angle_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal|numberSigned"
+                android:theme="@style/shapePropertyValueStyle"
+                tools:text="0.0" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

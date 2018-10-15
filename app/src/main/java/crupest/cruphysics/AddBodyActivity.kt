@@ -3,7 +3,6 @@ package crupest.cruphysics
 import android.content.Intent
 import android.os.Bundle
 import crupest.cruphysics.fragment.AddBodyShapeListFragment
-import crupest.cruphysics.physics.view.StaticWorldViewData
 import crupest.cruphysics.serialization.data.*
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson

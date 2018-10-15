@@ -7,11 +7,13 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
-import androidx.annotation.ColorInt
-import crupest.cruphysics.serialization.data.ShapeInfo
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.fillPaint
-import crupest.cruphysics.utility.hitTestSquare
 import crupest.cruphysics.utility.strokePaint
+import crupest.cruphysics.viewmodel.AddBodyViewModel
+import java.lang.IllegalStateException
 
 /**
  * Created by crupest on 2017/11/4.
@@ -30,11 +32,12 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         val radius = 15.0f
 
         fun hitTest(x: Float, y: Float, strict: Boolean = true): Boolean =
-                hitTestSquare(x, y, position.x, position.y, if (strict) radius else 40.0f)
+                distance(x, y, position.x, position.y) < if (strict) radius else 40.0f
     }
 
     protected abstract val controllers: Array<Controller>
 
+    private var viewModel: AddBodyViewModel? = null
 
     protected val bodyPaint: Paint = fillPaint(Color.BLUE)
     protected val bodyBorderPaint: Paint = strokePaint(Color.BLACK, 3.0f)
@@ -46,7 +49,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     private val draggedController: Controller
         get() = controllers[draggedControllerIndex]
 
-    private fun decideWhichController(x: Float, y: Float): Int {
+    private fun hitTestController(x: Float, y: Float): Int {
         val strictResult = controllers.indexOfFirst { it.hitTest(x, y) }
         return if (strictResult == -1)
             controllers.indexOfFirst { it.hitTest(x, y, false) }
@@ -64,7 +67,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event!!.action == MotionEvent.ACTION_DOWN) {
-            val whichController = decideWhichController(event.x, event.y)
+            val whichController = hitTestController(event.x, event.y)
             if (whichController != -1) {
                 draggedControllerIndex = whichController
                 return true
@@ -84,17 +87,15 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         return super.onTouchEvent(event)
     }
 
-    @get:ColorInt
-    @setparam:ColorInt
-    var color: Int
-        get() = bodyPaint.color
-        set(value) {
-            bodyPaint.color = value
+    fun bindViewModel(viewModel: AddBodyViewModel, lifecycleOwner: LifecycleOwner) {
+        if (this.viewModel != null)
+            throw IllegalStateException("A view model is already bound.")
+
+        this.viewModel = viewModel
+
+        viewModel.bodyColor.observe(lifecycleOwner, Observer {
+            bodyPaint.color = it
             repaint()
-        }
-
-    abstract fun generateShapeInfo(): ShapeInfo
-    abstract fun restoreShapeInfo(info: ShapeInfo)
-
-    abstract val propertyViewDelegates: List<IViewDelegate>
+        })
+    }
 }

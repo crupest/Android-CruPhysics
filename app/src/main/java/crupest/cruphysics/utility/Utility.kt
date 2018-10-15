@@ -29,25 +29,6 @@ fun showAlertDialog(context: Context, message: String): AlertDialog =
                     dialog.dismiss()
                 }.show()
 
-
-/**
- * @brief hit test whether a point is inside a square
- * @param x x of the test point
- * @param y y of the test point
- * @param centerX x of the center of the square
- * @param centerY y of the center of the square
- * @param radius the half length of the side of the square, default is <code>40.0f</code>
- * @return true if inside, otherwise false
- */
-fun hitTestSquare(x: Float, y: Float,
-                  centerX: Float, centerY: Float,
-                  radius: Float = 40.0f): Boolean {
-    return x > centerX - radius &&
-            x < centerX + radius &&
-            y > centerY - radius &&
-            y < centerY + radius
-}
-
 val random = Random()
 
 fun generateRandomColor(): Int = Color.rgb(

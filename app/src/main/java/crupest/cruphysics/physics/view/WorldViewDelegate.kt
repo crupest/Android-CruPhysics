@@ -4,14 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
-import crupest.cruphysics.component.IDrawWorldDelegate
 import crupest.cruphysics.physics.checkAndGetFixture
 import crupest.cruphysics.physics.cruUserData
 import crupest.cruphysics.physics.switchShape
 import crupest.cruphysics.physics.withTransform
 import org.dyn4j.dynamics.Body
 
-class WorldViewData() : IDrawWorldDelegate {
+class WorldViewDelegate() {
     constructor(bodies: Iterable<Body>) : this() {
         for (body in bodies)
             registerBody(body)
@@ -36,7 +35,7 @@ class WorldViewData() : IDrawWorldDelegate {
                 ?: throw IllegalArgumentException("The body hasn't been registered.")
     }
 
-    override fun draw(canvas: Canvas) {
+    fun draw(canvas: Canvas) {
         for ((body, bodyViewData) in bodyViewDataMap) {
             val shape = body.checkAndGetFixture().shape
             canvas.withTransform(body.transform) {
