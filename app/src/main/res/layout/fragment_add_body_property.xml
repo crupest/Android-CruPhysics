@@ -46,8 +46,7 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:gravity="center"
-            android:inputType="numberDecimal"
-            android:theme="@style/bodyPropertyLabelStyle" />
+            android:inputType="numberDecimal" />
 
         <TextView
             android:id="@+id/label_restitution"
