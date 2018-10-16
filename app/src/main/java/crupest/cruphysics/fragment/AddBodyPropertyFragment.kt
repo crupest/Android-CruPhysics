@@ -3,17 +3,18 @@ package crupest.cruphysics.fragment
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import crupest.cruphysics.AddBodyActivity
+import crupest.cruphysics.IOptionMenuActivity
+import crupest.cruphysics.Observable
 import crupest.cruphysics.R
 import crupest.cruphysics.serialization.data.BODY_TYPE_DYNAMIC
 import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
@@ -25,16 +26,22 @@ import me.priyesh.chroma.ChromaDialog
 import me.priyesh.chroma.ColorMode
 import me.priyesh.chroma.ColorSelectListener
 
-class BodyPropertyFragment : OptionMenuFragment() {
-
-    init {
-        optionMenuRes = R.menu.check_menu
-    }
+class AddBodyPropertyFragment : Fragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.check_menu)) {
+            if (it.itemId == R.id.ok) {
+                if (addBodyViewModel.density.value == 0.0)
+                    showAlertDialog(context!!, "Density can't be 0.")
+                else
+                    (parentFragment as AddBodyFragment).createBodyAndPopBack()
+                true
+            } else false
+        }
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
         addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
@@ -42,7 +49,7 @@ class BodyPropertyFragment : OptionMenuFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_body_property, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_body_property, container, false)
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
         val adapter = ArrayAdapter(context!!, R.layout.object_type_spinner_item, R.id.content,
@@ -113,30 +120,4 @@ class BodyPropertyFragment : OptionMenuFragment() {
 
         return rootView
     }
-
-    override fun onOptionMenuItemSelected(menuItem: MenuItem): Boolean =
-            if (menuItem.itemId == R.id.ok) {
-                //TODO!
-
-                val a = context as AddBodyActivity
-                val rootView = view!!
-
-                fun validateEditText(id: Int, propertyName: String, validate: (Double) -> Boolean) {
-                    val number = rootView.findViewById<EditText>(id).text.toString().toDoubleOrNull()
-                            ?: throw RuntimeException("${propertyName.capitalize()} is not a number.")
-                    if (!validate(number))
-                        throw RuntimeException("${propertyName.capitalize()} is not in valid range.")
-                }
-
-                try {
-                    validateEditText(R.id.edit_density, "density") { it > 0.0 }
-                    validateEditText(R.id.edit_restitution, "restitution") { it >= 0.0 }
-                    validateEditText(R.id.edit_friction, "friction") { it >= 0.0 }
-
-                    a.setResultAndFinish()
-                } catch (e: Exception) {
-                    showAlertDialog(context!!, e.message.orEmpty())
-                }
-                true
-            } else false
 }

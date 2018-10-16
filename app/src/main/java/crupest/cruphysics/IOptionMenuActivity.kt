@@ -1,7 +1,7 @@
 package crupest.cruphysics
 
 import android.view.MenuItem
-import androidx.annotation.MenuRes
+import androidx.lifecycle.LifecycleOwner
 
 /**
  * Created by crupest on 2017/11/30.
@@ -9,16 +9,5 @@ import androidx.annotation.MenuRes
  * Represents an activity with a settable option menu.
  */
 interface IOptionMenuActivity {
-    /**
-     * Get or set the resource id of the option menu.
-     */
-    @get:MenuRes
-    @setparam:MenuRes
-    var optionMenu: Int
-
-    /**
-     * Get or set the listener of the menu item selection.
-     * It is invoked when a option menu item is selected.
-     */
-    var optionMenuItemSelectedListener: ((MenuItem) -> Boolean)?
+    fun setOptionMenu(lifecycleOwner: LifecycleOwner, menuRes: Observable<Int>, listener: (MenuItem) -> Boolean)
 }

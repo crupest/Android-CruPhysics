@@ -24,7 +24,7 @@ fun EditText.bindDoubleLiveData(
     numberFormat.isDecimalSeparatorAlwaysShown = false
 
     if (init)
-        this.setText(numberFormat.format(liveData.value))
+        this.setText(numberFormat.format(liveData.value!!))
 
     liveData.observe(lifecycleOwner, Observer {
         this.setText(numberFormat.format(it))
@@ -47,7 +47,7 @@ fun EditText.bindDoubleLiveData(
                     error = true
                     return
                 } else {
-                    if ((this - (liveData.value ?: 0.0)).absoluteValue < 0.1.pow(numberPrecision))
+                    if ((this - (liveData.value!!)).absoluteValue < 0.1.pow(numberPrecision))
                         liveData.value = this
                     error = true
                 }
@@ -58,7 +58,7 @@ fun EditText.bindDoubleLiveData(
     if (correctAfterLoseFocus)
         this.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus && error) {
-                this.setText(numberFormat.format(liveData.value))
+                this.setText(numberFormat.format(liveData.value!!))
             }
         }
 }

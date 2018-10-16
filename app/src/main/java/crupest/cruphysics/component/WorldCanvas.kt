@@ -67,7 +67,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     private fun setCamera(camera: CameraData) {
         camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
-        onCameraChangedCore(viewMatrix)
+        onCameraChangedCore(viewMatrix, false)
     }
 
     private fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
@@ -185,10 +185,11 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     }
 
-    private fun onCameraChangedCore(newMatrix: Matrix) {
+    private fun onCameraChangedCore(newMatrix: Matrix, updateViewModel: Boolean = true) {
         onCameraChanged(newMatrix)
         scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
-        mainViewModel?.camera?.checkAndSetValue(generateCameraData())
+        if (updateViewModel)
+            mainViewModel?.camera?.checkAndSetValue(generateCameraData())
     }
 
     protected open fun onCameraChanged(newMatrix: Matrix) {
@@ -204,7 +205,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: MainViewModel, lifecycleOwner: LifecycleOwner) {
-        if (mainViewModel == null)
+        if (mainViewModel != null)
             throw IllegalStateException("A view model is already bound.")
 
         mainViewModel = viewModel

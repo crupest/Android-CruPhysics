@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="crupest.cruphysics.fragment.BodyPropertyFragment">
+    tools:context="crupest.cruphysics.fragment.AddBodyPropertyFragment">
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="2"
-        android:useDefaultMargins="true">
+        android:importantForAutofill="noExcludeDescendants"
+        android:useDefaultMargins="true"
+        tools:targetApi="O">
 
         <TextView
             android:id="@+id/body_type_label"
@@ -18,7 +19,8 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
-            android:text="@string/type" />
+            android:text="@string/type"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <Spinner
             android:id="@+id/body_type_spinner"
@@ -34,7 +36,8 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_density"
-            android:text="@string/density" />
+            android:text="@string/density"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <EditText
             android:id="@+id/edit_density"
@@ -43,7 +46,8 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:gravity="center"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <TextView
             android:id="@+id/label_restitution"
@@ -52,7 +56,8 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_restitution"
-            android:text="@string/restitution" />
+            android:text="@string/restitution"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <EditText
             android:id="@+id/edit_restitution"
@@ -70,7 +75,8 @@
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_friction"
-            android:text="@string/friction" />
+            android:text="@string/friction"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <EditText
             android:id="@+id/edit_friction"
@@ -88,7 +94,8 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_gravity="fill_horizontal"
-            android:text="@string/color" />
+            android:text="@string/color"
+            android:theme="@style/bodyPropertyLabelStyle" />
 
         <View
             android:id="@+id/color_block"

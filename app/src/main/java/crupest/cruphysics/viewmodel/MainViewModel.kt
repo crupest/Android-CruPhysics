@@ -45,7 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val recordList: LiveData<PagedList<WorldRecordEntity>> =
             LivePagedListBuilder(
                     worldRepository.dao.getRecords(),
-                    PagedList.Config.Builder().setEnablePlaceholders(false).build()
+                    PagedList.Config.Builder().setPageSize(20).setEnablePlaceholders(false).build()
             ).build()
 
     init {

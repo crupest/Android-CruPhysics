@@ -30,4 +30,9 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="bodyPropertyLabelStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">30sp</item>
+    </style>
 </resources>
