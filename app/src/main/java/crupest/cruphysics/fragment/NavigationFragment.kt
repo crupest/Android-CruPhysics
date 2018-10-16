@@ -19,4 +19,15 @@ open class NavigationFragment : OptionMenuFragment() {
             transaction.addToBackStack(null)
         transaction.commit()
     }
+
+    fun popBackStack(): Boolean {
+        val fragment = childFragmentManager.findFragmentById(R.id.navigation_fragment_root)
+        if (fragment is NavigationFragment && fragment.popBackStack())
+            return true
+        return childFragmentManager.popBackStackImmediate()
+    }
+
+    fun popBackStackNonRecursive(): Boolean {
+        return childFragmentManager.popBackStackImmediate()
+    }
 }

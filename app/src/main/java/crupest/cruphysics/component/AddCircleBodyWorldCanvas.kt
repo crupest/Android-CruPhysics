@@ -105,6 +105,15 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         viewCenterX = width.toFloat() / 2.0f
         viewCenterY = height.toFloat() / 2.0f
 
+        if (!viewModel!!.init)
+            viewModel!!.apply {
+                centerX.value = worldCenterX
+                centerY.value = worldCenterY
+                radius.value = worldRadius
+                angle.value = worldAngle
+                init = true
+            }
+
         updateControllerPosition()
         repaint()
     }
@@ -132,7 +141,7 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
             repaint()
         })
         viewModel.centerY.observe(lifecycleOwner, Observer {
-            worldCenterY= it
+            worldCenterY = it
             updateControllerPosition()
             repaint()
         })

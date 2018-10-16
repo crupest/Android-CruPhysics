@@ -8,7 +8,7 @@ import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toJson
 
 
-class AddBodyActivity : SingleFragmentActivity() {
+class AddBodyActivity : NavigationActivity() {
 
     companion object {
         const val ARG_WORLD = "WORLD"

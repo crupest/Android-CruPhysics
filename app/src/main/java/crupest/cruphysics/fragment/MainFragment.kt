@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import crupest.cruphysics.NavigationActivity
 import crupest.cruphysics.R
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.data.world.WorldRecordEntity
@@ -97,6 +99,11 @@ class MainFragment : OptionMenuFragment() {
             historyAdapter.submitList(it)
         })
         historyView.adapter = historyAdapter
+
+        rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
+            val activity = context as NavigationActivity
+            activity.navigateToFragment(AddBodyFragment())
+        }
 
         return rootView
     }

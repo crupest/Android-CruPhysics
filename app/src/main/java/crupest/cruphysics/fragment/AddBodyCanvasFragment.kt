@@ -5,6 +5,7 @@ import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.R
+import crupest.cruphysics.utility.showAlertDialog
 import crupest.cruphysics.viewmodel.AddBodyViewModel
 import crupest.cruphysics.viewmodel.MainViewModel
 
@@ -21,7 +22,7 @@ abstract class AddBodyCanvasFragment : OptionMenuFragment() {
     }
 
     protected lateinit var mainViewModel: MainViewModel
-    protected lateinit var canvasViewModel: AddBodyViewModel
+    protected lateinit var addBodyViewModel: AddBodyViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,13 +31,20 @@ abstract class AddBodyCanvasFragment : OptionMenuFragment() {
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
-        canvasViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
+        addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
     }
 
     override fun onOptionMenuItemSelected(menuItem: MenuItem): Boolean =
             if (menuItem.itemId == R.id.next) {
-                val parent = parentFragment as NavigationFragment
-                parent.navigateToFragment(BodyPropertyFragment())
+                val error = onValidate();
+                if (error != null) {
+                    showAlertDialog(context!!, error)
+                } else {
+                    val parent = parentFragment as NavigationFragment
+                    parent.navigateToFragment(BodyPropertyFragment())
+                }
                 true
             } else false
+
+    abstract fun onValidate(): String?
 }

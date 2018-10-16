@@ -122,6 +122,16 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         viewCenterX = width.toFloat() / 2.0f
         viewCenterY = height.toFloat() / 2.0f
 
+        if (!viewModel!!.init)
+            viewModel!!.apply {
+                centerX.value = worldCenterX
+                centerY.value = worldCenterY
+                width.value = worldWidth
+                height.value = worldHeight
+                angle.value = worldAngle
+                init = true
+            }
+
         updateControllerPosition()
         repaint()
     }
