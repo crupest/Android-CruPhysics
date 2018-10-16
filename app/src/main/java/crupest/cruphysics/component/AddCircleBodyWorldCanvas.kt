@@ -10,6 +10,7 @@ import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
+import crupest.cruphysics.viewmodel.setWhenNull
 import java.lang.IllegalStateException
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -105,14 +106,12 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         viewCenterX = width.toFloat() / 2.0f
         viewCenterY = height.toFloat() / 2.0f
 
-        if (!viewModel!!.init)
-            viewModel!!.apply {
-                centerX.value = worldCenterX
-                centerY.value = worldCenterY
-                radius.value = worldRadius
-                angle.value = worldAngle
-                init = true
-            }
+        viewModel!!.apply {
+            centerX.setWhenNull(worldCenterX)
+            centerY.setWhenNull(worldCenterY)
+            radius.setWhenNull(worldRadius)
+            angle.setWhenNull(worldAngle)
+        }
 
         updateControllerPosition()
         repaint()

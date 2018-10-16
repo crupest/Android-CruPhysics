@@ -11,6 +11,7 @@ import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.utility.toDegrees
 import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
+import crupest.cruphysics.viewmodel.setWhenNull
 import kotlin.math.*
 
 /**
@@ -122,15 +123,13 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         viewCenterX = width.toFloat() / 2.0f
         viewCenterY = height.toFloat() / 2.0f
 
-        if (!viewModel!!.init)
-            viewModel!!.apply {
-                centerX.value = worldCenterX
-                centerY.value = worldCenterY
-                width.value = worldWidth
-                height.value = worldHeight
-                angle.value = worldAngle
-                init = true
-            }
+        viewModel!!.apply {
+            centerX.setWhenNull(worldCenterX)
+            centerY.setWhenNull(worldCenterY)
+            width.setWhenNull(worldWidth)
+            height.setWhenNull(worldHeight)
+            angle.setWhenNull(worldAngle)
+        }
 
         updateControllerPosition()
         repaint()
