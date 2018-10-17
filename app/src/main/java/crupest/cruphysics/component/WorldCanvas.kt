@@ -24,7 +24,6 @@ import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.MainViewModel
 import crupest.cruphysics.viewmodel.checkAndSetValue
 import java.util.concurrent.atomic.AtomicBoolean
-import androidx.core.content.ContextCompat.getSystemService
 
 
 /**

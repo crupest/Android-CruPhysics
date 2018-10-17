@@ -11,7 +11,6 @@ import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
 import crupest.cruphysics.viewmodel.setWhenNull
-import java.lang.IllegalStateException
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin

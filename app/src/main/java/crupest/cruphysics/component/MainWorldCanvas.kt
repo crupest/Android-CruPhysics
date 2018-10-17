@@ -1,6 +1,5 @@
 package crupest.cruphysics.component
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.util.AttributeSet

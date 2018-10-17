@@ -13,7 +13,6 @@ import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.strokePaint
 import crupest.cruphysics.viewmodel.AddBodyViewModel
-import java.lang.IllegalStateException
 
 /**
  * Created by crupest on 2017/11/4.
