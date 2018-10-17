@@ -29,9 +29,11 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                 singleLongTouchDownPosition = PointF(event.x, event.y)
 
                 singleLongTouchTimerTask = setTimeout(0.5) {
-                    onSingleLongTouch(singleLongTouchDownPosition!!.x, singleLongTouchDownPosition!!.y)
-                    singleLongTouchTimerTask = null
-                    singleLongTouchDownPosition = null
+                    singleLongTouchDownPosition?.apply {
+                        onSingleLongTouch(x, y)
+                        singleLongTouchTimerTask = null
+                        singleLongTouchDownPosition = null
+                    }
                 }
                 super.onTouchEvent(event)
                 return true

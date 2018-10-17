@@ -1,12 +1,12 @@
 package crupest.cruphysics.data.world
 
-import androidx.paging.DataSource
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
 interface WorldRecordDao {
     @Query("SELECT * FROM world_record ORDER BY timestamp DESC")
-    fun getRecords(): DataSource.Factory<Int, WorldRecordEntity>
+    fun getRecords(): LiveData<List<WorldRecordEntity>>
 
     @Query("SELECT * FROM world_record ORDER BY timestamp DESC LIMIT 1")
     fun getLatestRecord(): WorldRecordEntity?

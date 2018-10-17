@@ -2,6 +2,7 @@ package crupest.cruphysics.data.world
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.lifecycle.LiveData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.toJson
@@ -18,13 +19,15 @@ class WorldRepository(
 
     private val workingExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
+    private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
 
     init {
         workingExecutor.submit {
             onFinishReadLatestListener.invoke(dao.getLatestRecord())
         }
     }
+
+    val records : LiveData<List<WorldRecordEntity>> = dao.getRecords()
 
     private fun compressThumbnail(thumbnail: Bitmap): ByteArray {
         return ByteArrayOutputStream().also {
@@ -44,9 +47,9 @@ class WorldRepository(
         }
     }
 
-    fun updateLatestRecordCamera(camera: CameraData, thumbnail: Bitmap) {
+    fun updateRecordCamera(record: WorldRecordEntity, camera: CameraData, thumbnail: Bitmap) {
         workingExecutor.submit {
-            dao.getLatestRecord()?.apply {
+            record.apply {
                 this.camera = camera.toJson()
                 this.thumbnail = compressThumbnail(thumbnail)
                 dao.update(this)

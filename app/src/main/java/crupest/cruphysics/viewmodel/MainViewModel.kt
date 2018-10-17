@@ -2,8 +2,6 @@ package crupest.cruphysics.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
 import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.component.delegate.WorldCanvasDelegate
 import crupest.cruphysics.data.world.WorldRecordEntity
@@ -39,18 +37,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
 
+    private var updateCamera = false
+
     val camera: MutableLiveData<CameraData> = MutableLiveData()
-    val recordList: LiveData<PagedList<WorldRecordEntity>> =
-            LivePagedListBuilder(
-                    worldRepository.dao.getRecords(),
-                    PagedList.Config.Builder().setPageSize(20).setEnablePlaceholders(false).build()
-            ).build()
+    val recordList: LiveData<List<WorldRecordEntity>> = worldRepository.records
 
     val drawWorldDelegate: LiveData<IDrawDelegate> = Transformations.map(drawWorldDelegateInternal) { it }
 
 
     init {
-        camera.value = CameraData()
         drawWorldDelegateInternal.value = WorldCanvasDelegate()
     }
 
@@ -59,22 +54,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun generateThumbnail() =
-            drawWorldDelegateInternal.value!!.generateThumbnail(1000, 500,
-                    camera.value!!.apply {
-                        CameraData(this.translation, this.scale * 0.5)
-                    }
-            )
+            drawWorldDelegateInternal.value!!.generateThumbnail(1000, 1000, camera.value!!.let {
+                it.copy(scale = it.scale * 0.6)
+            })
 
     private fun updateLatestRecordCamera(cameraData: CameraData) {
-        if (!world.isEmpty)
-            worldRepository.updateLatestRecordCamera(cameraData, generateThumbnail())
+        val list = recordList.value
+        if (updateCamera && !world.isEmpty && list != null && !list.isEmpty())
+            worldRepository.updateRecordCamera(list[0], cameraData, generateThumbnail())
     }
+
 
     fun recoverFromRecord(worldRecord: WorldRecordEntity) {
         world.removeAllBodiesAndJoints()
         worldRecord.world.fromJson<WorldData>().fromData(world)
         drawWorldDelegateInternal.value = WorldCanvasDelegate(world.bodies)
+        updateCamera = false
         camera.value = worldRecord.camera.fromJson()
+        updateCamera = true
     }
 
     private fun createCurrentRecord() {

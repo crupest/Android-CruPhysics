@@ -34,15 +34,6 @@ fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
 
 fun CameraData.fromData(centerX: Float, centerY: Float): Matrix {
     val matrix = Matrix()
-    matrix.preTranslate(
-            this.translation.x.toFloat(),
-            this.translation.y.toFloat()
-    )
-    matrix.preScale(
-            this.scale.toFloat(),
-            -this.scale.toFloat()
-    )
-    //align center
-    matrix.postTranslate(centerX, centerY)
+    this.fromData(matrix, centerX, centerY)
     return matrix
 }

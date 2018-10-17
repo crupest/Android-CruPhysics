@@ -162,13 +162,13 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
+        viewMatrix.postTranslate(-oldw.toFloat() / 2.0f, -oldh.toFloat() / 2.0f)
+        viewMatrix.postTranslate(w.toFloat() / 2.0f, h.toFloat() / 2.0f)
+
         if (!init) {
             onInitialize()
             init = true
         }
-
-        viewMatrix.postTranslate(-oldw.toFloat() / 2.0f, -oldh.toFloat() / 2.0f)
-        viewMatrix.postTranslate(w.toFloat() / 2.0f, h.toFloat() / 2.0f)
 
         onSizeChanged(w, h)
     }

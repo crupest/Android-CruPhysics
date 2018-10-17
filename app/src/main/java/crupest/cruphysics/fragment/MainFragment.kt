@@ -10,10 +10,7 @@ import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
 import crupest.cruphysics.Observable
 import crupest.cruphysics.component.MainWorldCanvas
+import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
 import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
@@ -40,15 +38,14 @@ class MainFragment : Fragment() {
 
 
     private inner class HistoryAdapter :
-            PagedListAdapter<WorldRecordEntity, HistoryAdapter.ViewHolder>(object :
-                    DiffUtil.ItemCallback<WorldRecordEntity>() {
-                override fun areItemsTheSame(old: WorldRecordEntity,
-                                             new: WorldRecordEntity): Boolean =
-                        old.id == new.id
+            ListLiveDataRecyclerAdapter<WorldRecordEntity, HistoryAdapter.ViewHolder>(
+                    this, mainViewModel.recordList, object : DiffTool<WorldRecordEntity> {
+                override fun areItemSame(oldOne: WorldRecordEntity,
+                                         newOne: WorldRecordEntity): Boolean =
+                        oldOne.id == newOne.id
 
-                override fun areContentsTheSame(old: WorldRecordEntity,
-                                                new: WorldRecordEntity): Boolean =
-                        old.timestamp == new.timestamp && old.world == new.world && old.camera == new.camera
+                override fun areContentSame(oldOne: WorldRecordEntity, newOne: WorldRecordEntity): Boolean =
+                        oldOne.timestamp == newOne.timestamp && oldOne.world == newOne.world && oldOne.camera == newOne.camera
             }) {
 
         inner class ViewHolder(val rootView: CardView) : RecyclerView.ViewHolder(rootView) {
@@ -62,7 +59,7 @@ class MainFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val record = getItem(position)!!
+            val record = getItem(position)
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(Date(record.timestamp))
@@ -116,9 +113,6 @@ class MainFragment : Fragment() {
                     historyView.layoutManager = LinearLayoutManager(
                             context, RecyclerView.VERTICAL, false)
                     val historyAdapter = HistoryAdapter()
-                    mainViewModel.recordList.observe(this, Observer {
-                        historyAdapter.submitList(it)
-                    })
                     historyView.adapter = historyAdapter
                 }
             }
