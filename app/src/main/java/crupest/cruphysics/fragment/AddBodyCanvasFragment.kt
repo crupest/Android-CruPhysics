@@ -26,7 +26,7 @@ abstract class AddBodyCanvasFragment : Fragment() {
 
         (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.next_menu)) {
             if (it.itemId == R.id.next) {
-                val error = onValidate();
+                val error = onValidate()
                 if (error != null) {
                     showAlertDialog(context!!, error)
                 } else {

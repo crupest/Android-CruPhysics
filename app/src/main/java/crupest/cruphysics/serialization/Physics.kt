@@ -29,23 +29,17 @@ fun String.deserializeAsMassType(): MassType = when (this) {
 
 fun Shape.toData(): ShapeData = this.switchShapeR(
         {
-            ShapeData(
-                    type = SHAPE_TYPE_CIRCLE,
-                    circleData = CircleData(
-                            center = it.center.toData(),
-                            radius = it.radius
-                    )
-            )
+            CircleData(
+                    center = it.center.toData(),
+                    radius = it.radius
+            ).createShapeData()
         },
         {
-            ShapeData(
-                    type = SHAPE_TYPE_RECTANGLE,
-                    rectangleData = RectangleData(
-                            center = it.center.toData(),
-                            width = it.width,
-                            height = it.height
-                    )
-            )
+            RectangleData(
+                    center = it.center.toData(),
+                    width = it.width,
+                    height = it.height
+            ).createShapeData()
         }
 )
 
