@@ -29,14 +29,14 @@
                 android:layout_height="wrap_content"
                 android:labelFor="@id/center_x_value"
                 android:text="@string/center_x_label"
-                android:theme="@style/shapePropertyLabelStyle" />
+                style="@style/shapePropertyLabelStyle" />
 
             <EditText
                 android:id="@+id/center_x_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned"
-                android:theme="@style/shapePropertyValueStyle"
+                style="@style/shapePropertyValueStyle"
                 tools:text="0.0" />
 
         </LinearLayout>
@@ -51,14 +51,14 @@
                 android:layout_height="wrap_content"
                 android:labelFor="@id/center_y_value"
                 android:text="@string/center_y_label"
-                android:theme="@style/shapePropertyLabelStyle" />
+                style="@style/shapePropertyLabelStyle" />
 
             <EditText
                 android:id="@+id/center_y_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned"
-                android:theme="@style/shapePropertyValueStyle"
+                style="@style/shapePropertyValueStyle"
                 tools:text="0.0" />
 
         </LinearLayout>
@@ -73,14 +73,14 @@
                 android:layout_height="wrap_content"
                 android:labelFor="@id/width_value"
                 android:text="@string/width_label"
-                android:theme="@style/shapePropertyLabelStyle" />
+                style="@style/shapePropertyLabelStyle" />
 
             <EditText
                 android:id="@+id/width_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:theme="@style/shapePropertyValueStyle"
+                style="@style/shapePropertyValueStyle"
                 tools:text="0.0" />
 
         </LinearLayout>
@@ -95,14 +95,14 @@
                 android:layout_height="wrap_content"
                 android:labelFor="@id/height_value"
                 android:text="@string/height_label"
-                android:theme="@style/shapePropertyLabelStyle" />
+                style="@style/shapePropertyLabelStyle" />
 
             <EditText
                 android:id="@+id/height_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:theme="@style/shapePropertyValueStyle"
+                style="@style/shapePropertyValueStyle"
                 tools:text="0.0" />
 
         </LinearLayout>
@@ -117,14 +117,14 @@
                 android:layout_height="wrap_content"
                 android:labelFor="@id/angle_value"
                 android:text="@string/angle_label"
-                android:theme="@style/shapePropertyLabelStyle" />
+                style="@style/shapePropertyLabelStyle" />
 
             <EditText
                 android:id="@+id/angle_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned"
-                android:theme="@style/shapePropertyValueStyle"
+                style="@style/shapePropertyValueStyle"
                 tools:text="0.0" />
 
         </LinearLayout>

@@ -1,12 +1,11 @@
 package crupest.cruphysics.viewmodel
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import crupest.cruphysics.CollectionChangedEventArgs
+import crupest.cruphysics.component.delegate.IDrawDelegate
+import crupest.cruphysics.component.delegate.WorldCanvasDelegate
 import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.serialization.data.CameraData
@@ -28,18 +27,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (record != null)
                     postOnMainThread {
                         recoverFromRecord(record)
+                        camera.observeForever(this::updateLatestRecordCamera)
                     }
             }
 
+    private var task: ScheduleTask? = null
 
     private val world: World = World()
-    private val bodyListChangedListeners: MutableList<(CollectionChangedEventArgs<Body>) -> Unit> = mutableListOf()
     private val worldStepListeners: MutableList<() -> Unit> = mutableListOf()
     private val worldStateChangedListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
 
-    private var thumbnailDelegateList: MutableList<((Int, Int, CameraData) -> Bitmap)> = mutableListOf()
-
-    private var task: ScheduleTask? = null
+    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
 
     val camera: MutableLiveData<CameraData> = MutableLiveData()
     val recordList: LiveData<PagedList<WorldRecordEntity>> =
@@ -48,40 +46,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     PagedList.Config.Builder().setPageSize(20).setEnablePlaceholders(false).build()
             ).build()
 
+    val drawWorldDelegate: LiveData<IDrawDelegate> = Transformations.map(drawWorldDelegateInternal) { it }
+
+
     init {
         camera.value = CameraData()
-        camera.observeForever {
-            if (!world.isEmpty)
-                generateThumbnail().apply {
-                    if (this == null)
-                        Log.d("MainViewModel", "Failed to generate thumbnail of world when camera is changed.")
-                    else
-                        worldRepository.updateLatestRecordCamera(it, this)
-                }
-        }
+        drawWorldDelegateInternal.value = WorldCanvasDelegate()
     }
 
     override fun onCleared() {
         worldRepository.closeAndWait()
     }
 
-    private fun generateThumbnail() = thumbnailDelegateList.lastOrNull()?.invoke(1000, 500, camera.value!!.apply {
-        CameraData(this.translation, this.scale * 0.5)
-    })
+    private fun generateThumbnail() =
+            drawWorldDelegateInternal.value!!.generateThumbnail(1000, 500,
+                    camera.value!!.apply {
+                        CameraData(this.translation, this.scale * 0.5)
+                    }
+            )
+
+    private fun updateLatestRecordCamera(cameraData: CameraData) {
+        if (!world.isEmpty)
+            worldRepository.updateLatestRecordCamera(cameraData, generateThumbnail())
+    }
 
     fun recoverFromRecord(worldRecord: WorldRecordEntity) {
-        val previousBodyList = world.bodies.toList()
         world.removeAllBodiesAndJoints()
-        bodyListChangedListeners.forEach {
-            it.invoke(CollectionChangedEventArgs(null, previousBodyList))
-        }
         worldRecord.world.fromJson<WorldData>().fromData(world)
+        drawWorldDelegateInternal.value = WorldCanvasDelegate(world.bodies)
         camera.value = worldRecord.camera.fromJson()
     }
 
     private fun createCurrentRecord() {
-        worldRepository.addRecord(world.toData(), camera.value!!, generateThumbnail()
-                ?: throw IllegalStateException("Failed to generate thumbnail of world when create new record."))
+        worldRepository.addRecord(world.toData(), camera.value!!, generateThumbnail())
     }
 
     fun updateTimestamp(worldRecord: WorldRecordEntity) {
@@ -102,10 +99,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun registerBodyListChangedListener(lifecycleOwner: LifecycleOwner, listener: (CollectionChangedEventArgs<Body>) -> Unit) {
-        registerListener(lifecycleOwner, bodyListChangedListeners, listener)
-    }
-
     fun registerWorldStepListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
         registerListener(lifecycleOwner, worldStepListeners, listener)
     }
@@ -114,27 +107,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         registerListener(lifecycleOwner, worldStateChangedListeners, listener)
     }
 
-    fun registerThumbnailDelegate(lifecycleOwner: LifecycleOwner, delegate: (Int, Int, CameraData) -> Bitmap) {
-        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-            fun addListener() {
-                thumbnailDelegateList.add(delegate)
-            }
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-            fun removeListener() {
-                thumbnailDelegateList.remove(delegate)
-            }
-        })
-    }
-
     private fun createNewWorld() {
         pauseWorld()
-        val previousBodyList = world.bodies.toList()
         world.removeAllBodiesAndJoints()
-        bodyListChangedListeners.forEach {
-            it.invoke(CollectionChangedEventArgs(null, previousBodyList))
-        }
+        drawWorldDelegateInternal.value = WorldCanvasDelegate()
     }
 
     fun createNewWorldAndResetCamera() {
@@ -169,17 +145,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addBody(body: Body) {
         world.addBody(body)
-        bodyListChangedListeners.forEach {
-            it.invoke(CollectionChangedEventArgs(listOf(body), null))
-        }
+        drawWorldDelegateInternal.value!!.registerBody(body)
         createCurrentRecord()
     }
 
     fun removeBody(body: Body) {
         world.removeBody(body)
-        bodyListChangedListeners.forEach {
-            it.invoke(CollectionChangedEventArgs(null, listOf(body)))
-        }
+        drawWorldDelegateInternal.value!!.unregisterBody(body)
         createCurrentRecord()
     }
 

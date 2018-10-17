@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
         val lifecycleObserver = object : LifecycleObserver {
             @OnLifecycleEvent(Lifecycle.Event.ON_START)
             fun setMenu() {
-                if (optionMenuRes != 0)
+                if (optionMenuItemSelectedListener != null)
                     throw IllegalStateException("Option menu is already set.")
 
                 optionMenuRes = menuRes.value
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
 
             @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
             fun unsetDrawer() {
-                if (optionMenuRes == 0)
+                if (optionMenuItemSelectedListener == null)
                     throw IllegalStateException("Option menu is not set yet.")
 
                 optionMenuRes = 0

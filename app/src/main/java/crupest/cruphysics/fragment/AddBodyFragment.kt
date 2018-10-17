@@ -3,6 +3,7 @@ package crupest.cruphysics.fragment
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
+import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.popParentBackStack
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
@@ -59,6 +60,8 @@ class AddBodyFragment : NavigationFragment() {
         body.addFixture(shape, viewModel.density.value!!, viewModel.friction.value!!, viewModel.restitution.value!!)
         body.translate(position)
         body.rotateAboutCenter(angle)
+
+        body.userData = BodyUserData(body, viewModel.bodyColor.value!!)
 
         mainViewModel.addBody(body)
 

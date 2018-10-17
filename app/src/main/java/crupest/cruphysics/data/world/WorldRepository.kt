@@ -50,7 +50,6 @@ class WorldRepository(
                 this.camera = camera.toJson()
                 this.thumbnail = compressThumbnail(thumbnail)
                 dao.update(this)
-
             }
         }
     }

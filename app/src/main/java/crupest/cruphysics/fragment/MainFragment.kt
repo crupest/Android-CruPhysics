@@ -132,8 +132,6 @@ class MainFragment : Fragment() {
 
         worldCanvas.bindViewModel(mainViewModel, this)
 
-        mainViewModel.registerThumbnailDelegate(this.viewLifecycleOwner, worldCanvas::generateThumbnail)
-
         rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
             val activity = context as MainActivity
             activity.navigateToFragment(AddBodyFragment())

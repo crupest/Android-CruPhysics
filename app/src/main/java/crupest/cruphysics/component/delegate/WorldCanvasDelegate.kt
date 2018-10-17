@@ -9,7 +9,12 @@ import crupest.cruphysics.physics.view.BodyViewData
 import crupest.cruphysics.serialization.data.CameraData
 import org.dyn4j.dynamics.Body
 
-class WorldCanvasDelegate {
+class WorldCanvasDelegate(): IDrawDelegate {
+    constructor(bodies: List<Body>) : this() {
+        bodies.forEach {
+            registerBody(it)
+        }
+    }
 
     private val bodyViewDataMap: MutableMap<Body, BodyViewData> = mutableMapOf()
 
@@ -30,7 +35,7 @@ class WorldCanvasDelegate {
                 ?: throw IllegalArgumentException("The body hasn't been registered.")
     }
 
-    fun draw(canvas: Canvas) {
+    override fun draw(canvas: Canvas) {
         for ((body, bodyViewData) in bodyViewDataMap) {
             val shape = body.checkAndGetFixture().shape
             canvas.withTransform(body.transform) {

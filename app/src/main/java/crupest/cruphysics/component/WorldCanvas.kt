@@ -2,16 +2,20 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.core.graphics.withMatrix
 import androidx.core.graphics.withTranslation
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.component.delegate.ScaleMarkDelegate
-import crupest.cruphysics.component.delegate.WorldCanvasDelegate
 import crupest.cruphysics.physics.fromData
 import crupest.cruphysics.physics.toData
 import crupest.cruphysics.serialization.data.CameraData
@@ -34,7 +38,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     protected var mainViewModel: MainViewModel? = null
         private set
 
-    private val worldCanvasDelegate = WorldCanvasDelegate()
+    private lateinit var worldCanvasDelegate: IDrawDelegate
     private val scaleMarkDelegate = ScaleMarkDelegate()
 
     private val viewMatrix: Matrix = Matrix()
@@ -71,8 +75,6 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     private fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
-
-    fun generateThumbnail(width: Int, height: Int, camera: CameraData): Bitmap = worldCanvasDelegate.generateThumbnail(width, height, camera)
 
     fun repaint() {
         if (!surfaceCreated.get())
@@ -214,22 +216,19 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             setCamera(it)
         }
 
+        viewModel.drawWorldDelegate.value?.also {
+            worldCanvasDelegate = it
+        }
+
         viewModel.camera.observe(lifecycleOwner, Observer {
             setCamera(it)
             repaint()
         })
 
-        viewModel.registerBodyListChangedListener(lifecycleOwner) { eventArgs ->
-            eventArgs.addCollection?.forEach {
-                worldCanvasDelegate.registerBody(it)
-            }
-
-            eventArgs.removeCollection?.forEach {
-                worldCanvasDelegate.unregisterBody(it)
-            }
-
+        viewModel.drawWorldDelegate.observe(lifecycleOwner, Observer {
+            worldCanvasDelegate = it
             repaint()
-        }
+        })
 
         viewModel.registerWorldStepListener(lifecycleOwner) {
             repaint()
