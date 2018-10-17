@@ -44,11 +44,11 @@ class MainFragment : Fragment() {
                     DiffUtil.ItemCallback<WorldRecordEntity>() {
                 override fun areItemsTheSame(old: WorldRecordEntity,
                                              new: WorldRecordEntity): Boolean =
-                        old.timestamp == new.timestamp
+                        old.id == new.id
 
                 override fun areContentsTheSame(old: WorldRecordEntity,
                                                 new: WorldRecordEntity): Boolean =
-                        old.world == new.world && old.camera == new.camera
+                        old.timestamp == new.timestamp && old.world == new.world && old.camera == new.camera
             }) {
 
         inner class ViewHolder(val rootView: CardView) : RecyclerView.ViewHolder(rootView) {
