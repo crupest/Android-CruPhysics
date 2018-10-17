@@ -4,12 +4,15 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PointF
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
+
 
 fun distance(x1: Float, y1: Float, x2: Float, y2: Float): Float =
         sqrt((x1 - x2).pow(2) + (y1 - y2).pow(2))
@@ -29,25 +32,6 @@ fun showAlertDialog(context: Context, message: String): AlertDialog =
                     dialog.dismiss()
                 }.show()
 
-
-/**
- * @brief hit test whether a point is inside a square
- * @param x x of the test point
- * @param y y of the test point
- * @param centerX x of the center of the square
- * @param centerY y of the center of the square
- * @param radius the half length of the side of the square, default is <code>40.0f</code>
- * @return true if inside, otherwise false
- */
-fun hitTestSquare(x: Float, y: Float,
-                  centerX: Float, centerY: Float,
-                  radius: Float = 40.0f): Boolean {
-    return x > centerX - radius &&
-            x < centerX + radius &&
-            y > centerY - radius &&
-            y < centerY + radius
-}
-
 val random = Random()
 
 fun generateRandomColor(): Int = Color.rgb(
@@ -62,4 +46,8 @@ fun nowLong(): Long = Date().time
 
 fun View.removeSelf() {
     (this.parent as ViewGroup).removeView(this)
+}
+
+fun postOnMainThread(action: () -> Unit) {
+    Handler(Looper.getMainLooper()).post(action)
 }

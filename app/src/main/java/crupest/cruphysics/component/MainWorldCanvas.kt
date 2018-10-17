@@ -1,12 +1,11 @@
 package crupest.cruphysics.component
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import crupest.cruphysics.utility.ScheduleTask
-import crupest.cruphysics.utility.hitTestSquare
+import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.setTimeout
 
 /**
@@ -18,11 +17,8 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
     private var singleLongTouchTimerTask: ScheduleTask? = null
     private var singleLongTouchDownPosition: PointF? = null
 
-    lateinit var mainWorldDelegate: IMainWorldDelegate
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-
+    override fun onTouchEventOverride(event: MotionEvent?): Boolean {
         when (event!!.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
 
@@ -30,23 +26,25 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                 singleLongTouchDownPosition = PointF(event.x, event.y)
 
                 singleLongTouchTimerTask = setTimeout(0.5) {
-                    onSingleLongTouch(singleLongTouchDownPosition!!.x, singleLongTouchDownPosition!!.y)
-                    singleLongTouchTimerTask = null
-                    singleLongTouchDownPosition = null
+                    singleLongTouchDownPosition?.apply {
+                        onSingleLongTouch(x, y)
+                        singleLongTouchTimerTask = null
+                        singleLongTouchDownPosition = null
+                    }
                 }
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val position = singleLongTouchDownPosition
                 if (position != null) {
-                    if (!hitTestSquare(event.x, event.y, position.x, position.y, 40.0f)) {
+                    if (distance(event.x, event.y, position.x, position.y) > 40.0f) {
                         singleLongTouchTimerTask?.cancel()
                         singleLongTouchTimerTask = null
                         singleLongTouchDownPosition = null
                     }
                 }
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
             MotionEvent.ACTION_POINTER_DOWN,
@@ -57,26 +55,31 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                 singleLongTouchTimerTask?.cancel()
                 singleLongTouchTimerTask = null
                 singleLongTouchDownPosition = null
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
         }
 
-        return super.onTouchEvent(event)
+        return super.onTouchEventOverride(event)
     }
+
 
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {
-            val body = viewToWorld(x, y).let {
-                mainWorldDelegate.bodyHitTest(it.x, it.y)
-            }
+            val viewModel = mainViewModel
 
-            if (body != null) {
-                CruPopupMenu(context, listOf(
-                        "Delete" to {
-                            mainWorldDelegate.removeBody(body)
-                        }
-                )).show(this, x.toInt(), y.toInt())
+            if (viewModel != null) {
+                val body = viewToWorld(x, y).let {
+                    viewModel.bodyHitTest(it.x, it.y)
+                }
+
+                if (body != null) {
+                    CruPopupMenu(context, listOf(
+                            "Delete" to {
+                                viewModel.removeBody(body)
+                            }
+                    )).show(this, x.toInt(), y.toInt())
+                }
             }
         }
     }

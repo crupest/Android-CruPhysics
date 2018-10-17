@@ -1,8 +1,8 @@
 package crupest.cruphysics.data.world
 
-import android.arch.persistence.room.Database
-import android.arch.persistence.room.Room
-import android.arch.persistence.room.RoomDatabase
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import android.content.Context
 
 @Database(entities = [WorldRecordEntity::class], version = 1, exportSchema = false)

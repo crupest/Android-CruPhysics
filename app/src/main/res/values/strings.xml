@@ -23,4 +23,11 @@
 
     <string name="history">history</string>
     <string name="world">world</string>
+
+    <string name="center_x_label">CenterX:</string>
+    <string name="center_y_label">CenterY:</string>
+    <string name="radius_label">Radius:</string>
+    <string name="angle_label">Angle:</string>
+    <string name="width_label">Width:</string>
+    <string name="height_label">Height:</string>
 </resources>

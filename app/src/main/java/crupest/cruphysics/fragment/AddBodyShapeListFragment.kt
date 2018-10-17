@@ -2,22 +2,25 @@ package crupest.cruphysics.fragment
 
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.ViewModelProviders
+import androidx.viewpager.widget.ViewPager
+import crupest.cruphysics.IOptionMenuActivity
+import crupest.cruphysics.Observable
 import crupest.cruphysics.R
-import crupest.cruphysics.SingleFragmentActivity
+import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
+import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
+import crupest.cruphysics.viewmodel.AddBodyViewModel
 
 
-class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_menu) {
+class AddBodyShapeListFragment : Fragment() {
 
     class AddBodyShapeListItemFragment : Fragment() {
 
@@ -76,6 +79,33 @@ class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_m
     }
 
 
+    private lateinit var addBodyViewModel: AddBodyViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.next_menu)) {
+            if (it.itemId == R.id.next) {
+                val parent = parentFragment as NavigationFragment
+                val pager = view!!.findViewById<ViewPager>(R.id.pager)
+                when (pager.currentItem) {
+                    0 -> {
+                        addBodyViewModel.shapeType.value = SHAPE_TYPE_CIRCLE
+                        parent.navigateToFragment(AddCircleBodyCanvasFragment())
+                    }
+                    1 ->{
+                        addBodyViewModel.shapeType.value = SHAPE_TYPE_RECTANGLE
+                        parent.navigateToFragment(AddRectangleBodyCanvasFragment())
+                    }
+                }
+                true
+            } else false
+        }
+
+        val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
+        addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list, container, false)
@@ -87,15 +117,4 @@ class AddBodyShapeListFragment : OptionMenuFragment(menuResource = R.menu.next_m
 
         return rootView
     }
-
-    override fun onOptionMenuItemSelected(menuItem: MenuItem): Boolean =
-            if (menuItem.itemId == R.id.next) {
-                val a = context as SingleFragmentActivity
-                val pager = view!!.findViewById<ViewPager>(R.id.pager)
-                when (pager.currentItem) {
-                    0 -> a.navigateToFragment(AddCircleBodyCanvasFragment())
-                    1 -> a.navigateToFragment(AddRectangleBodyCanvasFragment())
-                }
-                true
-            } else false
 }

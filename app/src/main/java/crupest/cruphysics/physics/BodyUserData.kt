@@ -1,6 +1,6 @@
 package crupest.cruphysics.physics
 
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import org.dyn4j.dynamics.Body
 
 /**
@@ -8,5 +8,4 @@ import org.dyn4j.dynamics.Body
  * Class [BodyUserData].
  */
 
-class BodyUserData(val body: Body,
-                   @param:ColorInt @field:ColorInt @get:ColorInt @setparam:ColorInt var color: Int)
+class BodyUserData(val body: Body, @ColorInt var color: Int)

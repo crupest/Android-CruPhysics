@@ -1,6 +1,6 @@
 package crupest.cruphysics.serialization.data
 
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -18,58 +18,60 @@ const val BODY_TYPE_DYNAMIC = "dynamic"
 
 @JsonClass(generateAdapter = true)
 data class Vector2Data(
-        var x: Double = 0.0,
-        var y: Double = 0.0
+        val x: Double = 0.0,
+        val y: Double = 0.0
 )
 
 @JsonClass(generateAdapter = true)
 data class CircleData(
-        var center: Vector2Data = Vector2Data(),
-        var radius: Double = 0.0
+        val center: Vector2Data = Vector2Data(),
+        val radius: Double = 0.0
 )
 
 @JsonClass(generateAdapter = true)
 data class RectangleData(
-        var center: Vector2Data = Vector2Data(),
-        var width: Double = 0.0,
-        var height: Double = 0.0
+        val center: Vector2Data = Vector2Data(),
+        val width: Double = 0.0,
+        val height: Double = 0.0
 )
 
 
 @JsonClass(generateAdapter = true)
 data class ShapeData(
-        var type: String = "",
-        @field:Json(name = "circle_data") var circleData: CircleData? = null,
-        @field:Json(name = "rectangle_data") var rectangleData: RectangleData? = null
+        val type: String = "",
+        @field:Json(name = "circle_data") val circleData: CircleData? = null,
+        @field:Json(name = "rectangle_data") val rectangleData: RectangleData? = null
 )
 
 @JsonClass(generateAdapter = true)
-data class BodyAppearanceData(@ColorInt var color: Int = 0x000000)
+data class BodyAppearanceData(@ColorInt val color: Int = 0x000000)
 
 @JsonClass(generateAdapter = true)
 data class BodyData(
-        var shape: ShapeData = ShapeData(),
-        var type: String = BODY_TYPE_STATIC,
-        var position: Vector2Data = Vector2Data(),
-        var rotation: Double = 0.0,
-        @field:Json(name = "linear_velocity") var linearVelocity: Vector2Data = Vector2Data(),
-        @field:Json(name = "angular_velocity") var angularVelocity: Double = 0.0,
-        var density: Double = 0.0,
-        var friction: Double = 0.0,
-        var restitution: Double = 0.0,
-        var appearance: BodyAppearanceData = BodyAppearanceData()
+        val shape: ShapeData = ShapeData(),
+        val type: String = BODY_TYPE_STATIC,
+        val position: Vector2Data = Vector2Data(),
+        val rotation: Double = 0.0,
+        @field:Json(name = "linear_velocity") val linearVelocity: Vector2Data = Vector2Data(),
+        @field:Json(name = "angular_velocity") val angularVelocity: Double = 0.0,
+        val density: Double = 0.0,
+        val friction: Double = 0.0,
+        val restitution: Double = 0.0,
+        val appearance: BodyAppearanceData = BodyAppearanceData()
 )
 
 @JsonClass(generateAdapter = true)
 data class WorldData(
-        var bodies: List<BodyData> = listOf(),
-        var gravity: Vector2Data = Vector2Data()
+        val bodies: List<BodyData> = listOf(),
+        val gravity: Vector2Data = Vector2Data()
 )
+
+private const val WORLD_VIEW_INIT_SCALE = 500.0
 
 @JsonClass(generateAdapter = true)
 data class CameraData(
-        var translation: Vector2Data = Vector2Data(),
-        var scale: Double = 0.0
+        val translation: Vector2Data = Vector2Data(),
+        val scale: Double = WORLD_VIEW_INIT_SCALE
 )
 
 //helper functions
