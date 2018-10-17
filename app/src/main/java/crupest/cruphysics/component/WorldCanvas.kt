@@ -2,14 +2,12 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.PointF
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.inputmethod.InputMethodManager
 import androidx.core.graphics.withMatrix
 import androidx.core.graphics.withTranslation
 import androidx.lifecycle.LifecycleOwner
@@ -26,6 +24,8 @@ import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.MainViewModel
 import crupest.cruphysics.viewmodel.checkAndSetValue
 import java.util.concurrent.atomic.AtomicBoolean
+import androidx.core.content.ContextCompat.getSystemService
+
 
 /**
  * Created by crupest on 2017/11/4.
@@ -47,6 +47,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     private var init = false
 
     init {
+        isFocusableInTouchMode = true
+
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
                 surfaceCreated.set(true)
@@ -103,8 +105,17 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     private val previousPointerPositionMap = mutableMapOf<Int, PointF>()
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    final override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event!!.actionMasked == MotionEvent.ACTION_DOWN)
+            requestFocus()
 
+        if (onTouchEventOverride(event))
+            return true
+
+        return super.onTouchEvent(event)
+    }
+
+    open fun onTouchEventOverride(event: MotionEvent?): Boolean {
         fun recordPointerPosition(index: Int) {
             previousPointerPositionMap.getOrPut(event!!.getPointerId(index)) {
                 PointF()
@@ -156,7 +167,15 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                 return true
             }
         }
-        return super.onTouchEvent(event)
+        return false
+    }
+
+    override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect)
+        if (gainFocus) {
+            val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(windowToken, 0)
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

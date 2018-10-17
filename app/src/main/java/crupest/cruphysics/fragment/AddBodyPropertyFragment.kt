@@ -18,7 +18,7 @@ import crupest.cruphysics.Observable
 import crupest.cruphysics.R
 import crupest.cruphysics.serialization.data.BODY_TYPE_DYNAMIC
 import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
-import crupest.cruphysics.utility.bindDoubleLiveData
+import crupest.cruphysics.viewmodel.bindDoubleLiveData
 import crupest.cruphysics.utility.showAlertDialog
 import crupest.cruphysics.viewmodel.AddBodyViewModel
 import crupest.cruphysics.viewmodel.checkAndSetValue

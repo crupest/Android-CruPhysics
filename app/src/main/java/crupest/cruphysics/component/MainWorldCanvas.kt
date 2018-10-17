@@ -19,9 +19,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
     private var singleLongTouchDownPosition: PointF? = null
 
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-
+    override fun onTouchEventOverride(event: MotionEvent?): Boolean {
         when (event!!.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
 
@@ -35,7 +33,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                         singleLongTouchDownPosition = null
                     }
                 }
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -47,7 +45,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                         singleLongTouchDownPosition = null
                     }
                 }
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
             MotionEvent.ACTION_POINTER_DOWN,
@@ -58,13 +56,14 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                 singleLongTouchTimerTask?.cancel()
                 singleLongTouchTimerTask = null
                 singleLongTouchDownPosition = null
-                super.onTouchEvent(event)
+                super.onTouchEventOverride(event)
                 return true
             }
         }
 
-        return super.onTouchEvent(event)
+        return super.onTouchEventOverride(event)
     }
+
 
     private fun onSingleLongTouch(x: Float, y: Float) {
         post {

@@ -65,7 +65,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         }
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    override fun onTouchEventOverride(event: MotionEvent?): Boolean {
         if (event!!.action == MotionEvent.ACTION_DOWN) {
             val whichController = hitTestController(event.x, event.y)
             if (whichController != -1) {
@@ -84,7 +84,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
                 return true
             }
         }
-        return super.onTouchEvent(event)
+        return super.onTouchEventOverride(event)
     }
 
     fun bindViewModel(viewModel: AddBodyViewModel, lifecycleOwner: LifecycleOwner) {

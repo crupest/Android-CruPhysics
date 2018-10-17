@@ -1,4 +1,4 @@
-package crupest.cruphysics.utility
+package crupest.cruphysics.viewmodel
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -27,7 +27,8 @@ fun EditText.bindDoubleLiveData(
         this.setText(numberFormat.format(liveData.value ?: 0.0))
 
     liveData.observe(lifecycleOwner, Observer {
-        this.setText(numberFormat.format(it))
+        if (!this.hasFocus())
+            this.setText(numberFormat.format(it))
     })
 
     var error = false

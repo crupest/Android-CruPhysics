@@ -9,7 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.R
 import crupest.cruphysics.component.AddCircleBodyWorldCanvas
-import crupest.cruphysics.utility.bindDoubleLiveData
+import crupest.cruphysics.viewmodel.bindDoubleLiveData
 import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
 
 class AddCircleBodyCanvasFragment : AddBodyCanvasFragment() {
