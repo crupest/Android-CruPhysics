@@ -24,7 +24,9 @@ fun EditText.bindDoubleLiveData(
     numberFormat.isDecimalSeparatorAlwaysShown = false
 
     if (init)
-        this.setText(numberFormat.format(liveData.value ?: 0.0))
+        post {
+            this.setText(numberFormat.format(liveData.value ?: 0.0))
+        }
 
     liveData.observe(lifecycleOwner, Observer {
         if (!this.hasFocus())
