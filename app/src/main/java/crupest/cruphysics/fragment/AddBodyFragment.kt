@@ -7,6 +7,7 @@ import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.popParentBackStack
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
+import crupest.cruphysics.serialization.deserializeAsMassType
 import crupest.cruphysics.viewmodel.AddBodyViewModel
 import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
 import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
@@ -60,6 +61,8 @@ class AddBodyFragment : NavigationFragment() {
         body.addFixture(shape, viewModel.density.value!!, viewModel.friction.value!!, viewModel.restitution.value!!)
         body.translate(position)
         body.rotateAboutCenter(angle)
+
+        body.setMass(viewModel.bodyType.value!!.deserializeAsMassType())
 
         body.userData = BodyUserData(body, viewModel.bodyColor.value!!)
 

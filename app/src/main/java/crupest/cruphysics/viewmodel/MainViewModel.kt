@@ -134,7 +134,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 task!!.cancel()
                 task = null
                 worldStateChangedListeners.forEach {
-                    it.invoke(true)
+                    it.invoke(false)
                 }
                 createCurrentRecord()
                 true
