@@ -10,6 +10,7 @@ import androidx.cardview.widget.CardView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +23,7 @@ import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
 import crupest.cruphysics.data.world.WorldRecordEntity
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 
 class MainFragment : Fragment() {
 
@@ -102,9 +103,9 @@ class MainFragment : Fragment() {
         val activity = context as FragmentActivity
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
 
-        mainViewModel.registerWorldStateChangedListener(this) {
+        mainViewModel.worldState.observe(this, Observer {
             optionMenuRes.value = if (it) R.menu.main_menu_play else R.menu.main_menu_pause
-        }
+        })
 
         (context as IDrawerActivity).setDrawerFragment(this) {
             DrawerFragment().apply {

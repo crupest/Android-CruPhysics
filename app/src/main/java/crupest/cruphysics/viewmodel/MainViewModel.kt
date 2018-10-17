@@ -33,9 +33,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val world: World = World()
     private val worldStepListeners: MutableList<() -> Unit> = mutableListOf()
-    private val worldStateChangedListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
 
     private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
+    private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
 
     private var updateCamera = false
 
@@ -43,10 +43,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val recordList: LiveData<List<WorldRecordEntity>> = worldRepository.records
 
     val drawWorldDelegate: LiveData<IDrawDelegate> = Transformations.map(drawWorldDelegateInternal) { it }
-
+    val worldState: LiveData<Boolean>
+        get() = worldStateInternal
 
     init {
         drawWorldDelegateInternal.value = WorldCanvasDelegate()
+        worldStateInternal.value = false
     }
 
     override fun onCleared() {
@@ -100,10 +102,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         registerListener(lifecycleOwner, worldStepListeners, listener)
     }
 
-    fun registerWorldStateChangedListener(lifecycleOwner: LifecycleOwner, listener: (Boolean) -> Unit) {
-        registerListener(lifecycleOwner, worldStateChangedListeners, listener)
-    }
-
     private fun createNewWorld() {
         pauseWorld()
         world.removeAllBodiesAndJoints()
@@ -123,9 +121,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         it.invoke()
                     }
                 }
-                worldStateChangedListeners.forEach {
-                    it.invoke(true)
-                }
+                worldStateInternal.value = true
                 true
             } else false
 
@@ -133,9 +129,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (task != null) {
                 task!!.cancel()
                 task = null
-                worldStateChangedListeners.forEach {
-                    it.invoke(false)
-                }
+                worldStateInternal.value = false
                 createCurrentRecord()
                 true
             } else false
