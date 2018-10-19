@@ -152,7 +152,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateLatestRecordCamera(cameraData: CameraData) {
         cameraInternal.value = cameraData
-        if (world.isEmpty)
+        if (!world.isEmpty)
             currentCameraUpdateFlow?.onNext(
                     WorldRepository.UpdateCameraInfo(cameraData, generateThumbnail())
             )
