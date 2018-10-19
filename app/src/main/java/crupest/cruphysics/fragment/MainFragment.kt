@@ -15,12 +15,14 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
 import crupest.cruphysics.Observable
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
 import crupest.cruphysics.data.world.WorldRecordEntity
+import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
 import java.util.Date
@@ -64,9 +66,12 @@ class MainFragment : Fragment() {
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
                     .format(Date(record.timestamp))
-            Glide.with(this@MainFragment).load(record.thumbnail).into(holder.worldImageView)
+            Glide.with(this@MainFragment).load(record.thumbnail).apply(RequestOptions.fitCenterTransform()).into(holder.worldImageView)
             holder.rootView.setOnClickListener {
                 mainViewModel.recoverFromRecordAndUpdateTimestamp(record)
+                postOnMainThread {
+                    historyView.scrollToPosition(0)
+                }
                 drawer.closeDrawers()
             }
         }
@@ -75,6 +80,7 @@ class MainFragment : Fragment() {
     private lateinit var mainViewModel: MainViewModel
 
     private lateinit var drawer: DrawerLayout
+    private lateinit var historyView: RecyclerView
 
     private val optionMenuRes = Observable(R.menu.main_menu_pause)
 
@@ -110,6 +116,7 @@ class MainFragment : Fragment() {
             DrawerFragment().apply {
                 createViewCallback = { rootView ->
                     val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
+                    this@MainFragment.historyView = historyView
                     historyView.layoutManager = LinearLayoutManager(
                             context, RecyclerView.VERTICAL, false)
                     val historyAdapter = HistoryAdapter()
