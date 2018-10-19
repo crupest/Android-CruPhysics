@@ -152,9 +152,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateLatestRecordCamera(cameraData: CameraData) {
         cameraInternal.value = cameraData
-        currentCameraUpdateFlow?.onNext(
-                WorldRepository.UpdateCameraInfo(cameraData, generateThumbnail())
-        )
+        if (world.isEmpty)
+            currentCameraUpdateFlow?.onNext(
+                    WorldRepository.UpdateCameraInfo(cameraData, generateThumbnail())
+            )
     }
 
     fun recoverFromRecordAndUpdateTimestamp(record: WorldRecordEntity) {
