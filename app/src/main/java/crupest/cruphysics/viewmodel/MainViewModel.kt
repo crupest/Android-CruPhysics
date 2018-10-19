@@ -12,11 +12,14 @@ import crupest.cruphysics.serialization.fromData
 import crupest.cruphysics.serialization.fromJson
 import crupest.cruphysics.serialization.toData
 import crupest.cruphysics.utility.ScheduleTask
+import crupest.cruphysics.utility.nowLong
 import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.utility.setInterval
+import io.reactivex.Flowable
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
+import org.reactivestreams.Subscriber
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -30,6 +33,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var task: ScheduleTask? = null
 
+
+    private var currentCameraUpdateFlow: Subscriber<WorldRepository.UpdateCameraInfo>? = null
+
     private val world: World = World()
     private val worldStepListeners: MutableList<() -> Unit> = mutableListOf()
 
@@ -38,7 +44,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
 
 
-    val recordList: LiveData<List<WorldRecordEntity>> = worldRepository.records
+    val recordList: Flowable<List<WorldRecordEntity>> = worldRepository.records
 
     val camera: LiveData<CameraData>
         get() = cameraInternal
@@ -60,26 +66,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(scale = it.scale * 0.6)
             })
 
-    fun recoverFromRecord(worldRecord: WorldRecordEntity) {
+    private fun createNewCameraUpdateFlow(timestamp: Long) {
+        currentCameraUpdateFlow = worldRepository.createNewCameraUpdateFlow(timestamp)
+    }
+
+    private fun recoverFrom(worldData: String, cameraData: String) {
         world.removeAllBodiesAndJoints()
-        worldRecord.world.fromJson<WorldData>().fromData(world)
+        worldData.fromJson<WorldData>().fromData(world)
         drawWorldDelegateInternal.value = WorldCanvasDelegate(world.bodies)
-        cameraInternal.value = worldRecord.camera.fromJson()
+        cameraInternal.value = cameraData.fromJson<CameraData>()
     }
 
-    private fun createCurrentRecord() {
-        worldRepository.addRecord(world.toData(), camera.value!!, generateThumbnail())
+    private fun recoverFromRecord(record: WorldRecordEntity) {
+        recoverFrom(record.world, record.camera)
+        createNewCameraUpdateFlow(record.timestamp)
     }
 
-    fun updateLatestRecordCamera(cameraData: CameraData) {
-        cameraInternal.value = cameraData
-        val list = recordList.value
-        if (!world.isEmpty && list != null && !list.isEmpty())
-            worldRepository.updateRecordCamera(list[0], cameraData, generateThumbnail())
-    }
-
-    fun updateTimestamp(worldRecord: WorldRecordEntity) {
-        worldRepository.updateTimestamp(worldRecord)
+    private fun createNewRecordFromCurrent() {
+        val timestamp = nowLong()
+        worldRepository.createRecord(timestamp, world.toData(), camera.value!!, generateThumbnail())
+        createNewCameraUpdateFlow(timestamp)
     }
 
     private fun <T : Function<Unit>> registerListener(lifecycleOwner: LifecycleOwner, listeners: MutableList<T>, listener: T) {
@@ -128,20 +134,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 task!!.cancel()
                 task = null
                 worldStateInternal.value = false
-                createCurrentRecord()
+                createNewRecordFromCurrent()
                 true
             } else false
 
     fun addBody(body: Body) {
         world.addBody(body)
         drawWorldDelegateInternal.value!!.registerBody(body)
-        createCurrentRecord()
+        createNewRecordFromCurrent()
     }
 
     fun removeBody(body: Body) {
         world.removeBody(body)
         drawWorldDelegateInternal.value!!.unregisterBody(body)
-        createCurrentRecord()
+        createNewRecordFromCurrent()
+    }
+
+    fun updateLatestRecordCamera(cameraData: CameraData) {
+        cameraInternal.value = cameraData
+        currentCameraUpdateFlow?.onNext(
+                WorldRepository.UpdateCameraInfo(cameraData, generateThumbnail())
+        )
+    }
+
+    fun recoverFromRecordAndUpdateTimestamp(record: WorldRecordEntity) {
+        recoverFrom(record.world, record.camera)
+        val timestamp = nowLong()
+        worldRepository.updateTimestamp(record.id, timestamp)
+        createNewCameraUpdateFlow(timestamp)
     }
 
     fun bodyHitTest(x: Double, y: Double): Body? =

@@ -66,8 +66,7 @@ class MainFragment : Fragment() {
                     .format(Date(record.timestamp))
             Glide.with(this@MainFragment).load(record.thumbnail).into(holder.worldImageView)
             holder.rootView.setOnClickListener {
-                mainViewModel.recoverFromRecord(record)
-                mainViewModel.updateTimestamp(record)
+                mainViewModel.recoverFromRecordAndUpdateTimestamp(record)
                 drawer.closeDrawers()
             }
         }

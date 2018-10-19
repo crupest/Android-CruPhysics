@@ -2,11 +2,14 @@ package crupest.cruphysics.data.world
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.lifecycle.LiveData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.toJson
-import crupest.cruphysics.utility.nowLong
+import io.reactivex.Flowable
+import io.reactivex.Scheduler
+import io.reactivex.processors.PublishProcessor
+import io.reactivex.schedulers.Schedulers
+import org.reactivestreams.Subscriber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -16,10 +19,15 @@ class WorldRepository(
         context: Context,
         onFinishReadLatestListener: ((WorldRecordEntity?) -> Unit)
 ) {
+    data class UpdateCameraInfo(val cameraData: CameraData, val thumbnail: Bitmap)
 
     private val workingExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
+    private var currentCameraUpdateFlow: PublishProcessor<UpdateCameraInfo>? = null
+
     private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
+
+    private val scheduler: Scheduler = Schedulers.from(workingExecutor)
 
     init {
         workingExecutor.submit {
@@ -27,7 +35,7 @@ class WorldRepository(
         }
     }
 
-    val records : LiveData<List<WorldRecordEntity>> = dao.getRecords()
+    val records: Flowable<List<WorldRecordEntity>> = dao.getRecords()
 
     private fun compressThumbnail(thumbnail: Bitmap): ByteArray {
         return ByteArrayOutputStream().also {
@@ -35,10 +43,14 @@ class WorldRepository(
         }.toByteArray()
     }
 
-    fun addRecord(worldData: WorldData, cameraData: CameraData, thumbnailBitmap: Bitmap) {
+    private fun updateCameraByTimestamp(timestamp: Long, camera: CameraData, thumbnail: Bitmap) {
+        dao.updateCameraByTimestamp(timestamp, camera.toJson(), compressThumbnail(thumbnail))
+    }
+
+    fun createRecord(timestamp: Long, worldData: WorldData, cameraData: CameraData, thumbnailBitmap: Bitmap) {
         workingExecutor.submit {
             val record = WorldRecordEntity().apply {
-                timestamp = nowLong()
+                this.timestamp = timestamp
                 world = worldData.toJson()
                 camera = cameraData.toJson()
                 thumbnail = compressThumbnail(thumbnailBitmap)
@@ -47,21 +59,25 @@ class WorldRepository(
         }
     }
 
-    fun updateRecordCamera(record: WorldRecordEntity, camera: CameraData, thumbnail: Bitmap) {
+    fun updateTimestamp(id: Long, timestamp: Long) {
         workingExecutor.submit {
-            record.apply {
-                this.camera = camera.toJson()
-                this.thumbnail = compressThumbnail(thumbnail)
-                dao.update(this)
-            }
+            dao.updateTimestamp(id, timestamp)
         }
     }
 
-    fun updateTimestamp(record: WorldRecordEntity) {
-        workingExecutor.submit {
-            record.timestamp = nowLong()
-            dao.update(record)
+    fun createNewCameraUpdateFlow(timestamp: Long): Subscriber<UpdateCameraInfo> {
+        currentCameraUpdateFlow?.apply {
+            onComplete()
         }
+        currentCameraUpdateFlow = PublishProcessor.create<UpdateCameraInfo>().apply {
+            this.onBackpressureLatest()
+                    .observeOn(scheduler)
+                    .subscribe {
+                        updateCameraByTimestamp(timestamp, it.cameraData, it.thumbnail)
+                    }
+        }
+
+        return currentCameraUpdateFlow!!
     }
 
     fun closeAndWait() {
