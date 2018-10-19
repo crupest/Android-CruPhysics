@@ -63,7 +63,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun generateThumbnail() =
             drawWorldDelegateInternal.value!!.generateThumbnail(1000, 1000, camera.value!!.let {
-                it.copy(scale = it.scale * 0.6)
+                it.copy(scale = it.scale * 0.5)
             })
 
     private fun createNewCameraUpdateFlow(timestamp: Long) {
@@ -152,7 +152,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateLatestRecordCamera(cameraData: CameraData) {
         cameraInternal.value = cameraData
-        if (world.isEmpty)
+        if (!world.isEmpty)
             currentCameraUpdateFlow?.onNext(
                     WorldRepository.UpdateCameraInfo(cameraData, generateThumbnail())
             )
