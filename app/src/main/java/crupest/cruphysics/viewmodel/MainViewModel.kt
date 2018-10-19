@@ -25,7 +25,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (record != null)
                     postOnMainThread {
                         recoverFromRecord(record)
-                        camera.observeForever(this::updateLatestRecordCamera)
                     }
             }
 
@@ -35,13 +34,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val worldStepListeners: MutableList<() -> Unit> = mutableListOf()
 
     private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
+    private val cameraInternal: MutableLiveData<CameraData> = MutableLiveData()
     private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
 
-    private var updateCamera = false
 
-    val camera: MutableLiveData<CameraData> = MutableLiveData()
     val recordList: LiveData<List<WorldRecordEntity>> = worldRepository.records
 
+    val camera: LiveData<CameraData>
+        get() = cameraInternal
     val drawWorldDelegate: LiveData<IDrawDelegate> = Transformations.map(drawWorldDelegateInternal) { it }
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
@@ -60,24 +60,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(scale = it.scale * 0.6)
             })
 
-    private fun updateLatestRecordCamera(cameraData: CameraData) {
-        val list = recordList.value
-        if (updateCamera && !world.isEmpty && list != null && !list.isEmpty())
-            worldRepository.updateRecordCamera(list[0], cameraData, generateThumbnail())
-    }
-
-
     fun recoverFromRecord(worldRecord: WorldRecordEntity) {
         world.removeAllBodiesAndJoints()
         worldRecord.world.fromJson<WorldData>().fromData(world)
         drawWorldDelegateInternal.value = WorldCanvasDelegate(world.bodies)
-        updateCamera = false
-        camera.value = worldRecord.camera.fromJson()
-        updateCamera = true
+        cameraInternal.value = worldRecord.camera.fromJson()
     }
 
     private fun createCurrentRecord() {
         worldRepository.addRecord(world.toData(), camera.value!!, generateThumbnail())
+    }
+
+    fun updateLatestRecordCamera(cameraData: CameraData) {
+        cameraInternal.value = cameraData
+        val list = recordList.value
+        if (!world.isEmpty && list != null && !list.isEmpty())
+            worldRepository.updateRecordCamera(list[0], cameraData, generateThumbnail())
     }
 
     fun updateTimestamp(worldRecord: WorldRecordEntity) {
@@ -110,7 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun createNewWorldAndResetCamera() {
         createNewWorld()
-        camera.value = CameraData()
+        cameraInternal.value = CameraData()
     }
 
     fun runWorld(): Boolean =

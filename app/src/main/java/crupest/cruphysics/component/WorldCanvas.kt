@@ -22,7 +22,6 @@ import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.MainViewModel
-import crupest.cruphysics.viewmodel.checkAndSetValue
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -209,7 +208,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         onCameraChanged(newMatrix)
         scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
         if (updateViewModel)
-            mainViewModel?.camera?.checkAndSetValue(generateCameraData())
+            mainViewModel?.updateLatestRecordCamera(generateCameraData())
     }
 
     protected open fun onCameraChanged(newMatrix: Matrix) {
