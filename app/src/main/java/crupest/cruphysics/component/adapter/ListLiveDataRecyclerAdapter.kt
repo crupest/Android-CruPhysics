@@ -1,13 +1,14 @@
 package crupest.cruphysics.component.adapter
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 
 abstract class ListLiveDataRecyclerAdapter<TElement, ViewHolder>(
         lifecycleOwner: LifecycleOwner,
-        listLiveData: LiveData<List<TElement>>,
+        listFlow: Flowable<List<TElement>>,
         private val diffTool: DiffTool<TElement>
 ) : RecyclerView.Adapter<ViewHolder>() where ViewHolder : RecyclerView.ViewHolder {
 
@@ -16,21 +17,28 @@ abstract class ListLiveDataRecyclerAdapter<TElement, ViewHolder>(
         fun areContentSame(oldOne: TElement, newOne: TElement): Boolean
     }
 
-    private var currentList: List<TElement>
+    private var disposable: Disposable? = null
+    private var currentList: List<TElement> = listOf()
 
     init {
-        val original = listLiveData.value
-        if (original == null)
-            currentList = listOf()
-        else {
-            currentList = original
-            compareAndNotify(listOf(), original)
-        }
+        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun subscribe() {
+                disposable = listFlow
+                        .onBackpressureLatest()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            val oldList = currentList
+                            currentList = it
+                            compareAndNotify(oldList, it)
+                        }
+            }
 
-        listLiveData.observe(lifecycleOwner, Observer {
-            val oldList = currentList
-            currentList = it
-            compareAndNotify(oldList, it)
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun unsubscribe() {
+                disposable?.dispose()
+            }
+
         })
     }
 
@@ -77,7 +85,7 @@ abstract class ListLiveDataRecyclerAdapter<TElement, ViewHolder>(
                     }
                 else
                     forEachRemain {
-                        if (it.oldPosition in newPosition..(oldPosition-1))
+                        if (it.oldPosition in newPosition..(oldPosition - 1))
                             it.oldPosition++
                     }
             }

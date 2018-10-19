@@ -14,6 +14,7 @@ import crupest.cruphysics.serialization.toData
 import crupest.cruphysics.utility.ScheduleTask
 import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.utility.setInterval
+import io.reactivex.Flowable
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
@@ -38,7 +39,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
 
 
-    val recordList: LiveData<List<WorldRecordEntity>> = worldRepository.records
+    val recordList: Flowable<List<WorldRecordEntity>> = worldRepository.records
 
     val camera: LiveData<CameraData>
         get() = cameraInternal

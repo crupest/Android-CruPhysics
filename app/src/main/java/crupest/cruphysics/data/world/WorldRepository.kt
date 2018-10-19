@@ -2,11 +2,11 @@ package crupest.cruphysics.data.world
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.lifecycle.LiveData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.nowLong
+import io.reactivex.Flowable
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -27,7 +27,7 @@ class WorldRepository(
         }
     }
 
-    val records : LiveData<List<WorldRecordEntity>> = dao.getRecords()
+    val records : Flowable<List<WorldRecordEntity>> = dao.getRecords()
 
     private fun compressThumbnail(thumbnail: Bitmap): ByteArray {
         return ByteArrayOutputStream().also {
