@@ -14,6 +14,9 @@ interface WorldRecordDao {
     @Insert
     fun insert(vararg record: WorldRecordEntity)
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun update(vararg record: WorldRecordEntity)
+    @Query("UPDATE world_record SET timestamp = :timestamp WHERE id = :id")
+    fun updateTimestamp(id: Long, timestamp: Long)
+
+    @Query("UPDATE world_record SET camera = :camera, thumbnail = :thumbnail WHERE timestamp = :timestamp")
+    fun updateCameraByTimestamp(timestamp: Long, camera: String, thumbnail: ByteArray)
 }
