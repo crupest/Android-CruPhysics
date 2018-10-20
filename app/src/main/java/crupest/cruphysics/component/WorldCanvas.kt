@@ -229,11 +229,11 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
         mainViewModel = viewModel
 
-        viewModel.camera.value?.also {
+        viewModel.camera.value!!.also {
             setCamera(it)
         }
 
-        viewModel.drawWorldDelegate.value?.also {
+        viewModel.drawWorldDelegate.value!!.also {
             worldCanvasDelegate = it
         }
 

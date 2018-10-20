@@ -48,11 +48,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val camera: LiveData<CameraData>
         get() = cameraInternal
-    val drawWorldDelegate: LiveData<IDrawDelegate> = Transformations.map(drawWorldDelegateInternal) { it }
+    val drawWorldDelegate: LiveData<WorldCanvasDelegate>
+        get() = drawWorldDelegateInternal
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
 
     init {
+        cameraInternal.value = CameraData()
         drawWorldDelegateInternal.value = WorldCanvasDelegate()
         worldStateInternal.value = false
     }
