@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
+import crupest.cruphysics.data.world.entity.WorldRecordEntity
 
 @Database(entities = [WorldRecordEntity::class], version = 1, exportSchema = false)
 abstract class WorldDatabase : RoomDatabase() {
