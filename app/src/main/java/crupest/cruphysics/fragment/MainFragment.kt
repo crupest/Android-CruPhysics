@@ -14,18 +14,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
-import crupest.cruphysics.Observable
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
-import crupest.cruphysics.data.world.WorldRecordEntity
+import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
 import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
-import java.util.Date
 
 class MainFragment : Fragment() {
 
@@ -41,14 +37,14 @@ class MainFragment : Fragment() {
 
 
     private inner class HistoryAdapter :
-            ListLiveDataRecyclerAdapter<WorldRecordEntity, HistoryAdapter.ViewHolder>(
-                    this, mainViewModel.recordList, object : DiffTool<WorldRecordEntity> {
-                override fun areItemSame(oldOne: WorldRecordEntity,
-                                         newOne: WorldRecordEntity): Boolean =
+            ListLiveDataRecyclerAdapter<ProcessedWorldRecordForHistory, HistoryAdapter.ViewHolder>(
+                    this, mainViewModel.recordListForHistoryFlow, object : DiffTool<ProcessedWorldRecordForHistory> {
+                override fun areItemSame(oldOne: ProcessedWorldRecordForHistory,
+                                         newOne: ProcessedWorldRecordForHistory): Boolean =
                         oldOne.id == newOne.id
 
-                override fun areContentSame(oldOne: WorldRecordEntity, newOne: WorldRecordEntity): Boolean =
-                        oldOne.timestamp == newOne.timestamp && oldOne.world == newOne.world && oldOne.camera == newOne.camera
+                override fun areContentSame(oldOne: ProcessedWorldRecordForHistory, newOne: ProcessedWorldRecordForHistory): Boolean =
+                        oldOne.timestamp == newOne.timestamp
             }) {
 
         inner class ViewHolder(val rootView: CardView) : RecyclerView.ViewHolder(rootView) {
@@ -65,8 +61,8 @@ class MainFragment : Fragment() {
             val record = getItem(position)
             holder.timeTextView.text = DateFormat
                     .getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                    .format(Date(record.timestamp))
-            Glide.with(this@MainFragment).load(record.thumbnail).apply(RequestOptions.fitCenterTransform()).into(holder.worldImageView)
+                    .format(record.timestamp)
+            holder.worldImageView.setImageBitmap(record.thumbnail)
             holder.rootView.setOnClickListener {
                 mainViewModel.recoverFromRecordAndUpdateTimestamp(record)
                 postOnMainThread {
