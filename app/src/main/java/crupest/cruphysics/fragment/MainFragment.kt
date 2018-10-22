@@ -65,9 +65,6 @@ class MainFragment : Fragment() {
             holder.worldImageView.setImageBitmap(record.thumbnail)
             holder.rootView.setOnClickListener {
                 mainViewModel.recoverFromRecordAndUpdateTimestamp(record)
-                postOnMainThread {
-                    historyView.scrollToPosition(0)
-                }
                 drawer.closeDrawers()
             }
         }
@@ -76,7 +73,6 @@ class MainFragment : Fragment() {
     private lateinit var mainViewModel: MainViewModel
 
     private lateinit var drawer: DrawerLayout
-    private lateinit var historyView: RecyclerView
 
     private val optionMenuRes = Observable(R.menu.main_menu_pause)
 
@@ -112,11 +108,17 @@ class MainFragment : Fragment() {
             DrawerFragment().apply {
                 createViewCallback = { rootView ->
                     val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
-                    this@MainFragment.historyView = historyView
+
                     historyView.layoutManager = LinearLayoutManager(
                             context, RecyclerView.VERTICAL, false)
                     val historyAdapter = HistoryAdapter()
                     historyView.adapter = historyAdapter
+
+                    mainViewModel.registerWorldHistoryScrollToTopListener(this.viewLifecycleOwner) {
+                        postOnMainThread {
+                            historyView.scrollToPosition(0)
+                        }
+                    }
                 }
             }
         }
