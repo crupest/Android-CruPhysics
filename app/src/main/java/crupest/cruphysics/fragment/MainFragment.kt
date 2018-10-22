@@ -53,7 +53,7 @@ class MainFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val rootView = LayoutInflater.from(context).inflate(R.layout.history_item, parent, false) as CardView
+            val rootView = LayoutInflater.from(context).inflate(R.layout.item_world_history, parent, false) as CardView
             return ViewHolder(rootView)
         }
 

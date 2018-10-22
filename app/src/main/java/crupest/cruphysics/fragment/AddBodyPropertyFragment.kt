@@ -52,7 +52,7 @@ class AddBodyPropertyFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_add_body_property, container, false)
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
-        val adapter = ArrayAdapter(context!!, R.layout.object_type_spinner_item, R.id.content,
+        val adapter = ArrayAdapter(context!!, R.layout.item_body_type_spinner, R.id.content,
                 context!!.resources.getStringArray(R.array.object_type_list))
         typeSpinner.adapter = adapter
 
