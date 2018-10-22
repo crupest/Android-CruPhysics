@@ -12,3 +12,9 @@ fun <T> MutableLiveData<T>.setWhenNull(value: T) {
     if (this.value == null)
         this.value = value
 }
+
+fun <T> mutableLiveData(): MutableLiveData<T> = MutableLiveData()
+
+fun <T> mutableLiveDataWithDefault(value: T): MutableLiveData<T> = MutableLiveData<T>().apply {
+    this.value = value
+}

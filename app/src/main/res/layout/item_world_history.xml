@@ -7,7 +7,7 @@
     android:layout_margin="10dp"
     android:foreground="?attr/selectableItemBackground"
     app:contentPadding="8dp"
-    app:cardBackgroundColor="#e1e1e1"
+    app:cardBackgroundColor="#1565c0"
     app:cardCornerRadius="5dp">
 
     <LinearLayout
@@ -20,6 +20,7 @@
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/icons"
             tools:text="@tools:sample/date/mmddyy"/>
 
         <ImageView

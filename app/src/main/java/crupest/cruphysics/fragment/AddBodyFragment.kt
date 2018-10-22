@@ -64,6 +64,9 @@ class AddBodyFragment : NavigationFragment() {
 
         body.setMass(viewModel.bodyType.value!!.deserializeAsMassType())
 
+        body.linearVelocity = Vector2(viewModel.velocityX.value!!, viewModel.velocityY.value!!)
+        body.angularVelocity = viewModel.angularVelocity.value!!
+
         body.userData = BodyUserData(body, viewModel.bodyColor.value!!)
 
         mainViewModel.addBody(body)

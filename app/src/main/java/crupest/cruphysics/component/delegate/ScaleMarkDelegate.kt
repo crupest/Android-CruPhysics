@@ -12,7 +12,7 @@ import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class ScaleMarkDelegate {
+class ScaleMarkDelegate(color: Int) {
     companion object {
         private const val expectScaleMarkWidth = 200
         private const val lineLabelGap = 5.0f
@@ -21,13 +21,13 @@ class ScaleMarkDelegate {
     }
 
     private val textPaint = TextPaint().also {
-        it.color = Color.BLACK
+        it.color = color
         it.isAntiAlias = true
         it.textSize = labelTextSize
     }
     private lateinit var scaleMarkText: StaticLayout
     private var markLineLength: Float = 0.0f
-    private val markLinePaint = strokePaint(Color.BLACK, 3.0f)
+    private val markLinePaint = strokePaint(color, 3.0f)
 
 
     fun draw(canvas: Canvas) {

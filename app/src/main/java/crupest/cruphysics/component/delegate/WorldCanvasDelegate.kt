@@ -66,7 +66,6 @@ class WorldCanvasDelegate(): IDrawDelegate {
 
     fun generateThumbnail(width: Int, height: Int, camera: CameraData): Bitmap =
             Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).applyCanvas {
-                drawColor(Color.WHITE)
                 concat(camera.fromData(
                         width.toFloat() / 2.0f, height.toFloat() / 2.0f))
                 draw(this)

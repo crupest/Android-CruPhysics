@@ -21,24 +21,17 @@ class CruPopupMenu(context: Context,
     private val popupWindow: PopupWindow
 
     init {
-        val layoutInflater = LayoutInflater.from(context)
-        val rootView = layoutInflater.inflate(R.layout.object_popup_menu, null)
-        val list = rootView.findViewById<ListView>(R.id.menu_list)
+        val list = LayoutInflater.from(context).inflate(R.layout.popup_menu, null) as ListView
 
         val adapter = ArrayAdapter(
                 context,
-                R.layout.menu_item,
+                R.layout.item_popup_menu_list,
                 R.id.content,
                 menuItemAndHandler.map { it.first }
         )
         list.adapter = adapter
 
-        popupWindow = PopupWindow(
-                rootView,
-                width,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
-        ).apply {
+        popupWindow = PopupWindow(list, width, ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             this.setBackgroundDrawable(ColorDrawable(
                     ContextCompat.getColor(context, R.color.menu_background)
             ))

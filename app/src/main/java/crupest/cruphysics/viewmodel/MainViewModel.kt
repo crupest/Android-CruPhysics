@@ -33,10 +33,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val world: World = World()
 
     private val worldRepaintListeners: MutableList<() -> Unit> = mutableListOf()
+    private val worldHistoryScrollToTopListeners: MutableList<() -> Unit> = mutableListOf()
 
-    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
-    private val cameraInternal: MutableLiveData<CameraData> = MutableLiveData()
-    private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
+    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = mutableLiveDataWithDefault(WorldCanvasDelegate())
+    private val cameraInternal: MutableLiveData<CameraData> = mutableLiveDataWithDefault(CameraData())
+    private val worldStateInternal: MutableLiveData<Boolean> = mutableLiveDataWithDefault(false)
 
 
     val recordListForHistoryFlow: Flowable<List<ProcessedWorldRecordForHistory>>
@@ -49,11 +50,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
 
-    init {
-        cameraInternal.value = CameraData()
-        drawWorldDelegateInternal.value = WorldCanvasDelegate()
-        worldStateInternal.value = false
-    }
 
     override fun onCleared() {
         worldRepository.closeAndWait()
@@ -73,6 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun createNewRecordFromCurrent() {
         worldRepository.createRecord(Date(), world.toData(), camera.value!!, generateThumbnail())
+        raiseWorldHistoryScrollToTopEvent()
     }
 
     private fun <T : Function<Unit>> registerListener(lifecycleOwner: LifecycleOwner, listeners: MutableList<T>, listener: T) {
@@ -91,6 +88,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun registerWorldRepaintListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
         registerListener(lifecycleOwner, worldRepaintListeners, listener)
+    }
+
+    fun registerWorldHistoryScrollToTopListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
+        registerListener(lifecycleOwner, worldHistoryScrollToTopListeners, listener)
+    }
+
+    private fun raiseWorldHistoryScrollToTopEvent() {
+        worldHistoryScrollToTopListeners.forEach {
+            it.invoke()
+        }
     }
 
     private fun createNewWorld() {
@@ -146,6 +153,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun recoverFromRecordAndUpdateTimestamp(record: ProcessedWorldRecordForHistory) {
         recoverFrom(record.world, record.camera)
         worldRepository.updateTimestamp(record.timestamp, Date())
+        raiseWorldHistoryScrollToTopEvent()
     }
 
     fun bodyHitTest(x: Double, y: Double): Body? =
