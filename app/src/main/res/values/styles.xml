@@ -1,45 +1,42 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/primary_500</item>
+        <item name="colorPrimaryDark">@color/primary_700</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/primary_900</item>
     </style>
 
-
-    <style name="NoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="ToolBarStyle">
-        <item name="android:textColorSecondary">#FFFFFFFF</item>
+    <style name="NoActionBarTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primary_500</item>
+        <item name="colorPrimaryDark">@color/primary_700</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/primary_900</item>
     </style>
 
     <style name="shapePropertyLabelStyle">
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:textColor">#b0000000</item>
+        <item name="android:textColor">@color/icons</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="shapePropertyValueStyle">
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:background">@null</item>
-        <item name="android:textColor">#b0000000</item>
+        <item name="android:textColor">@color/accent_900</item>
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="bodyPropertyLabelStyle">
         <item name="android:gravity">center</item>
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/icons</item>
         <item name="android:textSize">24sp</item>
         <item name="android:layout_gravity">fill_horizontal|center_vertical</item>
     </style>
 
     <style name="bodyPropertyValueStyle">
         <item name="android:gravity">center</item>
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/icons</item>
         <item name="android:textSize">22sp</item>
         <item name="android:layout_gravity">fill_horizontal|center_vertical</item>
     </style>

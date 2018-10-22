@@ -8,10 +8,12 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.withMatrix
 import androidx.core.graphics.withTranslation
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import crupest.cruphysics.R
 import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.component.delegate.ScaleMarkDelegate
 import crupest.cruphysics.physics.fromData
@@ -19,6 +21,7 @@ import crupest.cruphysics.physics.toData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.distance
+import crupest.cruphysics.utility.getColorFromAttr
 import crupest.cruphysics.utility.invertedMatrix
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.MainViewModel
@@ -42,7 +45,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         private set
 
     private lateinit var worldCanvasDelegate: IDrawDelegate
-    private val scaleMarkDelegate = ScaleMarkDelegate()
+    private val scaleMarkDelegate = ScaleMarkDelegate(ContextCompat.getColor(context!!, R.color.icons))
 
     private val viewMatrix: Matrix = Matrix()
 
@@ -96,7 +99,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     protected open fun onPaint(canvas: Canvas) {
-        canvas.drawColor(Color.WHITE)
+        canvas.drawColor(context.getColorFromAttr(android.R.attr.windowBackground))
         canvas.withMatrix(viewMatrix) {
             worldCanvasDelegate.draw(canvas)
         }

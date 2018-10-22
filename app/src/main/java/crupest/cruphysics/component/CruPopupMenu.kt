@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -20,9 +21,7 @@ class CruPopupMenu(context: Context,
     private val popupWindow: PopupWindow
 
     init {
-        val list = ListView(context)
-        list.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val list = LayoutInflater.from(context).inflate(R.layout.popup_menu, null) as ListView
 
         val adapter = ArrayAdapter(
                 context,

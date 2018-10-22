@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginBottom="80dp"
-        android:textColor="@android:color/black"
+        android:textColor="@color/icons"
         android:textSize="28sp"
         tools:text="@string/circle_body"/>
 

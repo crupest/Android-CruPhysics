@@ -4,7 +4,7 @@
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:textSize="18sp"
-    android:textColor="#FF000000"
+    android:textSize="20sp"
+    android:textColor="@color/icons"
     android:padding="@dimen/spinner_item_padding"
     tools:text="static" />
