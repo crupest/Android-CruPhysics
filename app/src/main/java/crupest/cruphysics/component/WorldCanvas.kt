@@ -252,7 +252,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             repaint()
         })
 
-        viewModel.registerWorldStepListener(lifecycleOwner) {
+        viewModel.registerWorldRepaintListener(lifecycleOwner) {
             repaint()
         }
 
