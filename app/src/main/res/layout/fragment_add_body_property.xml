@@ -19,7 +19,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:text="@string/type" />
 
         <Spinner
@@ -27,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center" />
 
         <TextView
             android:id="@+id/label_density"
@@ -35,7 +34,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_density"
             android:text="@string/density" />
 
@@ -45,7 +43,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:inputType="numberDecimal"
             tools:text="1.0" />
 
@@ -55,7 +52,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_restitution"
             android:text="@string/restitution" />
 
@@ -65,7 +61,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:inputType="numberDecimal"
             tools:text="0.0" />
 
@@ -75,7 +70,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:labelFor="@id/edit_friction"
             android:text="@string/friction" />
 
@@ -85,11 +79,66 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
             android:gravity="center"
             android:inputType="numberDecimal"
             tools:text="0.2" />
 
+        <TextView
+            android:id="@+id/label_velocity_x"
+            style="@style/bodyPropertyLabelStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:labelFor="@id/edit_velocity_x"
+            android:text="@string/velocity_x" />
+
+        <EditText
+            android:id="@+id/edit_velocity_x"
+            style="@style/bodyPropertyValueStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            tools:text="0.0" />
+
+        <TextView
+            android:id="@+id/label_velocity_y"
+            style="@style/bodyPropertyLabelStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:labelFor="@id/edit_velocity_y"
+            android:text="@string/velocity_y" />
+
+        <EditText
+            android:id="@+id/edit_velocity_y"
+            style="@style/bodyPropertyValueStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            tools:text="0.0" />
+
+        <TextView
+            android:id="@+id/label_angular_velocity"
+            style="@style/bodyPropertyLabelStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:labelFor="@id/edit_angular_velocity"
+            android:text="@string/angular_velocity" />
+
+        <EditText
+            android:id="@+id/edit_angular_velocity"
+            style="@style/bodyPropertyValueStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            tools:text="0.0" />
 
         <TextView
             android:id="@+id/label_color"

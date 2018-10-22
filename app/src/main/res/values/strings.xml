@@ -30,4 +30,7 @@
     <string name="angle_label">Angle:</string>
     <string name="width_label">Width:</string>
     <string name="height_label">Height:</string>
+    <string name="velocity_x">velocity_x</string>
+    <string name="velocity_y">velocity_y</string>
+    <string name="angular_velocity">angular velocity</string>
 </resources>

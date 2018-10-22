@@ -95,7 +95,9 @@ class AddBodyPropertyFragment : Fragment() {
         bindEditText(R.id.edit_density, addBodyViewModel.density, true)
         bindEditText(R.id.edit_restitution, addBodyViewModel.restitution, true)
         bindEditText(R.id.edit_friction, addBodyViewModel.friction, true)
-
+        bindEditText(R.id.edit_velocity_x, addBodyViewModel.velocityX)
+        bindEditText(R.id.edit_velocity_y, addBodyViewModel.velocityY)
+        bindEditText(R.id.edit_angular_velocity, addBodyViewModel.angularVelocity)
 
         val colorBlock: View = rootView.findViewById(R.id.color_block)
 
