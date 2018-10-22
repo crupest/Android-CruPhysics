@@ -3,7 +3,7 @@ package crupest.cruphysics.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
-import crupest.cruphysics.utility.generateRandomColor
+import crupest.cruphysics.utility.RandomHelper
 
 class AddBodyViewModel : ViewModel() {
     val shapeType: MutableLiveData<String> = MutableLiveData()
@@ -18,6 +18,6 @@ class AddBodyViewModel : ViewModel() {
         density.value = 1.0
         restitution.value = 0.0
         friction.value = 0.2
-        bodyColor.value = generateRandomColor()
+        bodyColor.value = RandomHelper.generateRandomColor()
     }
 }
