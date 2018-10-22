@@ -33,6 +33,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     : SurfaceView(context, attributeSet) {
 
+    companion object {
+        fun distance(p1: PointF, p2: PointF): Float =
+                distance(p1.x, p1.y, p2.x, p2.y)
+    }
+
     protected var mainViewModel: MainViewModel? = null
         private set
 
