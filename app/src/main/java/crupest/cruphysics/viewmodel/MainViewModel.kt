@@ -31,7 +31,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
     private val world: World = World()
-    private val worldStepListeners: MutableList<() -> Unit> = mutableListOf()
+
+    private val worldRepaintListeners: MutableList<() -> Unit> = mutableListOf()
 
     private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
     private val cameraInternal: MutableLiveData<CameraData> = MutableLiveData()
@@ -88,8 +89,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun registerWorldStepListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
-        registerListener(lifecycleOwner, worldStepListeners, listener)
+    fun registerWorldRepaintListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
+        registerListener(lifecycleOwner, worldRepaintListeners, listener)
     }
 
     private fun createNewWorld() {
@@ -107,7 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (task == null) {
                 task = setInterval(1.0 / 60.0) {
                     world.update(1.0 / 60.0)
-                    worldStepListeners.forEach {
+                    worldRepaintListeners.forEach {
                         it.invoke()
                     }
                 }
