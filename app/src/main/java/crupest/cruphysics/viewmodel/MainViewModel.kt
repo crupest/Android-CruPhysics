@@ -34,9 +34,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val worldRepaintListeners: MutableList<() -> Unit> = mutableListOf()
 
-    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = MutableLiveData()
-    private val cameraInternal: MutableLiveData<CameraData> = MutableLiveData()
-    private val worldStateInternal: MutableLiveData<Boolean> = MutableLiveData()
+    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = mutableLiveDataWithDefault(WorldCanvasDelegate())
+    private val cameraInternal: MutableLiveData<CameraData> = mutableLiveDataWithDefault(CameraData())
+    private val worldStateInternal: MutableLiveData<Boolean> = mutableLiveDataWithDefault(false)
 
 
     val recordListForHistoryFlow: Flowable<List<ProcessedWorldRecordForHistory>>
@@ -49,11 +49,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
 
-    init {
-        cameraInternal.value = CameraData()
-        drawWorldDelegateInternal.value = WorldCanvasDelegate()
-        worldStateInternal.value = false
-    }
 
     override fun onCleared() {
         worldRepository.closeAndWait()
