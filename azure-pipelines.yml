@@ -7,9 +7,9 @@ steps:
     workingDirectory: ''
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
-    publishJUnitResults: false
+    publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
-    tasks: 'assembleDebug'
+    tasks: 'build'
 
 - task: CopyFiles@2
   inputs:
@@ -19,4 +19,4 @@ steps:
 - task: PublishBuildArtifacts@1
   inputs:
     pathToPublish: '$(build.artifactStagingDirectory)'
-    artifactName: 'debug_apk'
+    artifactName: 'apk'
