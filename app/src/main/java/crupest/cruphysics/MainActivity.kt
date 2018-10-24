@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
 
         drawer = findViewById(R.id.drawer)
         drawer.isEnabled = false
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
         drawer.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -160,45 +161,38 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
         return drawer
     }
 
-    override fun setDrawerFragment(lifecycleOwner: LifecycleOwner, drawerFragmentFactory: () -> Fragment) {
-        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_START)
-            fun setDrawer() {
-                if (supportFragmentManager.findFragmentById(R.id.drawer_content) != null)
-                    throw IllegalStateException("Drawer fragment is already set.")
-
-                navigationButtonDrawable.isVisible = true
-                navigationButtonDrawable.animateIconState(MaterialMenuDrawable.IconState.BURGER)
-                toolbar.setNavigationOnClickListener {
-                    if (isDrawerOpened)
-                        drawer.closeDrawer(GravityCompat.START, true)
-                    else
-                        drawer.openDrawer(GravityCompat.START, true)
-                }
-
-                drawer.isEnabled = true
-                val transaction = supportFragmentManager.beginTransaction()
-                transaction.add(R.id.drawer_content, drawerFragmentFactory())
-                transaction.commitAllowingStateLoss()
+    override fun setDrawerFragment(fragment: Fragment?) {
+        if (fragment != null) {
+            navigationButtonDrawable.isVisible = true
+            navigationButtonDrawable.animateIconState(MaterialMenuDrawable.IconState.BURGER)
+            navigationButtonDrawable.iconState = MaterialMenuDrawable.IconState.BURGER
+            toolbar.setNavigationOnClickListener {
+                if (isDrawerOpened)
+                    drawer.closeDrawer(GravityCompat.START, true)
+                else
+                    drawer.openDrawer(GravityCompat.START, true)
             }
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-            fun unsetDrawer() {
-                val drawerFragment = supportFragmentManager.findFragmentById(R.id.drawer_content)
-                        ?: throw IllegalStateException("No drawer fragment exists.")
-
+            drawer.isEnabled = true
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNDEFINED)
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.drawer_content, fragment)
+            transaction.commitAllowingStateLoss()
+        } else {
+            supportFragmentManager.findFragmentById(R.id.drawer_content)?.also {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.remove(drawerFragment)
+                transaction.remove(it)
                 transaction.commitAllowingStateLoss()
                 drawer.isEnabled = false
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
-        })
+        }
     }
 
     override fun setNavigateBackButton(show: Boolean) {
         if (show) {
             navigationButtonDrawable.isVisible = true
             navigationButtonDrawable.animateIconState(MaterialMenuDrawable.IconState.ARROW)
+            navigationButtonDrawable.iconState = MaterialMenuDrawable.IconState.ARROW
             toolbar.setNavigationOnClickListener {
                 onBackPressed()
             }
