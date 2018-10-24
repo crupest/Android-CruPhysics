@@ -1,12 +1,17 @@
 package crupest.cruphysics
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
+import com.balysv.materialmenu.MaterialMenuDrawable
 import crupest.cruphysics.fragment.MainFragment
 import crupest.cruphysics.fragment.NavigationFragment
 import java.lang.IllegalStateException
@@ -16,17 +21,54 @@ import java.lang.IllegalStateException
  * Navigate fragment using [navigateToFragment].
  * Please override [onCreate] to navigate to the first fragment using [navigateToFragment].
  */
-class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigation, IDrawerActivity {
+class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigation, IDrawerActivity, INavigateBackButtonActivity {
+
+    private lateinit var toolbar: Toolbar
 
     private lateinit var drawer: DrawerLayout
+    private var isDrawerOpened: Boolean = false
+
+    private lateinit var navigationButtonDrawable: MaterialMenuDrawable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.tool_bar))
+        toolbar = findViewById(R.id.tool_bar)
+        setSupportActionBar(toolbar)
+
+        navigationButtonDrawable = MaterialMenuDrawable(this, Color.WHITE, MaterialMenuDrawable.Stroke.THIN)
+        toolbar.navigationIcon = navigationButtonDrawable
 
         drawer = findViewById(R.id.drawer)
         drawer.isEnabled = false
+
+        drawer.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                if (drawer.isEnabled) // !!! this function is called oddly so we need to check whether the drawer is enabled!!!
+                    navigationButtonDrawable.setTransformationOffset(
+                            MaterialMenuDrawable.AnimationState.BURGER_ARROW,
+                            if (isDrawerOpened) 2 - slideOffset else slideOffset
+                    )
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+                isDrawerOpened = true
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                isDrawerOpened = false
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_IDLE) {
+                    if (isDrawerOpened) {
+                        navigationButtonDrawable.iconState = MaterialMenuDrawable.IconState.ARROW
+                    } else {
+                        navigationButtonDrawable.iconState = MaterialMenuDrawable.IconState.BURGER
+                    }
+                }
+            }
+        })
 
         navigateToFragment(MainFragment(), false)
     }
@@ -125,6 +167,15 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
                 if (supportFragmentManager.findFragmentById(R.id.drawer_content) != null)
                     throw IllegalStateException("Drawer fragment is already set.")
 
+                navigationButtonDrawable.isVisible = true
+                navigationButtonDrawable.animateIconState(MaterialMenuDrawable.IconState.BURGER)
+                toolbar.setNavigationOnClickListener {
+                    if (isDrawerOpened)
+                        drawer.closeDrawer(GravityCompat.START, true)
+                    else
+                        drawer.openDrawer(GravityCompat.START, true)
+                }
+
                 drawer.isEnabled = true
                 val transaction = supportFragmentManager.beginTransaction()
                 transaction.add(R.id.drawer_content, drawerFragmentFactory())
@@ -142,5 +193,18 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
                 drawer.isEnabled = false
             }
         })
+    }
+
+    override fun setNavigateBackButton(show: Boolean) {
+        if (show) {
+            navigationButtonDrawable.isVisible = true
+            navigationButtonDrawable.animateIconState(MaterialMenuDrawable.IconState.ARROW)
+            toolbar.setNavigationOnClickListener {
+                onBackPressed()
+            }
+        } else {
+            navigationButtonDrawable.isVisible = false
+            toolbar.setNavigationOnClickListener(null)
+        }
     }
 }

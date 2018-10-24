@@ -23,7 +23,7 @@ import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
 
-class MainFragment : Fragment() {
+class MainFragment : BaseFragment() {
 
     class DrawerFragment : Fragment() {
         var createViewCallback: ((View) -> Unit)? = null
