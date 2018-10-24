@@ -27,17 +27,38 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="horizontalSpaceViewStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="bodyPropertyItemStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">57dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingStart">30dp</item>
+        <item name="android:paddingEnd">30dp</item>
+        <item name="android:background">?selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+    </style>
+
     <style name="bodyPropertyLabelStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/icons</item>
-        <item name="android:textSize">24sp</item>
-        <item name="android:layout_gravity">fill_horizontal|center_vertical</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
     <style name="bodyPropertyValueStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/icons</item>
-        <item name="android:textSize">22sp</item>
-        <item name="android:layout_gravity">fill_horizontal|center_vertical</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 </resources>

@@ -5,160 +5,157 @@
     android:layout_height="match_parent"
     tools:context="crupest.cruphysics.fragment.AddBodyPropertyFragment">
 
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
+        android:divider="@drawable/horizontal_divider"
         android:importantForAutofill="noExcludeDescendants"
-        android:useDefaultMargins="true"
+        android:orientation="vertical"
+        android:showDividers="middle|end"
         tools:targetApi="O">
 
-        <TextView
-            android:id="@+id/body_type_label"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="@string/type" />
+        <LinearLayout style="@style/bodyPropertyItemStyle">
 
-        <Spinner
-            android:id="@+id/body_type_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:layout_gravity="center" />
+            <TextView
+                android:id="@+id/body_type_label"
+                style="@style/bodyPropertyLabelStyle"
+                android:text="@string/type" />
 
-        <TextView
-            android:id="@+id/label_density"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_density"
-            android:text="@string/density" />
+            <View style="@style/horizontalSpaceViewStyle" />
 
-        <EditText
-            android:id="@+id/edit_density"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:inputType="numberDecimal"
-            tools:text="1.0" />
+            <Spinner
+                android:id="@+id/body_type_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                tools:listitem="@layout/item_body_type_spinner" />
 
-        <TextView
-            android:id="@+id/label_restitution"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_restitution"
-            android:text="@string/restitution" />
+        </LinearLayout>
 
-        <EditText
-            android:id="@+id/edit_restitution"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:inputType="numberDecimal"
-            tools:text="0.0" />
+        <LinearLayout style="@style/bodyPropertyItemStyle">
 
-        <TextView
-            android:id="@+id/label_friction"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_friction"
-            android:text="@string/friction" />
+            <TextView
+                android:id="@+id/label_density"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_density"
+                android:text="@string/density" />
 
-        <EditText
-            android:id="@+id/edit_friction"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:gravity="center"
-            android:inputType="numberDecimal"
-            tools:text="0.2" />
+            <View style="@style/horizontalSpaceViewStyle" />
 
-        <TextView
-            android:id="@+id/label_velocity_x"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_velocity_x"
-            android:text="@string/velocity_x" />
+            <EditText
+                android:id="@+id/edit_density"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="1.0" />
 
-        <EditText
-            android:id="@+id/edit_velocity_x"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:gravity="center"
-            android:inputType="numberDecimal"
-            tools:text="0.0" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/label_velocity_y"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_velocity_y"
-            android:text="@string/velocity_y" />
+        <LinearLayout style="@style/bodyPropertyItemStyle">
 
-        <EditText
-            android:id="@+id/edit_velocity_y"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:gravity="center"
-            android:inputType="numberDecimal"
-            tools:text="0.0" />
+            <TextView
+                android:id="@+id/label_restitution"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_restitution"
+                android:text="@string/restitution" />
 
-        <TextView
-            android:id="@+id/label_angular_velocity"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:labelFor="@id/edit_angular_velocity"
-            android:text="@string/angular_velocity" />
+            <View style="@style/horizontalSpaceViewStyle" />
 
-        <EditText
-            android:id="@+id/edit_angular_velocity"
-            style="@style/bodyPropertyValueStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:gravity="center"
-            android:inputType="numberDecimal"
-            tools:text="0.0" />
+            <EditText
+                android:id="@+id/edit_restitution"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="0.0" />
 
-        <TextView
-            android:id="@+id/label_color"
-            style="@style/bodyPropertyLabelStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:layout_gravity="fill_horizontal"
-            android:text="@string/color" />
+        </LinearLayout>
 
-        <View
-            android:id="@+id/color_block"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_columnWeight="1"
-            android:layout_gravity="fill"
-            android:layout_marginStart="40dp"
-            android:layout_marginEnd="40dp"
-            tools:background="#FF0000FF" />
 
-    </GridLayout>
+        <LinearLayout style="@style/bodyPropertyItemStyle">
+
+            <TextView
+                android:id="@+id/label_friction"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_friction"
+                android:text="@string/friction" />
+
+            <View style="@style/horizontalSpaceViewStyle" />
+
+            <EditText
+                android:id="@+id/edit_friction"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="0.2" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/bodyPropertyItemStyle">
+
+            <TextView
+                android:id="@+id/label_velocity_x"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_velocity_x"
+                android:text="@string/velocity_x" />
+
+            <View style="@style/horizontalSpaceViewStyle" />
+
+            <EditText
+                android:id="@+id/edit_velocity_x"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="0.0" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/bodyPropertyItemStyle">
+
+            <TextView
+                android:id="@+id/label_velocity_y"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_velocity_y"
+                android:text="@string/velocity_y" />
+
+            <View style="@style/horizontalSpaceViewStyle" />
+
+            <EditText
+                android:id="@+id/edit_velocity_y"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="0.0" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/bodyPropertyItemStyle">
+
+            <TextView
+                android:id="@+id/label_angular_velocity"
+                style="@style/bodyPropertyLabelStyle"
+                android:labelFor="@id/edit_angular_velocity"
+                android:text="@string/angular_velocity" />
+
+            <View style="@style/horizontalSpaceViewStyle" />
+
+            <EditText
+                android:id="@+id/edit_angular_velocity"
+                style="@style/bodyPropertyValueStyle"
+                android:inputType="numberDecimal"
+                tools:text="0.0" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/bodyPropertyItemStyle">
+
+            <TextView
+                android:id="@+id/label_color"
+                style="@style/bodyPropertyLabelStyle"
+                android:text="@string/color" />
+
+            <View style="@style/horizontalSpaceViewStyle" />
+
+            <View
+                android:id="@+id/color_block"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                tools:background="#FF0000FF" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </ScrollView>
