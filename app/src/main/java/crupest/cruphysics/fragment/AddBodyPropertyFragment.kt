@@ -12,12 +12,10 @@ import android.widget.Spinner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import crupest.cruphysics.*
-import crupest.cruphysics.serialization.data.BODY_TYPE_DYNAMIC
-import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
-import crupest.cruphysics.viewmodel.bindDoubleLiveData
-import crupest.cruphysics.utility.showAlertDialog
+import crupest.cruphysics.R
+import crupest.cruphysics.physics.BodyType
 import crupest.cruphysics.viewmodel.AddBodyViewModel
+import crupest.cruphysics.viewmodel.bindDoubleLiveData
 import crupest.cruphysics.viewmodel.checkAndSetValue
 import me.priyesh.chroma.ChromaDialog
 import me.priyesh.chroma.ColorMode
@@ -26,15 +24,6 @@ import me.priyesh.chroma.ColorSelectListener
 class AddBodyPropertyFragment : BaseFragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
-
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.check_menu) {
-        addHandler(R.id.ok) {
-            if (addBodyViewModel.density.value == 0.0)
-                showAlertDialog(context!!, "Density can't be 0.")
-            else
-                (parentFragment as AddBodyFragment).createBodyAndPopBack()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,15 +43,15 @@ class AddBodyPropertyFragment : BaseFragment() {
 
 
         typeSpinner.setSelection(when (addBodyViewModel.bodyType.value) {
-            BODY_TYPE_STATIC -> 0
-            BODY_TYPE_DYNAMIC -> 1
+            BodyType.STATIC -> 0
+            BodyType.DYNAMIC -> 1
             else -> throw IllegalStateException("Unknown body type.")
         })
 
         addBodyViewModel.bodyType.observe(this.viewLifecycleOwner, Observer {
             typeSpinner.setSelection(when (addBodyViewModel.bodyType.value) {
-                BODY_TYPE_STATIC -> 0
-                BODY_TYPE_DYNAMIC -> 1
+                BodyType.STATIC -> 0
+                BodyType.DYNAMIC -> 1
                 else -> throw IllegalStateException("Unknown body type.")
             })
         })
@@ -70,8 +59,8 @@ class AddBodyPropertyFragment : BaseFragment() {
         typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 when (position) {
-                    0 -> BODY_TYPE_STATIC
-                    1 -> BODY_TYPE_DYNAMIC
+                    0 -> BodyType.STATIC
+                    1 -> BodyType.DYNAMIC
                     else -> null
                 }?.run {
                     addBodyViewModel.bodyType.checkAndSetValue(this)
@@ -118,4 +107,6 @@ class AddBodyPropertyFragment : BaseFragment() {
 
         return rootView
     }
+
+    fun validate(): String? = if (addBodyViewModel.density.value == 0.0) "Density can't be 0." else null
 }

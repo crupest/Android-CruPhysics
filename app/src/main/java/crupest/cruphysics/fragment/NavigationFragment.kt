@@ -48,8 +48,14 @@ abstract class NavigationFragment : BaseFragment(), IFragmentNavigator {
                     ?: throw IllegalStateException("Fragment not loaded.")) as BaseFragment
 
     override fun popBackStack(): Boolean {
+        val previousFragment = getCurrentFragment()
         val result =  childFragmentManager.popBackStackImmediate()
+        onPopBackStack(previousFragment)
         notifyActivityNavigated()
         return result
+    }
+
+    protected open fun onPopBackStack(previousFragment: BaseFragment) {
+
     }
 }

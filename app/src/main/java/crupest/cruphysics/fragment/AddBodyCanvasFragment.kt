@@ -20,13 +20,7 @@ abstract class AddBodyCanvasFragment : BaseFragment() {
 
     override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu) {
         addHandler(R.id.next) {
-            val error = onValidate()
-            if (error != null) {
-                showAlertDialog(context!!, error)
-            } else {
-                val parent = parentFragment as NavigationFragment
-                parent.navigateTo(AddBodyPropertyFragment())
-            }
+
         }
     }
 
@@ -40,5 +34,5 @@ abstract class AddBodyCanvasFragment : BaseFragment() {
         addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
     }
 
-    abstract fun onValidate(): String?
+    abstract fun validate(): String?
 }

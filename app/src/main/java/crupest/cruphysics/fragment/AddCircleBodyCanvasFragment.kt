@@ -44,7 +44,7 @@ class AddCircleBodyCanvasFragment : AddBodyCanvasFragment() {
         return rootView
     }
 
-    override fun onValidate(): String? {
+    override fun validate(): String? {
         if (viewModel.radius.value == 0.0)
             return "Radius can't be 0."
         return null
