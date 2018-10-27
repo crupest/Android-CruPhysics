@@ -79,22 +79,22 @@ class AddBodyShapeListFragment : BaseFragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
 
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu, mapOf(
-            R.id.next withHandler {
-                val parent = parentFragment as NavigationFragment
-                val pager = view!!.findViewById<ViewPager>(R.id.pager)
-                when (pager.currentItem) {
-                    0 -> {
-                        addBodyViewModel.shapeType.value = SHAPE_TYPE_CIRCLE
-                        parent.navigateTo(AddCircleBodyCanvasFragment())
-                    }
-                    1 ->{
-                        addBodyViewModel.shapeType.value = SHAPE_TYPE_RECTANGLE
-                        parent.navigateTo(AddRectangleBodyCanvasFragment())
-                    }
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu) {
+        addHandler(R.id.next) {
+            val parent = parentFragment as NavigationFragment
+            val pager = view!!.findViewById<ViewPager>(R.id.pager)
+            when (pager.currentItem) {
+                0 -> {
+                    addBodyViewModel.shapeType.value = SHAPE_TYPE_CIRCLE
+                    parent.navigateTo(AddCircleBodyCanvasFragment())
+                }
+                1 -> {
+                    addBodyViewModel.shapeType.value = SHAPE_TYPE_RECTANGLE
+                    parent.navigateTo(AddRectangleBodyCanvasFragment())
                 }
             }
-    ))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

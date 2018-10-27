@@ -11,8 +11,24 @@ interface IOptionMenuActivity {
     fun setOptionMenu(optionMenuInfo: OptionMenuInfo?)
 }
 
-infix fun Int.withHandler(handler: () -> Unit): Pair<Int, () -> Unit> = this to handler
+class OptionMenuBuilder {
+    val handlers: MutableMap<Int, () -> Unit> = mutableMapOf()
 
-fun staticOptionMenu(menuRes: Int, handlers: Map<Int, () -> Unit>) = IOptionMenuActivity.OptionMenuInfo(
-        Observable(menuRes), handlers
-)
+    fun addHandler(id: Int, handler: () -> Unit) {
+        handlers[id] = handler
+    }
+}
+
+fun staticOptionMenu(menuRes: Int, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
+    val builder = OptionMenuBuilder()
+    builder.block()
+
+    return IOptionMenuActivity.OptionMenuInfo(Observable(menuRes), builder.handlers)
+}
+
+fun dynamicOptionMenu(menuRes: Observable<Int>, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
+    val builder = OptionMenuBuilder()
+    builder.block()
+
+    return IOptionMenuActivity.OptionMenuInfo(menuRes, builder.handlers)
+}

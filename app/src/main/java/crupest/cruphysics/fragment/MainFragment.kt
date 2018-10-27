@@ -98,18 +98,17 @@ class MainFragment : BaseFragment() {
                 }
             }
 
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = IOptionMenuActivity.OptionMenuInfo(
-            optionMenuRes, mapOf(
-            R.id.play withHandler {
-                mainViewModel.runWorld()
-            },
-            R.id.pause withHandler {
-                mainViewModel.pauseWorld()
-            },
-            R.id.create_new withHandler {
-                mainViewModel.createNewWorldAndResetCamera()
-            }
-    ))
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = dynamicOptionMenu(optionMenuRes) {
+        addHandler(R.id.play) {
+            mainViewModel.runWorld()
+        }
+        addHandler(R.id.pause) {
+            mainViewModel.pauseWorld()
+        }
+        addHandler(R.id.create_new) {
+            mainViewModel.createNewWorldAndResetCamera()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

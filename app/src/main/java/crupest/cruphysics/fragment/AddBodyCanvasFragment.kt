@@ -18,17 +18,17 @@ abstract class AddBodyCanvasFragment : BaseFragment() {
     protected lateinit var mainViewModel: MainViewModel
     protected lateinit var addBodyViewModel: AddBodyViewModel
 
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu, mapOf(
-            R.id.next withHandler {
-                val error = onValidate()
-                if (error != null) {
-                    showAlertDialog(context!!, error)
-                } else {
-                    val parent = parentFragment as NavigationFragment
-                    parent.navigateTo(AddBodyPropertyFragment())
-                }
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu) {
+        addHandler(R.id.next) {
+            val error = onValidate()
+            if (error != null) {
+                showAlertDialog(context!!, error)
+            } else {
+                val parent = parentFragment as NavigationFragment
+                parent.navigateTo(AddBodyPropertyFragment())
             }
-    ))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

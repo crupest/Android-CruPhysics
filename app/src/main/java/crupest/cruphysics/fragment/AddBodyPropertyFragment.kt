@@ -27,14 +27,14 @@ class AddBodyPropertyFragment : BaseFragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
 
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.check_menu, mapOf(
-            R.id.ok withHandler {
-                if (addBodyViewModel.density.value == 0.0)
-                    showAlertDialog(context!!, "Density can't be 0.")
-                else
-                    (parentFragment as AddBodyFragment).createBodyAndPopBack()
-            }
-    ))
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.check_menu) {
+        addHandler(R.id.ok) {
+            if (addBodyViewModel.density.value == 0.0)
+                showAlertDialog(context!!, "Density can't be 0.")
+            else
+                (parentFragment as AddBodyFragment).createBodyAndPopBack()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
