@@ -10,14 +10,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
-import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.Observable
 import crupest.cruphysics.R
-import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
-import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
-import crupest.cruphysics.viewmodel.AddBodyViewModel
+import crupest.cruphysics.physics.ShapeType
 
 
 class AddBodyShapeListFragment : BaseFragment() {
@@ -79,35 +74,6 @@ class AddBodyShapeListFragment : BaseFragment() {
     }
 
 
-    private lateinit var addBodyViewModel: AddBodyViewModel
-
-    override fun determineShowNavigateBackButton(): Boolean = true
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.next_menu)) {
-            if (it.itemId == R.id.next) {
-                val parent = parentFragment as NavigationFragment
-                val pager = view!!.findViewById<ViewPager>(R.id.pager)
-                when (pager.currentItem) {
-                    0 -> {
-                        addBodyViewModel.shapeType.value = SHAPE_TYPE_CIRCLE
-                        parent.navigateToFragment(AddCircleBodyCanvasFragment())
-                    }
-                    1 ->{
-                        addBodyViewModel.shapeType.value = SHAPE_TYPE_RECTANGLE
-                        parent.navigateToFragment(AddRectangleBodyCanvasFragment())
-                    }
-                }
-                true
-            } else false
-        }
-
-        val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
-        addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list, container, false)
@@ -118,5 +84,11 @@ class AddBodyShapeListFragment : BaseFragment() {
         viewPager.adapter = adapter
 
         return rootView
+    }
+
+    fun getCurrentShapeType(): ShapeType = when (view!!.findViewById<ViewPager>(R.id.pager).currentItem) {
+        0 -> ShapeType.CIRCLE
+        1 -> ShapeType.RECTANGLE
+        else -> throw IllegalStateException("Unknown selection.")
     }
 }

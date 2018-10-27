@@ -45,7 +45,7 @@ class AddRectangleBodyCanvasFragment: AddBodyCanvasFragment() {
         return rootView
     }
 
-    override fun onValidate(): String? {
+    override fun validate(): String? {
         var error: String? = null
         if (viewModel.width.value == 0.0)
             error = error.orEmpty() + "Width can't be 0.\n"

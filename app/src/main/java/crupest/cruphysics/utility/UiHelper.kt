@@ -23,6 +23,10 @@ fun postOnMainThread(action: () -> Unit) {
     Handler(Looper.getMainLooper()).post(action)
 }
 
+fun postDelayOnMainThread(delay: Long, action: () -> Unit) {
+    Handler(Looper.getMainLooper()).postDelayed(action, delay)
+}
+
 fun Context.getColorFromAttr(
         @AttrRes attrColor: Int,
         typedValue: TypedValue = TypedValue(),
