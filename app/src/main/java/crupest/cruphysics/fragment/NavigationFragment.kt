@@ -35,6 +35,7 @@ abstract class NavigationFragment : BaseFragment(), IFragmentNavigator {
         if (addToBackStack) {
             transaction.addToBackStack(null)
             transaction.commit()
+            childFragmentManager.executePendingTransactions()
             onNavigate(fragment)
         } else
             transaction.commitNow()

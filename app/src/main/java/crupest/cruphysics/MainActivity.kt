@@ -13,7 +13,7 @@ import androidx.fragment.app.FragmentTransaction
 import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.BaseFragment
 import crupest.cruphysics.fragment.MainFragment
-import crupest.cruphysics.utility.postOnMainThread
+import crupest.cruphysics.utility.postDelayOnMainThread
 
 class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivity, IDrawerActivity, INavigationButtonActivity {
 
@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
         if (addToBackStack) {
             transaction.addToBackStack(null)
             transaction.commit()
+            supportFragmentManager.executePendingTransactions()
         } else
             transaction.commitNow()
     }
@@ -130,7 +131,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     }
 
     internal fun notifyNavigated() {
-        postOnMainThread {
+        postDelayOnMainThread(1) {
             onNavigated()
         }
     }
