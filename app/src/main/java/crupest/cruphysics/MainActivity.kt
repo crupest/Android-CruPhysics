@@ -3,10 +3,14 @@ package crupest.cruphysics
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
+import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.MainFragment
 import crupest.cruphysics.fragment.NavigationFragment
 import java.lang.IllegalStateException
@@ -16,17 +20,63 @@ import java.lang.IllegalStateException
  * Navigate fragment using [navigateToFragment].
  * Please override [onCreate] to navigate to the first fragment using [navigateToFragment].
  */
-class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigation, IDrawerActivity {
+class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigation, IDrawerActivity, INavigateBackButtonActivity {
+
+    private lateinit var toolbar: Toolbar
 
     private lateinit var drawer: DrawerLayout
+    private var isDrawerOpened: Boolean = false
+
+    private lateinit var navigationButtonDrawable: NavigationIconDrawable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.tool_bar))
+        toolbar = findViewById(R.id.tool_bar)
+        setSupportActionBar(toolbar)
+
+        navigationButtonDrawable = NavigationIconDrawable(this)
+        toolbar.navigationIcon = navigationButtonDrawable
 
         drawer = findViewById(R.id.drawer)
         drawer.isEnabled = false
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
+        drawer.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+            private var init: Boolean = false
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                if (slideOffset.isNaN()) {  // !!! Fuck the damn stupid api!!!!
+                    init = true
+                    return
+                }
+
+                if (init) {
+                    init = false
+                    return
+                }
+
+                navigationButtonDrawable.transformationValue = slideOffset
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+                isDrawerOpened = true
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                isDrawerOpened = false
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_IDLE) {
+                    if (isDrawerOpened) {
+                        navigationButtonDrawable.setState(NavigationIconDrawable.IconState.ARROW, false)
+                    } else {
+                        navigationButtonDrawable.setState(NavigationIconDrawable.IconState.BURGER, false)
+                    }
+                }
+            }
+        })
 
         navigateToFragment(MainFragment(), false)
     }
@@ -118,29 +168,42 @@ class MainActivity : AppCompatActivity(), IOptionMenuActivity, IFragmentNavigati
         return drawer
     }
 
-    override fun setDrawerFragment(lifecycleOwner: LifecycleOwner, drawerFragmentFactory: () -> Fragment) {
-        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_START)
-            fun setDrawer() {
-                if (supportFragmentManager.findFragmentById(R.id.drawer_content) != null)
-                    throw IllegalStateException("Drawer fragment is already set.")
-
-                drawer.isEnabled = true
-                val transaction = supportFragmentManager.beginTransaction()
-                transaction.add(R.id.drawer_content, drawerFragmentFactory())
-                transaction.commitAllowingStateLoss()
+    override fun setDrawerFragment(fragment: Fragment?) {
+        if (fragment != null) {
+            navigationButtonDrawable.isDrawableVisible = true
+            navigationButtonDrawable.setState(NavigationIconDrawable.IconState.BURGER)
+            toolbar.setNavigationOnClickListener {
+                if (isDrawerOpened)
+                    drawer.closeDrawer(GravityCompat.START, true)
+                else
+                    drawer.openDrawer(GravityCompat.START, true)
             }
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-            fun unsetDrawer() {
-                val drawerFragment = supportFragmentManager.findFragmentById(R.id.drawer_content)
-                        ?: throw IllegalStateException("No drawer fragment exists.")
-
+            drawer.isEnabled = true
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNDEFINED)
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.drawer_content, fragment)
+            transaction.commitAllowingStateLoss()
+        } else {
+            supportFragmentManager.findFragmentById(R.id.drawer_content)?.also {
                 val transaction = supportFragmentManager.beginTransaction()
-                transaction.remove(drawerFragment)
+                transaction.remove(it)
                 transaction.commitAllowingStateLoss()
                 drawer.isEnabled = false
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
-        })
+        }
+    }
+
+    override fun setNavigateBackButton(show: Boolean) {
+        if (show) {
+            navigationButtonDrawable.isDrawableVisible = true
+            navigationButtonDrawable.setState(NavigationIconDrawable.IconState.ARROW)
+            toolbar.setNavigationOnClickListener {
+                onBackPressed()
+            }
+        } else {
+            navigationButtonDrawable.isDrawableVisible = false
+            toolbar.setNavigationOnClickListener(null)
+        }
     }
 }

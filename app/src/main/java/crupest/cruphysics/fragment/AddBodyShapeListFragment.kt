@@ -20,7 +20,7 @@ import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
 import crupest.cruphysics.viewmodel.AddBodyViewModel
 
 
-class AddBodyShapeListFragment : Fragment() {
+class AddBodyShapeListFragment : BaseFragment() {
 
     class AddBodyShapeListItemFragment : Fragment() {
 
@@ -80,6 +80,8 @@ class AddBodyShapeListFragment : Fragment() {
 
 
     private lateinit var addBodyViewModel: AddBodyViewModel
+
+    override fun determineShowNavigateBackButton(): Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

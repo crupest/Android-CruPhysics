@@ -23,7 +23,7 @@ import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
 
-class MainFragment : Fragment() {
+class MainFragment : BaseFragment() {
 
     class DrawerFragment : Fragment() {
         var createViewCallback: ((View) -> Unit)? = null
@@ -76,6 +76,24 @@ class MainFragment : Fragment() {
 
     private val optionMenuRes = Observable(R.menu.main_menu_pause)
 
+    override fun determineDrawer(activity: IDrawerActivity): Fragment? =
+            DrawerFragment().apply {
+                createViewCallback = { rootView ->
+                    val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
+
+                    historyView.layoutManager = LinearLayoutManager(
+                            context, RecyclerView.VERTICAL, false)
+                    val historyAdapter = HistoryAdapter()
+                    historyView.adapter = historyAdapter
+
+                    mainViewModel.registerWorldHistoryScrollToTopListener(this.viewLifecycleOwner) {
+                        postOnMainThread {
+                            historyView.scrollToPosition(0)
+                        }
+                    }
+                }
+            }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -104,24 +122,6 @@ class MainFragment : Fragment() {
             optionMenuRes.value = if (it) R.menu.main_menu_play else R.menu.main_menu_pause
         })
 
-        (context as IDrawerActivity).setDrawerFragment(this) {
-            DrawerFragment().apply {
-                createViewCallback = { rootView ->
-                    val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
-
-                    historyView.layoutManager = LinearLayoutManager(
-                            context, RecyclerView.VERTICAL, false)
-                    val historyAdapter = HistoryAdapter()
-                    historyView.adapter = historyAdapter
-
-                    mainViewModel.registerWorldHistoryScrollToTopListener(this.viewLifecycleOwner) {
-                        postOnMainThread {
-                            historyView.scrollToPosition(0)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

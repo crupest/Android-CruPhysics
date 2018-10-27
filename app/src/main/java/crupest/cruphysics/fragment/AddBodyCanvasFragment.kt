@@ -1,7 +1,6 @@
 package crupest.cruphysics.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.IOptionMenuActivity
@@ -17,9 +16,11 @@ import crupest.cruphysics.viewmodel.MainViewModel
  */
 
 
-abstract class AddBodyCanvasFragment : Fragment() {
+abstract class AddBodyCanvasFragment : BaseFragment() {
     protected lateinit var mainViewModel: MainViewModel
     protected lateinit var addBodyViewModel: AddBodyViewModel
+
+    override fun determineShowNavigateBackButton(): Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
