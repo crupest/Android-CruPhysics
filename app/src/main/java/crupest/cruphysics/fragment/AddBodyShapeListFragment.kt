@@ -12,9 +12,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
-import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.Observable
-import crupest.cruphysics.R
+import crupest.cruphysics.*
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
 import crupest.cruphysics.viewmodel.AddBodyViewModel
@@ -81,28 +79,25 @@ class AddBodyShapeListFragment : BaseFragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
 
-    override fun determineShowNavigateBackButton(): Boolean = true
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.next_menu)) {
-            if (it.itemId == R.id.next) {
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu, mapOf(
+            R.id.next withHandler {
                 val parent = parentFragment as NavigationFragment
                 val pager = view!!.findViewById<ViewPager>(R.id.pager)
                 when (pager.currentItem) {
                     0 -> {
                         addBodyViewModel.shapeType.value = SHAPE_TYPE_CIRCLE
-                        parent.navigateToFragment(AddCircleBodyCanvasFragment())
+                        parent.navigateTo(AddCircleBodyCanvasFragment())
                     }
                     1 ->{
                         addBodyViewModel.shapeType.value = SHAPE_TYPE_RECTANGLE
-                        parent.navigateToFragment(AddRectangleBodyCanvasFragment())
+                        parent.navigateTo(AddRectangleBodyCanvasFragment())
                     }
                 }
-                true
-            } else false
-        }
+            }
+    ))
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
         addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)

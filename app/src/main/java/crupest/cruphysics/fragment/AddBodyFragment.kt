@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.physics.BodyUserData
-import crupest.cruphysics.popParentBackStack
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_CIRCLE
 import crupest.cruphysics.serialization.data.SHAPE_TYPE_RECTANGLE
 import crupest.cruphysics.serialization.deserializeAsMassType
@@ -29,10 +28,9 @@ class AddBodyFragment : NavigationFragment() {
         val activity = context as FragmentActivity
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
         viewModel = ViewModelProviders.of(this).get(AddBodyViewModel::class.java)
-
-        if (savedInstanceState == null)
-            navigateToFragment(AddBodyShapeListFragment(), false)
     }
+
+    override fun onNavigateToFirstFragment(): BaseFragment = AddBodyShapeListFragment()
 
     fun createBodyAndPopBack() {
         val position = Vector2()
@@ -71,6 +69,6 @@ class AddBodyFragment : NavigationFragment() {
 
         mainViewModel.addBody(body)
 
-        popParentBackStack()
+        getParentNavigator().popBackStack()
     }
 }

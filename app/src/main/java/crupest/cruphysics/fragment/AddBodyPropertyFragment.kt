@@ -12,9 +12,7 @@ import android.widget.Spinner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import crupest.cruphysics.IOptionMenuActivity
-import crupest.cruphysics.Observable
-import crupest.cruphysics.R
+import crupest.cruphysics.*
 import crupest.cruphysics.serialization.data.BODY_TYPE_DYNAMIC
 import crupest.cruphysics.serialization.data.BODY_TYPE_STATIC
 import crupest.cruphysics.viewmodel.bindDoubleLiveData
@@ -29,20 +27,17 @@ class AddBodyPropertyFragment : BaseFragment() {
 
     private lateinit var addBodyViewModel: AddBodyViewModel
 
-    override fun determineShowNavigateBackButton(): Boolean = true
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (context as IOptionMenuActivity).setOptionMenu(this, Observable(R.menu.check_menu)) {
-            if (it.itemId == R.id.ok) {
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.check_menu, mapOf(
+            R.id.ok withHandler {
                 if (addBodyViewModel.density.value == 0.0)
                     showAlertDialog(context!!, "Density can't be 0.")
                 else
                     (parentFragment as AddBodyFragment).createBodyAndPopBack()
-                true
-            } else false
-        }
+            }
+    ))
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
         addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)

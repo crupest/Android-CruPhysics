@@ -33,12 +33,18 @@ class MainFragment : BaseFragment() {
             createViewCallback?.invoke(rootView)
             return rootView
         }
+
+        companion object {
+            fun createInstance(createViewCallback: (View) -> Unit): DrawerFragment = DrawerFragment().apply {
+                this.createViewCallback = createViewCallback
+            }
+        }
     }
 
 
     private inner class HistoryAdapter :
             ListLiveDataRecyclerAdapter<ProcessedWorldRecordForHistory, HistoryAdapter.ViewHolder>(
-                    this, mainViewModel.recordListForHistoryFlow, object : DiffTool<ProcessedWorldRecordForHistory> {
+                    this.viewLifecycleOwner, mainViewModel.recordListForHistoryFlow, object : DiffTool<ProcessedWorldRecordForHistory> {
                 override fun areItemSame(oldOne: ProcessedWorldRecordForHistory,
                                          newOne: ProcessedWorldRecordForHistory): Boolean =
                         oldOne.id == newOne.id
@@ -77,43 +83,36 @@ class MainFragment : BaseFragment() {
     private val optionMenuRes = Observable(R.menu.main_menu_pause)
 
     override fun determineDrawer(activity: IDrawerActivity): Fragment? =
-            DrawerFragment().apply {
-                createViewCallback = { rootView ->
-                    val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
+            DrawerFragment.createInstance { rootView ->
+                val historyView = rootView.findViewById<RecyclerView>(R.id.history_view)
 
-                    historyView.layoutManager = LinearLayoutManager(
-                            context, RecyclerView.VERTICAL, false)
-                    val historyAdapter = HistoryAdapter()
-                    historyView.adapter = historyAdapter
+                historyView.layoutManager = LinearLayoutManager(
+                        context, RecyclerView.VERTICAL, false)
+                val historyAdapter = HistoryAdapter()
+                historyView.adapter = historyAdapter
 
-                    mainViewModel.registerWorldHistoryScrollToTopListener(this.viewLifecycleOwner) {
-                        postOnMainThread {
-                            historyView.scrollToPosition(0)
-                        }
+                mainViewModel.registerWorldHistoryScrollToTopListener(this.viewLifecycleOwner) {
+                    postOnMainThread {
+                        historyView.scrollToPosition(0)
                     }
                 }
             }
 
+    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = IOptionMenuActivity.OptionMenuInfo(
+            optionMenuRes, mapOf(
+            R.id.play withHandler {
+                mainViewModel.runWorld()
+            },
+            R.id.pause withHandler {
+                mainViewModel.pauseWorld()
+            },
+            R.id.create_new withHandler {
+                mainViewModel.createNewWorldAndResetCamera()
+            }
+    ))
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        (context as IOptionMenuActivity).setOptionMenu(this, optionMenuRes) {
-            when (it.itemId) {
-                R.id.play -> {
-                    mainViewModel.runWorld()
-                    true
-                }
-                R.id.pause -> {
-                    mainViewModel.pauseWorld()
-                    true
-                }
-                R.id.create_new -> {
-                    mainViewModel.createNewWorldAndResetCamera()
-                    true
-                }
-                else -> false
-            }
-        }
 
         val activity = context as FragmentActivity
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
@@ -133,7 +132,7 @@ class MainFragment : BaseFragment() {
 
         rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
             val activity = context as MainActivity
-            activity.navigateToFragment(AddBodyFragment())
+            activity.navigateTo(AddBodyFragment())
         }
 
         return rootView

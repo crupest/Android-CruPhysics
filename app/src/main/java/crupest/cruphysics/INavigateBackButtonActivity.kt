@@ -1,5 +1,11 @@
 package crupest.cruphysics
 
-interface INavigateBackButtonActivity {
-    fun setNavigateBackButton(show: Boolean)
+interface INavigationButtonActivity {
+    enum class Button {
+        NONE,
+        BACK,
+        MENU
+    }
+
+    fun setNavigationButton(button: Button)
 }
