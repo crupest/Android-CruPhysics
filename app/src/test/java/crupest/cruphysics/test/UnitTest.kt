@@ -13,11 +13,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class UnitTest {
     @Test
-    fun test() {
-
-    }
-
-    @Test
     fun cameraTest() {
         val cameraData = CameraData(Vector2Data(100.0, 100.0), 500.0)
         val convertBack = cameraData.fromData(100.0f, 100.0f).toData(100.0f, 100.0f)
