@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import crupest.cruphysics.IFragmentNavigator
 import crupest.cruphysics.MainActivity
 import crupest.cruphysics.R
@@ -28,12 +27,13 @@ abstract class NavigationFragment : BaseFragment(), IFragmentNavigator {
         (context as MainActivity).notifyNavigated()
     }
 
-    private fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean) {
+    private fun navigateToFragment(fragment: BaseFragment, addToBackStack: Boolean) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.navigation_fragment_root, fragment)
         if (addToBackStack) {
             transaction.addToBackStack(null)
             transaction.commit()
+            onNavigate(fragment)
         } else
             transaction.commitNow()
         notifyActivityNavigated()
@@ -48,14 +48,13 @@ abstract class NavigationFragment : BaseFragment(), IFragmentNavigator {
                     ?: throw IllegalStateException("Fragment not loaded.")) as BaseFragment
 
     override fun popBackStack(): Boolean {
-        val previousFragment = getCurrentFragment()
         val result =  childFragmentManager.popBackStackImmediate()
-        onPopBackStack(previousFragment)
+        onNavigate(getCurrentFragment())
         notifyActivityNavigated()
         return result
     }
 
-    protected open fun onPopBackStack(previousFragment: BaseFragment) {
+    protected open fun onNavigate(newFragment: BaseFragment) {
 
     }
 }

@@ -46,7 +46,6 @@ class AddBodyFragment : NavigationFragment() {
                     showAlertDialog(context!!, error)
                 } else {
                     navigateTo(AddBodyPropertyFragment())
-                    optionMenuRes.value = R.menu.check_menu
                 }
                 return@addHandler
             }
@@ -74,9 +73,12 @@ class AddBodyFragment : NavigationFragment() {
 
     override fun onNavigateToFirstFragment(): BaseFragment = AddBodyShapeListFragment()
 
-    override fun onPopBackStack(previousFragment: BaseFragment) {
-        if (previousFragment is AddBodyPropertyFragment)
-            optionMenuRes.value = R.menu.next_menu
+    override fun onNavigate(newFragment: BaseFragment) {
+        optionMenuRes.value = when (newFragment) {
+            is AddBodyShapeListFragment, is AddBodyCanvasFragment -> R.menu.next_menu
+            is AddBodyPropertyFragment -> R.menu.check_menu
+            else -> throw IllegalStateException("You can't reach here.")
+        }
     }
 
     private fun createBodyAndPopBack() {
