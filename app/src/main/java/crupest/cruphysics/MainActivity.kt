@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.BaseFragment
 import crupest.cruphysics.fragment.MainFragment
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     private fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, fragment)
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         if (addToBackStack) {
             transaction.addToBackStack(null)
             transaction.commit()

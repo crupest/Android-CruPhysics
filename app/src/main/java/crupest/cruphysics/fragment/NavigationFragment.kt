@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentTransaction
 import crupest.cruphysics.IFragmentNavigator
 import crupest.cruphysics.MainActivity
 import crupest.cruphysics.R
@@ -30,6 +31,7 @@ abstract class NavigationFragment : BaseFragment(), IFragmentNavigator {
     private fun navigateToFragment(fragment: BaseFragment, addToBackStack: Boolean) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.navigation_fragment_root, fragment)
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         if (addToBackStack) {
             transaction.addToBackStack(null)
             transaction.commit()
