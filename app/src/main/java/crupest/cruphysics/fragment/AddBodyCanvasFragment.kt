@@ -3,8 +3,6 @@ package crupest.cruphysics.fragment
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
-import crupest.cruphysics.*
-import crupest.cruphysics.utility.showAlertDialog
 import crupest.cruphysics.viewmodel.AddBodyViewModel
 import crupest.cruphysics.viewmodel.MainViewModel
 
@@ -17,12 +15,6 @@ import crupest.cruphysics.viewmodel.MainViewModel
 abstract class AddBodyCanvasFragment : BaseFragment() {
     protected lateinit var mainViewModel: MainViewModel
     protected lateinit var addBodyViewModel: AddBodyViewModel
-
-    override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = staticOptionMenu(R.menu.next_menu) {
-        addHandler(R.id.next) {
-
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

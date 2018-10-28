@@ -120,15 +120,22 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewCenterX = width.toFloat() / 2.0f
-        viewCenterY = height.toFloat() / 2.0f
-
         viewModel!!.apply {
-            centerX.setWhenNull(worldCenterX)
-            centerY.setWhenNull(worldCenterY)
-            width.setWhenNull(worldWidth)
-            height.setWhenNull(worldHeight)
-            angle.setWhenNull(worldAngle)
+            if (centerX.value == null) {
+                viewCenterX = this@AddRectangleBodyWorldCanvas.width.toFloat() / 2.0f
+                viewCenterY = this@AddRectangleBodyWorldCanvas.height.toFloat() / 2.0f
+                centerX.value = worldCenterX
+                centerY.value = worldCenterY
+                width.value = worldWidth
+                height.value = worldHeight
+                angle.value = worldAngle
+            } else {
+                worldCenterX = centerX.value!!
+                worldCenterY = centerY.value!!
+                worldWidth = width.value!!
+                worldHeight = height.value!!
+                worldAngle = angle.value!!
+            }
         }
 
         updateControllerPosition()
