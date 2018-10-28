@@ -102,14 +102,20 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewCenterX = width.toFloat() / 2.0f
-        viewCenterY = height.toFloat() / 2.0f
-
         viewModel!!.apply {
-            centerX.setWhenNull(worldCenterX)
-            centerY.setWhenNull(worldCenterY)
-            radius.setWhenNull(worldRadius)
-            angle.setWhenNull(worldAngle)
+            if (centerX.value == null) {
+                viewCenterX = width.toFloat() / 2.0f
+                viewCenterY = height.toFloat() / 2.0f
+                centerX.value = worldCenterX
+                centerY.value = worldCenterY
+                radius.value = worldRadius
+                angle.value = worldAngle
+            } else {
+                worldCenterX = centerX.value!!
+                worldCenterY = centerY.value!!
+                worldRadius = radius.value!!
+                worldAngle = angle.value!!
+            }
         }
 
         updateControllerPosition()

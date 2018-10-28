@@ -20,10 +20,7 @@ import crupest.cruphysics.physics.fromData
 import crupest.cruphysics.physics.toData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
-import crupest.cruphysics.utility.distance
-import crupest.cruphysics.utility.getColorFromAttr
-import crupest.cruphysics.utility.invertedMatrix
-import crupest.cruphysics.utility.mapPoint
+import crupest.cruphysics.utility.*
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -70,9 +67,13 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         })
     }
 
-    fun worldToView(radius: Double): Float = viewMatrix.mapRadius(radius.toFloat())
+    // the robolectric doesn't implement it. So I have to implement it myself.
+    // remember to delete it.
+    private fun Matrix.myMapRadius(radius: Float): Float = this.getValues()[Matrix.MSCALE_X] * radius
+
+    fun worldToView(radius: Double): Float = viewMatrix.myMapRadius(radius.toFloat())
     fun worldToView(x: Double, y: Double): PointF = viewMatrix.mapPoint(x.toFloat(), y.toFloat())
-    fun viewToWorld(radius: Float): Double = viewMatrix.invertedMatrix.mapRadius(radius).toDouble()
+    fun viewToWorld(radius: Float): Double = viewMatrix.invertedMatrix.myMapRadius(radius).toDouble()
     fun viewToWorld(x: Float, y: Float): Vector2Data = viewMatrix.invertedMatrix.mapPoint(x, y).let {
         Vector2Data(it.x.toDouble(), it.y.toDouble())
     }
@@ -237,9 +238,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
         mainViewModel = viewModel
 
-        viewModel.camera.value!!.also {
-            setCamera(it)
-        }
+        setCamera(viewModel.camera.value!!)
 
         viewModel.drawWorldDelegate.value!!.also {
             worldCanvasDelegate = it
