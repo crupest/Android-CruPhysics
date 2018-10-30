@@ -1,29 +1,22 @@
 package crupest.cruphysics.test
 
-import android.view.View
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.*
-import androidx.test.espresso.UiController
+import androidx.test.espresso.Espresso.onData
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.assertion.ViewAssertions.*
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.AndroidJUnit4
 import crupest.cruphysics.MainActivity
 import crupest.cruphysics.R
+import org.hamcrest.Matchers.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.hamcrest.Matchers.*
-import androidx.test.espresso.ViewAction
-import org.hamcrest.Matcher
-import androidx.test.espresso.util.HumanReadables
-import androidx.test.espresso.PerformException
-import androidx.test.espresso.util.TreeIterables
-import java.util.concurrent.TimeoutException
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
 
-
+/*
 fun waitFor(millis: Long) {
     onView(isRoot()).perform(object : ViewAction {
         override fun getConstraints(): Matcher<View> {
@@ -76,7 +69,7 @@ fun waitId(viewId: Int, millis: Long) {
         }
     })
 }
-
+*/
 
 @RunWith(AndroidJUnit4::class)
 class ActivityUnitTest {

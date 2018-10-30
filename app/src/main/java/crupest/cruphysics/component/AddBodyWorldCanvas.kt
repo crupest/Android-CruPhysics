@@ -64,8 +64,8 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         }
     }
 
-    override fun onTouchEventOverride(event: MotionEvent?): Boolean {
-        if (event!!.action == MotionEvent.ACTION_DOWN) {
+    override fun onTouchEventOverride(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
             val whichController = hitTestController(event.x, event.y)
             if (whichController != -1) {
                 draggedControllerIndex = whichController
@@ -87,8 +87,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: AddBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        if (this.viewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+        check(this.viewModel != null) { "AddBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 

@@ -18,8 +18,8 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
     private var singleLongTouchDownPosition: PointF? = null
 
 
-    override fun onTouchEventOverride(event: MotionEvent?): Boolean {
-        when (event!!.actionMasked) {
+    override fun onTouchEventOverride(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
 
                 // !!! Save the point because event object will be recycled.

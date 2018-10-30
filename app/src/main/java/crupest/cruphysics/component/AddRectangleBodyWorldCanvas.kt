@@ -120,7 +120,8 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewModel!!.apply {
+        viewModel.apply {
+            checkNotNull(this) { "AddRectangleBodyViewModel is not bound now." }
             if (centerX.value == null) {
                 viewCenterX = this@AddRectangleBodyWorldCanvas.width.toFloat() / 2.0f
                 viewCenterY = this@AddRectangleBodyWorldCanvas.height.toFloat() / 2.0f
@@ -155,8 +156,7 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: AddRectangleBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        if (this.viewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+        check(this.viewModel == null) { "AddRectangleBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 

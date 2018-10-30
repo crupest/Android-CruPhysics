@@ -112,8 +112,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     private val previousPointerPositionMap = mutableMapOf<Int, PointF>()
 
     @SuppressLint("ClickableViewAccessibility")
-    final override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event!!.actionMasked == MotionEvent.ACTION_DOWN)
+    final override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN)
             requestFocus()
 
         if (onTouchEventOverride(event))
@@ -122,14 +122,14 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         return super.onTouchEvent(event)
     }
 
-    open fun onTouchEventOverride(event: MotionEvent?): Boolean {
+    open fun onTouchEventOverride(event: MotionEvent): Boolean {
         fun recordPointerPosition(index: Int) {
-            previousPointerPositionMap.getOrPut(event!!.getPointerId(index)) {
+            previousPointerPositionMap.getOrPut(event.getPointerId(index)) {
                 PointF()
             }.set(event.getX(index), event.getY(index))
         }
 
-        when (event!!.actionMasked) {
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 recordPointerPosition(event.actionIndex)
                 return true

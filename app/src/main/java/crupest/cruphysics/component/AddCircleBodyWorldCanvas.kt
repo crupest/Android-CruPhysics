@@ -102,7 +102,8 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewModel!!.apply {
+        viewModel.apply {
+            checkNotNull(this) { "AddCircleBodyViewModel is not bound now." }
             if (centerX.value == null) {
                 viewCenterX = width.toFloat() / 2.0f
                 viewCenterY = height.toFloat() / 2.0f
@@ -134,8 +135,7 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: AddCircleBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        if (this.viewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+        check(this.viewModel == null) { "AddCircleBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 
