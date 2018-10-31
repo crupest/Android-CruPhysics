@@ -10,6 +10,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.BaseFragment
 import crupest.cruphysics.fragment.MainFragment
@@ -87,8 +88,18 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     private var optionMenuInfo: IOptionMenuActivity.OptionMenuInfo? = null
 
     override fun setOptionMenu(optionMenuInfo: IOptionMenuActivity.OptionMenuInfo?) {
+        val old = this.optionMenuInfo
+        old?.apply { menuRes.changeListener = null }
+
         this.optionMenuInfo = optionMenuInfo
-        optionMenuRes = optionMenuInfo?.menuRes?.value ?: 0
+        if (optionMenuInfo != null) {
+            optionMenuRes = optionMenuInfo.menuRes.value
+            optionMenuInfo.menuRes.changeListener = {
+                optionMenuRes = it
+            }
+        } else {
+            optionMenuRes = 0
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

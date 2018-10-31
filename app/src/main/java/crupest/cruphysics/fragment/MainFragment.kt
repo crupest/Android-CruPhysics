@@ -141,4 +141,10 @@ class MainFragment : BaseFragment() {
         super.onActivityCreated(savedInstanceState)
         drawer = (context as IDrawerActivity).getDrawer()
     }
+
+    override fun onPause() {
+        super.onPause()
+
+        mainViewModel.pauseWorld()
+    }
 }
