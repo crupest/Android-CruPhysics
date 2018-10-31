@@ -1,7 +1,6 @@
 package crupest.cruphysics.component.delegate
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.text.Html
 import android.text.Layout
 import android.text.StaticLayout

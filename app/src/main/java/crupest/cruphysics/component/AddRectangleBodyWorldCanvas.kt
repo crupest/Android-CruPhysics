@@ -11,7 +11,6 @@ import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.utility.toDegrees
 import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
-import crupest.cruphysics.viewmodel.setWhenNull
 import kotlin.math.*
 
 /**
