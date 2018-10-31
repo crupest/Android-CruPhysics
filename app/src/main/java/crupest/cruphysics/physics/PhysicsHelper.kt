@@ -32,20 +32,55 @@ val Body.cruUserData: BodyUserData
     get() = this.userData as BodyUserData
 
 
-inline fun Shape.switchShape(circleHandler: (Circle) -> Unit,
-                             rectangleHandler: (Rectangle) -> Unit) {
-    when (this) {
-        is Circle -> circleHandler(this)
-        is Rectangle -> rectangleHandler(this)
-        else -> throw UnsupportedOperationException(
-                "Shape ${this::class.simpleName} is unsupported.")
+class ShapeHandlers<TReturn>(throwOnElse: Boolean) {
+
+    var circleHandler: ((Circle) -> TReturn)? = null
+    var rectangleHandler: ((Rectangle) -> TReturn)? = null
+    var elseHandler: (() -> TReturn)? = null
+
+    init {
+        if (throwOnElse)
+            onElse { throw IllegalStateException("Unknown shape.") }
+    }
+
+    fun onCircle(block: (Circle) -> TReturn) {
+        check(circleHandler == null)
+        circleHandler = block
+    }
+
+    fun onRectangle(block: (Rectangle) -> TReturn) {
+        check(rectangleHandler == null)
+        rectangleHandler = block
+    }
+
+    fun onElse(block: () -> TReturn) {
+        check(elseHandler == null)
+        elseHandler = block
+    }
+
+    fun check() {
+        checkNotNull(circleHandler)
+        checkNotNull(rectangleHandler)
+        checkNotNull(elseHandler)
     }
 }
 
-inline fun <T> Shape.switchShapeR(circleHandler: (Circle) -> T,
-                                  rectangleHandler: (Rectangle) -> T) = when (this) {
-    is Circle -> circleHandler(this)
-    is Rectangle -> rectangleHandler(this)
-    else -> throw UnsupportedOperationException(
-            "Shape ${this::class.simpleName} is unsupported.")
+inline fun Shape.switchShape(throwOnElse: Boolean = true, block: ShapeHandlers<Unit>.() -> Unit) {
+    val handlers = ShapeHandlers<Unit>(throwOnElse).apply(block)
+    handlers.check()
+    when (this) {
+        is Circle -> handlers.circleHandler!!.invoke(this)
+        is Rectangle -> handlers.rectangleHandler!!.invoke(this)
+        else -> handlers.elseHandler!!.invoke()
+    }
+}
+
+inline fun <T> Shape.switchShapeR(throwOnElse: Boolean = true, block: ShapeHandlers<T>.() -> Unit): T {
+    val handlers = ShapeHandlers<T>(throwOnElse).apply(block)
+    handlers.check()
+    return when (this) {
+        is Circle -> handlers.circleHandler!!.invoke(this)
+        is Rectangle -> handlers.rectangleHandler!!.invoke(this)
+        else -> handlers.elseHandler!!.invoke()
+    }
 }

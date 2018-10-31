@@ -87,7 +87,7 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: AddBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        check(this.viewModel != null) { "AddBodyViewModel is already bound." }
+        check(this.viewModel == null) { "AddBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 

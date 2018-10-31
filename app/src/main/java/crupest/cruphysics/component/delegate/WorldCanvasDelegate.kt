@@ -9,7 +9,7 @@ import crupest.cruphysics.physics.view.BodyViewData
 import crupest.cruphysics.serialization.data.CameraData
 import org.dyn4j.dynamics.Body
 
-class WorldCanvasDelegate(): IDrawDelegate {
+class WorldCanvasDelegate() : IDrawDelegate {
     constructor(bodies: List<Body>) : this() {
         bodies.forEach {
             registerBody(it)
@@ -39,27 +39,27 @@ class WorldCanvasDelegate(): IDrawDelegate {
         for ((body, bodyViewData) in bodyViewDataMap) {
             val shape = body.checkAndGetFixture().shape
             canvas.withTransform(body.transform) {
-                shape.switchShape(
-                        circleHandler = {
-                            drawCircle(
-                                    it.center.x.toFloat(),
-                                    it.center.y.toFloat(),
-                                    it.radius.toFloat(),
-                                    bodyViewData.paint
-                            )
-                        },
-                        rectangleHandler = {
-                            val hw = it.width / 2.0
-                            val hh = it.height / 2.0
-                            drawRect(
-                                    (it.center.x - hw).toFloat(),
-                                    (it.center.y + hh).toFloat(),
-                                    (it.center.x + hw).toFloat(),
-                                    (it.center.y - hh).toFloat(),
-                                    bodyViewData.paint
-                            )
-                        }
-                )
+                shape.switchShape {
+                    onCircle {
+                        drawCircle(
+                                it.center.x.toFloat(),
+                                it.center.y.toFloat(),
+                                it.radius.toFloat(),
+                                bodyViewData.paint
+                        )
+                    }
+                    onRectangle {
+                        val hw = it.width / 2.0
+                        val hh = it.height / 2.0
+                        drawRect(
+                                (it.center.x - hw).toFloat(),
+                                (it.center.y + hh).toFloat(),
+                                (it.center.x + hw).toFloat(),
+                                (it.center.y - hh).toFloat(),
+                                bodyViewData.paint
+                        )
+                    }
+                }
             }
         }
     }

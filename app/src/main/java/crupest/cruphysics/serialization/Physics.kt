@@ -27,21 +27,21 @@ fun String.deserializeAsMassType(): MassType = when (this) {
     else -> throw InvalidParameterException("Invalid string as body type.")
 }
 
-fun Shape.toData(): ShapeData = this.switchShapeR(
-        {
-            CircleData(
-                    center = it.center.toData(),
-                    radius = it.radius
-            ).createShapeData()
-        },
-        {
-            RectangleData(
-                    center = it.center.toData(),
-                    width = it.width,
-                    height = it.height
-            ).createShapeData()
-        }
-)
+fun Shape.toData(): ShapeData = this.switchShapeR {
+    onCircle {
+        CircleData(
+                center = it.center.toData(),
+                radius = it.radius
+        ).createShapeData()
+    }
+    onRectangle {
+        RectangleData(
+                center = it.center.toData(),
+                width = it.width,
+                height = it.height
+        ).createShapeData()
+    }
+}
 
 
 fun ShapeData.fromData(): Convex {

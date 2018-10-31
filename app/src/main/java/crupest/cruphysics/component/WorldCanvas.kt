@@ -233,8 +233,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: MainViewModel, lifecycleOwner: LifecycleOwner) {
-        if (mainViewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+        check(mainViewModel == null) {"MainViewModel is already bound."}
 
         mainViewModel = viewModel
 
