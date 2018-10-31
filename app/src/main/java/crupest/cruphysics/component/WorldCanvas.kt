@@ -41,7 +41,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     protected var mainViewModel: MainViewModel? = null
         private set
 
-    private lateinit var worldCanvasDelegate: IDrawDelegate
+    private lateinit var drawWorldDelegate: IDrawDelegate
     private val scaleMarkDelegate = ScaleMarkDelegate(ContextCompat.getColor(context!!, R.color.icons))
 
     private val viewMatrix: Matrix = Matrix()
@@ -102,7 +102,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     protected open fun onPaint(canvas: Canvas) {
         canvas.drawColor(context.getColorFromAttr(android.R.attr.windowBackground))
         canvas.withMatrix(viewMatrix) {
-            worldCanvasDelegate.draw(canvas)
+            drawWorldDelegate.draw(canvas)
         }
         canvas.withTranslation(width - scaleMarkDelegate.expectWidth - 50.0f, 50.0f) {
             scaleMarkDelegate.draw(canvas)
@@ -233,23 +233,16 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     }
 
     fun bindViewModel(viewModel: MainViewModel, lifecycleOwner: LifecycleOwner) {
-        check(mainViewModel == null) {"MainViewModel is already bound."}
+        check(mainViewModel == null) { "MainViewModel is already bound." }
 
         mainViewModel = viewModel
 
         setCamera(viewModel.camera.value!!)
 
-        viewModel.drawWorldDelegate.value!!.also {
-            worldCanvasDelegate = it
-        }
+        drawWorldDelegate = viewModel.drawWorldDelegate
 
         viewModel.camera.observe(lifecycleOwner, Observer {
             setCamera(it)
-            repaint()
-        })
-
-        viewModel.drawWorldDelegate.observe(lifecycleOwner, Observer {
-            worldCanvasDelegate = it
             repaint()
         })
 

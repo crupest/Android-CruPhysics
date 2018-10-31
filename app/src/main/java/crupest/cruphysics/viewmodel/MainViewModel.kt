@@ -2,7 +2,7 @@ package crupest.cruphysics.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
-import crupest.cruphysics.component.delegate.WorldCanvasDelegate
+import crupest.cruphysics.component.delegate.DrawWorldDelegate
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
 import crupest.cruphysics.serialization.data.CameraData
@@ -35,7 +35,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val worldRepaintListeners: MutableList<() -> Unit> = mutableListOf()
     private val worldHistoryScrollToTopListeners: MutableList<() -> Unit> = mutableListOf()
 
-    private val drawWorldDelegateInternal: MutableLiveData<WorldCanvasDelegate> = mutableLiveDataWithDefault(WorldCanvasDelegate())
     private val cameraInternal: MutableLiveData<CameraData> = mutableLiveDataWithDefault(CameraData())
     private val worldStateInternal: MutableLiveData<Boolean> = mutableLiveDataWithDefault(false)
 
@@ -43,27 +42,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val recordListForHistoryFlow: Flowable<List<ProcessedWorldRecordForHistory>>
         get() = worldRepository.getRecordListFlow()
 
+    val drawWorldDelegate: DrawWorldDelegate = DrawWorldDelegate(cameraInternal)
     val camera: LiveData<CameraData>
         get() = cameraInternal
-    val drawWorldDelegate: LiveData<WorldCanvasDelegate>
-        get() = drawWorldDelegateInternal
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
 
 
     override fun onCleared() {
+        drawWorldDelegate.onClear()
         worldRepository.closeAndWait()
     }
 
     private fun generateThumbnail() =
-            drawWorldDelegateInternal.value!!.generateThumbnail(1000, 1000, camera.value!!.let {
+            drawWorldDelegate.generateThumbnail(1000, 1000, camera.value!!.let {
                 it.copy(scale = it.scale * 0.5)
             })
 
     private fun recoverFrom(worldData: WorldData, cameraData: CameraData) {
         world.removeAllBodiesAndJoints()
         worldData.fromData(world)
-        drawWorldDelegateInternal.value = WorldCanvasDelegate(world.bodies)
+        drawWorldDelegate.clearAndRegister(world.bodies)
         cameraInternal.value = cameraData
     }
 
@@ -103,7 +102,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun createNewWorld() {
         pauseWorld()
         world.removeAllBodiesAndJoints()
-        drawWorldDelegateInternal.value = WorldCanvasDelegate()
+        drawWorldDelegate.unregisterAllBody()
     }
 
     fun createNewWorldAndResetCamera() {
@@ -134,13 +133,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addBody(body: Body) {
         world.addBody(body)
-        drawWorldDelegateInternal.value!!.registerBody(body)
+        drawWorldDelegate.registerBody(body)
         createNewRecordFromCurrent()
     }
 
     fun removeBody(body: Body) {
         world.removeBody(body)
-        drawWorldDelegateInternal.value!!.unregisterBody(body)
+        drawWorldDelegate.unregisterBody(body)
         createNewRecordFromCurrent()
     }
 
