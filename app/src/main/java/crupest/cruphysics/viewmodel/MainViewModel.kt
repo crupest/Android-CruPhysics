@@ -93,6 +93,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         registerListener(lifecycleOwner, worldHistoryScrollToTopListeners, listener)
     }
 
+    private fun notifyRepaint() {
+        worldRepaintListeners.forEach {
+            it.invoke()
+        }
+    }
+
     private fun raiseWorldHistoryScrollToTopEvent() {
         worldHistoryScrollToTopListeners.forEach {
             it.invoke()
@@ -114,9 +120,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (task == null) {
                 task = setInterval(1.0 / 60.0) {
                     world.update(1.0 / 60.0)
-                    worldRepaintListeners.forEach {
-                        it.invoke()
-                    }
+                    notifyRepaint()
                 }
                 worldStateInternal.value = true
                 true
@@ -135,12 +139,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         world.addBody(body)
         drawWorldDelegate.registerBody(body)
         createNewRecordFromCurrent()
+        notifyRepaint()
     }
 
     fun removeBody(body: Body) {
         world.removeBody(body)
         drawWorldDelegate.unregisterBody(body)
-        createNewRecordFromCurrent()
+        if (!world.isEmpty)
+            createNewRecordFromCurrent()
+        notifyRepaint()
     }
 
     fun updateLatestRecordCamera(cameraData: CameraData) {
