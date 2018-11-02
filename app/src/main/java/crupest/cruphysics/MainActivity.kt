@@ -19,10 +19,10 @@ import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivity, IDrawerActivity, INavigationButtonActivity {
 
-    private class FragmentInfoCache {
-        var optionMenu: WeakReference<BaseFragment>? = null
-        var drawer: WeakReference<BaseFragment>? = null
-        var navigationButton: WeakReference<BaseFragment>? = null
+    private enum class FragmentInfoKey {
+        OPTION_MENU,
+        DRAWER,
+        NAVIGATION_BUTTON
     }
 
     private lateinit var toolbar: Toolbar
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
 
     private lateinit var navigationButtonDrawable: NavigationIconDrawable
 
-    private val fragmentInfoCache = FragmentInfoCache()
+    private val fragmentInfoCache = mutableMapOf<FragmentInfoKey, WeakReference<BaseFragment>>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -158,55 +158,48 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     }
 
     private fun onNavigated() {
+
         var fragment: BaseFragment = getCurrentFragment()
 
-        var optionMenuDetermined = false
-        var drawerDetermined = false
-        var navigationButtonDetermined = false
+        val determinedSet = mutableSetOf<FragmentInfoKey>()
 
+        fun determine(name: FragmentInfoKey, fragment: BaseFragment, action: (BaseFragment) -> Boolean) {
+            if (name in determinedSet)
+                return
+
+            if (fragmentInfoCache[name] == fragment) {
+                determinedSet.add(name)
+                return
+            }
+
+            val result = action(fragment)
+            if (result) {
+                determinedSet.add(name)
+                fragmentInfoCache[name] = fragment.weakReference()
+            }
+        }
+
+        fun <T : Any> T?.ifNotNull(block: (T) -> Unit): Boolean {
+            return if (this == null) false else {
+                block(this)
+                true
+            }
+        }
 
         while (true) {
-
-            if (!optionMenuDetermined) {
-                if (fragment == fragmentInfoCache.optionMenu?.get())
-                    optionMenuDetermined = true
-                else {
-                    val optionMenu = fragment.determineOptionMenu()
-                    if (optionMenu != null) {
-                        setOptionMenu(optionMenu)
-                        fragmentInfoCache.optionMenu = fragment.weakReference()
-                        optionMenuDetermined = true
-                    }
-                }
+            determine(FragmentInfoKey.OPTION_MENU, fragment) { f ->
+                f.determineOptionMenu().ifNotNull { setOptionMenu(it) }
             }
 
-            if (!drawerDetermined) {
-                if (fragment == fragmentInfoCache.drawer?.get())
-                    drawerDetermined = true
-                else {
-                    val drawerFragment = fragment.determineDrawer(this)
-                    if (drawerFragment != null) {
-                        setDrawerFragment(drawerFragment)
-                        fragmentInfoCache.drawer = fragment.weakReference()
-                        drawerDetermined = true
-                    }
-                }
+            determine(FragmentInfoKey.DRAWER, fragment) { f->
+                f.determineDrawer(this).ifNotNull { setDrawerFragment(it) }
             }
 
-            if (!navigationButtonDetermined) {
-                if (fragment == fragmentInfoCache.navigationButton?.get())
-                    navigationButtonDetermined = true
-                else {
-                    val button = fragment.determineNavigationButton()
-                    if (button != null) {
-                        setNavigationButton(button)
-                        fragmentInfoCache.navigationButton = fragment.weakReference()
-                        navigationButtonDetermined = true
-                    }
-                }
+            determine(FragmentInfoKey.NAVIGATION_BUTTON, fragment) { f ->
+                f.determineNavigationButton().ifNotNull { setNavigationButton(it) }
             }
 
-            if (optionMenuDetermined && drawerDetermined && navigationButtonDetermined)
+            if (FragmentInfoKey.values().all { it in determinedSet })
                 break
 
             if (fragment is IFragmentNavigator)
@@ -215,19 +208,17 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
                 break
         }
 
-        if (!optionMenuDetermined) {
-            fragmentInfoCache.optionMenu = null
-            setOptionMenu(null)
+        fun checkDetermine(key: FragmentInfoKey, onUndetermined: () -> Unit) {
+            if (key !in determinedSet) {
+                fragmentInfoCache.remove(key)
+                onUndetermined()
+            }
         }
 
-        if (!drawerDetermined) {
-            fragmentInfoCache.drawer = null
-            setDrawerFragment(null)
-        }
-
-        if (!navigationButtonDetermined) {
-            fragmentInfoCache.navigationButton = null
-            setNavigationButton(if (drawerDetermined) INavigationButtonActivity.Button.MENU else INavigationButtonActivity.Button.BACK)
+        checkDetermine(FragmentInfoKey.OPTION_MENU) { setOptionMenu(null) }
+        checkDetermine(FragmentInfoKey.DRAWER) { setDrawerFragment(null) }
+        checkDetermine(FragmentInfoKey.NAVIGATION_BUTTON) {
+            setNavigationButton(if (FragmentInfoKey.DRAWER in determinedSet) INavigationButtonActivity.Button.MENU else INavigationButtonActivity.Button.BACK)
         }
     }
 
