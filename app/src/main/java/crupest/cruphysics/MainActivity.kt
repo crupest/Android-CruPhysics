@@ -14,8 +14,16 @@ import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.BaseFragment
 import crupest.cruphysics.fragment.MainFragment
 import crupest.cruphysics.utility.postDelayOnMainThread
+import crupest.cruphysics.utility.weakReference
+import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivity, IDrawerActivity, INavigationButtonActivity {
+
+    private class FragmentInfoCache {
+        var optionMenu: WeakReference<BaseFragment>? = null
+        var drawer: WeakReference<BaseFragment>? = null
+        var navigationButton: WeakReference<BaseFragment>? = null
+    }
 
     private lateinit var toolbar: Toolbar
 
@@ -23,6 +31,9 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     private var isDrawerOpened: Boolean = false
 
     private lateinit var navigationButtonDrawable: NavigationIconDrawable
+
+    private val fragmentInfoCache = FragmentInfoCache()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -157,26 +168,41 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
         while (true) {
 
             if (!optionMenuDetermined) {
-                val optionMenu = fragment.determineOptionMenu()
-                if (optionMenu != null) {
-                    setOptionMenu(optionMenu)
+                if (fragment == fragmentInfoCache.optionMenu?.get())
                     optionMenuDetermined = true
+                else {
+                    val optionMenu = fragment.determineOptionMenu()
+                    if (optionMenu != null) {
+                        setOptionMenu(optionMenu)
+                        fragmentInfoCache.optionMenu = fragment.weakReference()
+                        optionMenuDetermined = true
+                    }
                 }
             }
 
             if (!drawerDetermined) {
-                val drawerFragment = fragment.determineDrawer(this)
-                if (drawerFragment != null) {
-                    setDrawerFragment(drawerFragment)
+                if (fragment == fragmentInfoCache.drawer?.get())
                     drawerDetermined = true
+                else {
+                    val drawerFragment = fragment.determineDrawer(this)
+                    if (drawerFragment != null) {
+                        setDrawerFragment(drawerFragment)
+                        fragmentInfoCache.drawer = fragment.weakReference()
+                        drawerDetermined = true
+                    }
                 }
             }
 
             if (!navigationButtonDetermined) {
-                val button = fragment.determineNavigationButton()
-                if (button != null) {
-                    setNavigationButton(button)
+                if (fragment == fragmentInfoCache.navigationButton?.get())
                     navigationButtonDetermined = true
+                else {
+                    val button = fragment.determineNavigationButton()
+                    if (button != null) {
+                        setNavigationButton(button)
+                        fragmentInfoCache.navigationButton = fragment.weakReference()
+                        navigationButtonDetermined = true
+                    }
                 }
             }
 
@@ -190,14 +216,17 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
         }
 
         if (!optionMenuDetermined) {
+            fragmentInfoCache.optionMenu = null
             setOptionMenu(null)
         }
 
         if (!drawerDetermined) {
+            fragmentInfoCache.drawer = null
             setDrawerFragment(null)
         }
 
         if (!navigationButtonDetermined) {
+            fragmentInfoCache.navigationButton = null
             setNavigationButton(if (drawerDetermined) INavigationButtonActivity.Button.MENU else INavigationButtonActivity.Button.BACK)
         }
     }
