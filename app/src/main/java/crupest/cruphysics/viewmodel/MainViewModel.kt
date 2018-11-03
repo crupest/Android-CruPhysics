@@ -16,7 +16,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
-import java.util.Date
+import java.lang.IllegalArgumentException
+import java.util.*
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -164,4 +165,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun bodyHitTest(x: Double, y: Double): Body? =
             world.bodies.firstOrNull { it.contains(Vector2(x, y)) }
+
+    fun getBodyById(id: UUID) = world.bodies.find { it.id == id }
+            ?: throw IllegalArgumentException("No body has id as $id")
+
+    fun updateBody(body: Body) {
+        drawWorldDelegate.updateBody(body)
+        notifyRepaint()
+    }
 }

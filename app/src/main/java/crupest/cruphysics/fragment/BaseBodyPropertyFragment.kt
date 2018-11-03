@@ -22,7 +22,8 @@ import me.priyesh.chroma.ColorSelectListener
 
 abstract class BaseBodyPropertyFragment : BaseFragment() {
 
-    private lateinit var viewModel: BodyPropertyViewModel
+    protected lateinit var viewModel: BodyPropertyViewModel
+        private set
 
     abstract fun onSetViewModel(): BodyPropertyViewModel
 

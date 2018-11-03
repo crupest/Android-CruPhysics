@@ -105,19 +105,7 @@ class CreateBodyFragment : NavigationFragment() {
             }
         }
 
-        val body = Body()
-        body.addFixture(shape, propertyViewModel.density.value!!, propertyViewModel.friction.value!!, propertyViewModel.restitution.value!!)
-        body.translate(position)
-        body.rotateAboutCenter(angle)
-
-        body.setMass(propertyViewModel.bodyType.value!!.massType)
-
-        body.linearVelocity = Vector2(propertyViewModel.velocityX.value!!, propertyViewModel.velocityY.value!!)
-        body.angularVelocity = propertyViewModel.angularVelocity.value!!
-
-        body.userData = BodyUserData(body, propertyViewModel.bodyColor.value!!)
-
-        mainViewModel.addBody(body)
+        mainViewModel.addBody(propertyViewModel.createBody(shape, position, angle))
 
         getParentNavigator().popBackStack()
     }

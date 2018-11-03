@@ -142,13 +142,15 @@ class MainFragment : BaseFragment() {
                     addMenuItem("Delete") {
                         viewModel.removeBody(body)
                     }
+                    addMenuItem("Property") {
+                        getParentNavigator().navigateTo(EditBodyPropertyFragment.newInstance(body.id))
+                    }
                 }.show(worldCanvas, it.x.toInt(), it.y.toInt())
             }
         }
 
         rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
-            val activity = context as MainActivity
-            activity.navigateTo(CreateBodyFragment())
+            getParentNavigator().navigateTo(CreateBodyFragment())
         }
 
         return rootView

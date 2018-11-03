@@ -139,6 +139,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
 
     override fun navigateTo(fragment: BaseFragment) {
         navigateToFragment(fragment, true)
+        notifyNavigated()
     }
 
     override fun getCurrentFragment(): BaseFragment =
