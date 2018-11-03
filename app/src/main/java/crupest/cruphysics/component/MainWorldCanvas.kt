@@ -17,6 +17,7 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
     private var singleLongTouchTimerTask: ScheduleTask? = null
     private var singleLongTouchDownPosition: PointF? = null
 
+    var singleLongTouchListener: ((PointF) -> Unit)? = null
 
     override fun onTouchEventOverride(event: MotionEvent): Boolean {
         when (event.actionMasked) {
@@ -26,10 +27,12 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
                 singleLongTouchDownPosition = PointF(event.x, event.y)
 
                 singleLongTouchTimerTask = setTimeout(0.5) {
-                    singleLongTouchDownPosition?.apply {
-                        onSingleLongTouch(x, y)
-                        singleLongTouchTimerTask = null
-                        singleLongTouchDownPosition = null
+                    post {
+                        singleLongTouchDownPosition?.apply {
+                            singleLongTouchListener?.invoke(PointF(x, y))
+                            singleLongTouchTimerTask = null
+                            singleLongTouchDownPosition = null
+                        }
                     }
                 }
                 super.onTouchEventOverride(event)
@@ -49,7 +52,6 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
             }
             MotionEvent.ACTION_POINTER_DOWN,
             MotionEvent.ACTION_OUTSIDE,
-            MotionEvent.ACTION_UP,
                 // In fact, I think there is no need to check ACTION_POINTER_UP.
             MotionEvent.ACTION_POINTER_UP -> {
                 singleLongTouchTimerTask?.cancel()
@@ -61,26 +63,5 @@ class MainWorldCanvas(context: Context?, attributeSet: AttributeSet?) : WorldCan
         }
 
         return super.onTouchEventOverride(event)
-    }
-
-
-    private fun onSingleLongTouch(x: Float, y: Float) {
-        post {
-            val viewModel = mainViewModel
-
-            if (viewModel != null) {
-                val body = viewToWorld(x, y).let {
-                    viewModel.bodyHitTest(it.x, it.y)
-                }
-
-                if (body != null) {
-                    CruPopupMenu(context, listOf(
-                            "Delete" to {
-                                viewModel.removeBody(body)
-                            }
-                    )).show(this, x.toInt(), y.toInt())
-                }
-            }
-        }
     }
 }
