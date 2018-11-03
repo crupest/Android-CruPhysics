@@ -12,6 +12,7 @@
         android:importantForAutofill="noExcludeDescendants"
         android:orientation="vertical"
         android:showDividers="middle|end"
+        android:animateLayoutChanges="true"
         tools:targetApi="O">
 
         <LinearLayout style="@style/bodyPropertyItemStyle">
@@ -32,7 +33,9 @@
 
         </LinearLayout>
 
-        <LinearLayout style="@style/bodyPropertyItemStyle">
+        <LinearLayout
+            android:id="@+id/item_density"
+            style="@style/bodyPropertyItemStyle">
 
             <TextView
                 android:id="@+id/label_density"
@@ -86,7 +89,9 @@
                 tools:text="0.2" />
         </LinearLayout>
 
-        <LinearLayout style="@style/bodyPropertyItemStyle">
+        <LinearLayout
+            android:id="@+id/item_velocity_x"
+            style="@style/bodyPropertyItemStyle">
 
             <TextView
                 android:id="@+id/label_velocity_x"
@@ -103,7 +108,9 @@
                 tools:text="0.0" />
         </LinearLayout>
 
-        <LinearLayout style="@style/bodyPropertyItemStyle">
+        <LinearLayout
+            android:id="@+id/item_velocity_y"
+            style="@style/bodyPropertyItemStyle">
 
             <TextView
                 android:id="@+id/label_velocity_y"
@@ -121,7 +128,9 @@
 
         </LinearLayout>
 
-        <LinearLayout style="@style/bodyPropertyItemStyle">
+        <LinearLayout
+            android:id="@+id/item_angular_velocity"
+            style="@style/bodyPropertyItemStyle">
 
             <TextView
                 android:id="@+id/label_angular_velocity"

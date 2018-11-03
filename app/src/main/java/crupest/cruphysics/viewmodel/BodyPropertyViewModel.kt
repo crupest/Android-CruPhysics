@@ -46,14 +46,22 @@ class BodyPropertyViewModel : ViewModel() {
 
     fun writeToBody(body: Body) {
         val fixture = body.checkAndGetFixture()
-        fixture.density = density.value!!
+        fixture.density = density.value!!.takeUnless { it == 0.0 } ?: 1.0
         fixture.restitution = restitution.value!!
         fixture.friction = friction.value!!
 
         body.setMass(bodyType.value!!.massType)
 
-        body.linearVelocity = Vector2(velocityX.value!!, velocityY.value!!)
-        body.angularVelocity = angularVelocity.value!!
+        when (bodyType.value!!) {
+            BodyType.DYNAMIC -> {
+                body.linearVelocity = Vector2(velocityX.value!!, velocityY.value!!)
+                body.angularVelocity = angularVelocity.value!!
+            }
+            BodyType.STATIC -> {
+                body.linearVelocity = Vector2()
+                body.angularVelocity = 0.0
+            }
+        }
 
         body.userData = BodyUserData(body, bodyColor.value!!)
     }
@@ -61,14 +69,22 @@ class BodyPropertyViewModel : ViewModel() {
     fun createBody(shape: Convex, position: Vector2, angle: Double): Body {
         val body = Body()
 
-        body.addFixture(shape, density.value!!, friction.value!!, restitution.value!!)
+        body.addFixture(shape, density.value!!.takeUnless { it == 0.0 } ?: 1.0, friction.value!!, restitution.value!!)
         body.translate(position)
         body.rotateAboutCenter(angle)
 
         body.setMass(bodyType.value!!.massType)
 
-        body.linearVelocity = Vector2(velocityX.value!!, velocityY.value!!)
-        body.angularVelocity = angularVelocity.value!!
+        when (bodyType.value!!) {
+            BodyType.DYNAMIC -> {
+                body.linearVelocity = Vector2(velocityX.value!!, velocityY.value!!)
+                body.angularVelocity = angularVelocity.value!!
+            }
+            BodyType.STATIC -> {
+                body.linearVelocity = Vector2()
+                body.angularVelocity = 0.0
+            }
+        }
 
         body.userData = BodyUserData(body, bodyColor.value!!)
 
