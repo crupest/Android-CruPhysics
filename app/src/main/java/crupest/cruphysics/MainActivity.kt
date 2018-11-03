@@ -179,6 +179,7 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
             }
         }
 
+        @Suppress("unused") // there is a bug on lint.
         fun <T : Any> T?.ifNotNull(block: (T) -> Unit): Boolean {
             return if (this == null) false else {
                 block(this)

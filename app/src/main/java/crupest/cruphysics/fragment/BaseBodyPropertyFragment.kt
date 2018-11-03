@@ -11,25 +11,25 @@ import android.widget.EditText
 import android.widget.Spinner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.R
 import crupest.cruphysics.physics.BodyType
-import crupest.cruphysics.viewmodel.AddBodyViewModel
+import crupest.cruphysics.viewmodel.BodyPropertyViewModel
 import crupest.cruphysics.viewmodel.bindDoubleLiveData
 import crupest.cruphysics.viewmodel.checkAndSetValue
 import me.priyesh.chroma.ChromaDialog
 import me.priyesh.chroma.ColorMode
 import me.priyesh.chroma.ColorSelectListener
 
-class AddBodyPropertyFragment : BaseFragment() {
+abstract class BaseBodyPropertyFragment : BaseFragment() {
 
-    private lateinit var addBodyViewModel: AddBodyViewModel
+    private lateinit var viewModel: BodyPropertyViewModel
+
+    abstract fun onSetViewModel(): BodyPropertyViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
-        addBodyViewModel = ViewModelProviders.of(parent).get(AddBodyViewModel::class.java)
+        viewModel = onSetViewModel()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -42,19 +42,15 @@ class AddBodyPropertyFragment : BaseFragment() {
         typeSpinner.adapter = adapter
 
 
-        typeSpinner.setSelection(when (addBodyViewModel.bodyType.value) {
-            BodyType.STATIC -> 0
-            BodyType.DYNAMIC -> 1
-            else -> throw IllegalStateException("Unknown body type.")
-        })
-
-        addBodyViewModel.bodyType.observe(this.viewLifecycleOwner, Observer {
-            typeSpinner.setSelection(when (addBodyViewModel.bodyType.value) {
+        val setSpinnerSelection = { bodyType: BodyType ->
+            typeSpinner.setSelection(when (bodyType) {
                 BodyType.STATIC -> 0
                 BodyType.DYNAMIC -> 1
-                else -> throw IllegalStateException("Unknown body type.")
             })
-        })
+        }
+
+        viewModel.bodyType.value?.apply { setSpinnerSelection(this) }
+        viewModel.bodyType.observe(this.viewLifecycleOwner, Observer(setSpinnerSelection))
 
         typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -63,7 +59,7 @@ class AddBodyPropertyFragment : BaseFragment() {
                     1 -> BodyType.DYNAMIC
                     else -> null
                 }?.run {
-                    addBodyViewModel.bodyType.checkAndSetValue(this)
+                    viewModel.bodyType.checkAndSetValue(this)
                 }
             }
 
@@ -77,18 +73,18 @@ class AddBodyPropertyFragment : BaseFragment() {
         }
 
 
-        bindEditText(R.id.edit_density, addBodyViewModel.density, true)
-        bindEditText(R.id.edit_restitution, addBodyViewModel.restitution, true)
-        bindEditText(R.id.edit_friction, addBodyViewModel.friction, true)
-        bindEditText(R.id.edit_velocity_x, addBodyViewModel.velocityX)
-        bindEditText(R.id.edit_velocity_y, addBodyViewModel.velocityY)
-        bindEditText(R.id.edit_angular_velocity, addBodyViewModel.angularVelocity)
+        bindEditText(R.id.edit_density, viewModel.density, true)
+        bindEditText(R.id.edit_restitution, viewModel.restitution, true)
+        bindEditText(R.id.edit_friction, viewModel.friction, true)
+        bindEditText(R.id.edit_velocity_x, viewModel.velocityX)
+        bindEditText(R.id.edit_velocity_y, viewModel.velocityY)
+        bindEditText(R.id.edit_angular_velocity, viewModel.angularVelocity)
 
         val colorBlock: View = rootView.findViewById(R.id.color_block)
 
-        colorBlock.background = ColorDrawable(addBodyViewModel.bodyColor.value!!)
+        colorBlock.background = ColorDrawable(viewModel.bodyColor.value!!)
 
-        addBodyViewModel.bodyColor.observe(this.viewLifecycleOwner, Observer {
+        viewModel.bodyColor.observe(this.viewLifecycleOwner, Observer {
             (colorBlock.background as ColorDrawable).color = it
         })
 
@@ -98,7 +94,7 @@ class AddBodyPropertyFragment : BaseFragment() {
                     .colorMode(ColorMode.RGB) // There's also ARGB and HSV
                     .onColorSelected(object : ColorSelectListener {
                         override fun onColorSelected(color: Int) {
-                            addBodyViewModel.bodyColor.value = color
+                            viewModel.bodyColor.value = color
                         }
                     })
                     .create()
@@ -108,5 +104,5 @@ class AddBodyPropertyFragment : BaseFragment() {
         return rootView
     }
 
-    fun validate(): String? = if (addBodyViewModel.density.value == 0.0) "Density can't be 0." else null
+    fun validate(): String? = if (viewModel.density.value == 0.0) "Density can't be 0." else null
 }

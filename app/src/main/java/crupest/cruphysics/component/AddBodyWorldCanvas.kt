@@ -8,11 +8,11 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.fillPaint
 import crupest.cruphysics.utility.strokePaint
-import crupest.cruphysics.viewmodel.AddBodyViewModel
 
 /**
  * Created by crupest on 2017/11/4.
@@ -36,7 +36,6 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
 
     protected abstract val controllers: Array<Controller>
 
-    private var viewModel: AddBodyViewModel? = null
 
     protected val bodyPaint: Paint = fillPaint(Color.BLUE)
     protected val bodyBorderPaint: Paint = strokePaint(Color.BLACK, 3.0f)
@@ -86,12 +85,9 @@ abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         return super.onTouchEventOverride(event)
     }
 
-    fun bindViewModel(viewModel: AddBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        check(this.viewModel == null) { "AddBodyViewModel is already bound." }
-
-        this.viewModel = viewModel
-
-        viewModel.bodyColor.observe(lifecycleOwner, Observer {
+    fun bindColorLiveData(colorLiveData: LiveData<Int>, lifecycleOwner: LifecycleOwner) {
+        colorLiveData.value?.also { bodyPaint.color }
+        colorLiveData.observe(lifecycleOwner, Observer {
             bodyPaint.color = it
             repaint()
         })

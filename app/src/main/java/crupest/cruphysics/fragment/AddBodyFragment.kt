@@ -10,10 +10,7 @@ import crupest.cruphysics.dynamicOptionMenu
 import crupest.cruphysics.physics.BodyUserData
 import crupest.cruphysics.physics.ShapeType
 import crupest.cruphysics.utility.showAlertDialog
-import crupest.cruphysics.viewmodel.AddBodyViewModel
-import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
-import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
-import crupest.cruphysics.viewmodel.MainViewModel
+import crupest.cruphysics.viewmodel.*
 import org.dyn4j.dynamics.Body
 import org.dyn4j.geometry.Circle
 import org.dyn4j.geometry.Convex
@@ -24,6 +21,7 @@ class AddBodyFragment : NavigationFragment() {
 
     private lateinit var mainViewModel: MainViewModel
     private lateinit var viewModel: AddBodyViewModel
+    private lateinit var propertyViewModel: BodyPropertyViewModel
 
     private val optionMenuRes: Observable<Int> = Observable(R.menu.next_menu)
 
@@ -45,7 +43,7 @@ class AddBodyFragment : NavigationFragment() {
                 if (error != null) {
                     showAlertDialog(context!!, error)
                 } else {
-                    navigateTo(AddBodyPropertyFragment())
+                    navigateTo(CreateBodyPropertyFragment())
                 }
                 return@addHandler
             }
@@ -54,7 +52,7 @@ class AddBodyFragment : NavigationFragment() {
         }
 
         addHandler(R.id.ok) {
-            val fragment = getCurrentFragment() as AddBodyPropertyFragment
+            val fragment = getCurrentFragment() as BaseBodyPropertyFragment
             val error = fragment.validate()
             if (error != null)
                 showAlertDialog(context!!, error)
@@ -69,6 +67,10 @@ class AddBodyFragment : NavigationFragment() {
         val activity = context as FragmentActivity
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
         viewModel = ViewModelProviders.of(this).get(AddBodyViewModel::class.java)
+        propertyViewModel = ViewModelProviders.of(this).get(BodyPropertyViewModel::class.java)
+
+        if (savedInstanceState == null)
+            propertyViewModel.initDefault()
     }
 
     override fun onNavigateToFirstFragment(): BaseFragment = AddBodyShapeListFragment()
@@ -76,7 +78,7 @@ class AddBodyFragment : NavigationFragment() {
     override fun onNavigate(newFragment: BaseFragment) {
         optionMenuRes.value = when (newFragment) {
             is AddBodyShapeListFragment, is AddBodyCanvasFragment -> R.menu.next_menu
-            is AddBodyPropertyFragment -> R.menu.check_menu
+            is BaseBodyPropertyFragment -> R.menu.check_menu
             else -> throw IllegalStateException("You can't reach here.")
         }
     }
@@ -104,16 +106,16 @@ class AddBodyFragment : NavigationFragment() {
         }
 
         val body = Body()
-        body.addFixture(shape, viewModel.density.value!!, viewModel.friction.value!!, viewModel.restitution.value!!)
+        body.addFixture(shape, propertyViewModel.density.value!!, propertyViewModel.friction.value!!, propertyViewModel.restitution.value!!)
         body.translate(position)
         body.rotateAboutCenter(angle)
 
-        body.setMass(viewModel.bodyType.value!!.massType)
+        body.setMass(propertyViewModel.bodyType.value!!.massType)
 
-        body.linearVelocity = Vector2(viewModel.velocityX.value!!, viewModel.velocityY.value!!)
-        body.angularVelocity = viewModel.angularVelocity.value!!
+        body.linearVelocity = Vector2(propertyViewModel.velocityX.value!!, propertyViewModel.velocityY.value!!)
+        body.angularVelocity = propertyViewModel.angularVelocity.value!!
 
-        body.userData = BodyUserData(body, viewModel.bodyColor.value!!)
+        body.userData = BodyUserData(body, propertyViewModel.bodyColor.value!!)
 
         mainViewModel.addBody(body)
 

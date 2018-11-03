@@ -29,7 +29,7 @@ class AddCircleBodyCanvasFragment : AddBodyCanvasFragment() {
 
         val canvas = rootView.findViewById<AddCircleBodyWorldCanvas>(R.id.world_canvas)
         canvas.bindViewModel(mainViewModel, this.viewLifecycleOwner)
-        canvas.bindViewModel(addBodyViewModel, this.viewLifecycleOwner)
+        canvas.bindColorLiveData(propertyViewModel.bodyColor, this.viewLifecycleOwner)
         canvas.bindViewModel(viewModel, this.viewLifecycleOwner)
 
         fun bindEditText(id: Int, liveData: MutableLiveData<Double>, noLessThan0: Boolean = false) {
