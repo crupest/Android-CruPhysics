@@ -15,9 +15,9 @@ import crupest.cruphysics.R
 import crupest.cruphysics.physics.ShapeType
 
 
-class AddBodyShapeListFragment : BaseFragment() {
+class CreateBodyShapeListFragment : BaseFragment() {
 
-    class AddBodyShapeListItemFragment : Fragment() {
+    class CreateBodyShapeListItemFragment : Fragment() {
 
         private lateinit var name: String
         private var imageSrc: Int = 0
@@ -33,7 +33,7 @@ class AddBodyShapeListFragment : BaseFragment() {
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
-            val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list_item, container, false)
+            val rootView = inflater.inflate(R.layout.fragment_create_body_shape_list_item, container, false)
 
             val nameText = rootView.findViewById<TextView>(R.id.name)
             val image = rootView.findViewById<ImageView>(R.id.image)
@@ -53,8 +53,8 @@ class AddBodyShapeListFragment : BaseFragment() {
             private const val ARG_NAME = "Name"
             private const val ARG_IMAGE_SRC = "ImageSrc"
 
-            fun newInstance(name: String, imageSrc: Int = 0): AddBodyShapeListItemFragment {
-                val fragment = AddBodyShapeListItemFragment()
+            fun newInstance(name: String, imageSrc: Int = 0): CreateBodyShapeListItemFragment {
+                val fragment = CreateBodyShapeListItemFragment()
                 val args = Bundle()
                 args.putString(ARG_NAME, name)
                 args.putInt(ARG_IMAGE_SRC, imageSrc)
@@ -67,8 +67,8 @@ class AddBodyShapeListFragment : BaseFragment() {
     private inner class MyAdapter(manager: FragmentManager) : FragmentStatePagerAdapter(manager) {
         override fun getCount(): Int = 2
         override fun getItem(position: Int): Fragment = when (position) {
-            0 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.circle_body), R.drawable.circle_body_sample)
-            1 -> AddBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_body), R.drawable.rectangle_body_sample)
+            0 -> CreateBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.circle_body), R.drawable.circle_body_sample)
+            1 -> CreateBodyShapeListItemFragment.newInstance(context!!.resources.getString(R.string.rectangle_body), R.drawable.rectangle_body_sample)
             else -> throw RuntimeException("Out of range!")
         }
     }
@@ -76,7 +76,7 @@ class AddBodyShapeListFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_body_shape_list, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_create_body_shape_list, container, false)
 
         val viewPager = rootView.findViewById<ViewPager>(R.id.pager)
 

@@ -131,7 +131,7 @@ class MainFragment : BaseFragment() {
 
         rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
             val activity = context as MainActivity
-            activity.navigateTo(AddBodyFragment())
+            activity.navigateTo(CreateBodyFragment())
         }
 
         return rootView
@@ -140,5 +140,11 @@ class MainFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         drawer = (context as IDrawerActivity).getDrawer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        mainViewModel.pauseWorld()
     }
 }

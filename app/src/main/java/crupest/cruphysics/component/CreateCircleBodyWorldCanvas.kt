@@ -9,20 +9,19 @@ import androidx.lifecycle.Observer
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.mapPoint
-import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
-import crupest.cruphysics.viewmodel.setWhenNull
+import crupest.cruphysics.viewmodel.CreateCircleBodyViewModel
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
 /**
  * Created by crupest on 2017/11/6.
- * View component [AddCircleBodyWorldCanvas].
+ * View component [CreateCircleBodyWorldCanvas].
  */
-class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
-    : AddBodyWorldCanvas(context, attrs) {
+class CreateCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
+    : CreateBodyWorldCanvas(context, attrs) {
 
-    private var viewModel: AddCircleBodyViewModel? = null
+    private var viewModel: CreateCircleBodyViewModel? = null
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
@@ -102,7 +101,8 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewModel!!.apply {
+        viewModel.apply {
+            checkNotNull(this) { "CreateCircleBodyViewModel is not bound now." }
             if (centerX.value == null) {
                 viewCenterX = width.toFloat() / 2.0f
                 viewCenterY = height.toFloat() / 2.0f
@@ -133,9 +133,8 @@ class AddCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         repaint()
     }
 
-    fun bindViewModel(viewModel: AddCircleBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        if (this.viewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+    fun bindViewModel(viewModel: CreateCircleBodyViewModel, lifecycleOwner: LifecycleOwner) {
+        check(this.viewModel == null) { "CreateCircleBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 

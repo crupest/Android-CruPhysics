@@ -14,8 +14,16 @@ import crupest.cruphysics.component.drawable.NavigationIconDrawable
 import crupest.cruphysics.fragment.BaseFragment
 import crupest.cruphysics.fragment.MainFragment
 import crupest.cruphysics.utility.postDelayOnMainThread
+import crupest.cruphysics.utility.weakReference
+import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivity, IDrawerActivity, INavigationButtonActivity {
+
+    private enum class FragmentInfoKey {
+        OPTION_MENU,
+        DRAWER,
+        NAVIGATION_BUTTON
+    }
 
     private lateinit var toolbar: Toolbar
 
@@ -23,6 +31,9 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     private var isDrawerOpened: Boolean = false
 
     private lateinit var navigationButtonDrawable: NavigationIconDrawable
+
+    private val fragmentInfoCache = mutableMapOf<FragmentInfoKey, WeakReference<BaseFragment>>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +98,18 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     private var optionMenuInfo: IOptionMenuActivity.OptionMenuInfo? = null
 
     override fun setOptionMenu(optionMenuInfo: IOptionMenuActivity.OptionMenuInfo?) {
+        val old = this.optionMenuInfo
+        old?.apply { menuRes.changeListener = null }
+
         this.optionMenuInfo = optionMenuInfo
-        optionMenuRes = optionMenuInfo?.menuRes?.value ?: 0
+        if (optionMenuInfo != null) {
+            optionMenuRes = optionMenuInfo.menuRes.value
+            optionMenuInfo.menuRes.changeListener = {
+                optionMenuRes = it
+            }
+        } else {
+            optionMenuRes = 0
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -137,40 +158,49 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
     }
 
     private fun onNavigated() {
+
         var fragment: BaseFragment = getCurrentFragment()
 
-        var optionMenuDetermined = false
-        var drawerDetermined = false
-        var navigationButtonDetermined = false
+        val determinedSet = mutableSetOf<FragmentInfoKey>()
 
+        fun determine(name: FragmentInfoKey, fragment: BaseFragment, action: (BaseFragment) -> Boolean) {
+            if (name in determinedSet)
+                return
+
+            if (fragmentInfoCache[name] == fragment) {
+                determinedSet.add(name)
+                return
+            }
+
+            val result = action(fragment)
+            if (result) {
+                determinedSet.add(name)
+                fragmentInfoCache[name] = fragment.weakReference()
+            }
+        }
+
+        @Suppress("unused") // there is a bug on lint.
+        fun <T : Any> T?.ifNotNull(block: (T) -> Unit): Boolean {
+            return if (this == null) false else {
+                block(this)
+                true
+            }
+        }
 
         while (true) {
-
-            if (!optionMenuDetermined) {
-                val optionMenu = fragment.determineOptionMenu()
-                if (optionMenu != null) {
-                    setOptionMenu(optionMenu)
-                    optionMenuDetermined = true
-                }
+            determine(FragmentInfoKey.OPTION_MENU, fragment) { f ->
+                f.determineOptionMenu().ifNotNull { setOptionMenu(it) }
             }
 
-            if (!drawerDetermined) {
-                val drawerFragment = fragment.determineDrawer(this)
-                if (drawerFragment != null) {
-                    setDrawerFragment(drawerFragment)
-                    drawerDetermined = true
-                }
+            determine(FragmentInfoKey.DRAWER, fragment) { f->
+                f.determineDrawer(this).ifNotNull { setDrawerFragment(it) }
             }
 
-            if (!navigationButtonDetermined) {
-                val button = fragment.determineNavigationButton()
-                if (button != null) {
-                    setNavigationButton(button)
-                    navigationButtonDetermined = true
-                }
+            determine(FragmentInfoKey.NAVIGATION_BUTTON, fragment) { f ->
+                f.determineNavigationButton().ifNotNull { setNavigationButton(it) }
             }
 
-            if (optionMenuDetermined && drawerDetermined && navigationButtonDetermined)
+            if (FragmentInfoKey.values().all { it in determinedSet })
                 break
 
             if (fragment is IFragmentNavigator)
@@ -179,16 +209,17 @@ class MainActivity : AppCompatActivity(), IFragmentNavigator, IOptionMenuActivit
                 break
         }
 
-        if (!optionMenuDetermined) {
-            setOptionMenu(null)
+        fun checkDetermine(key: FragmentInfoKey, onUndetermined: () -> Unit) {
+            if (key !in determinedSet) {
+                fragmentInfoCache.remove(key)
+                onUndetermined()
+            }
         }
 
-        if (!drawerDetermined) {
-            setDrawerFragment(null)
-        }
-
-        if (!navigationButtonDetermined) {
-            setNavigationButton(if (drawerDetermined) INavigationButtonActivity.Button.MENU else INavigationButtonActivity.Button.BACK)
+        checkDetermine(FragmentInfoKey.OPTION_MENU) { setOptionMenu(null) }
+        checkDetermine(FragmentInfoKey.DRAWER) { setDrawerFragment(null) }
+        checkDetermine(FragmentInfoKey.NAVIGATION_BUTTON) {
+            setNavigationButton(if (FragmentInfoKey.DRAWER in determinedSet) INavigationButtonActivity.Button.MENU else INavigationButtonActivity.Button.BACK)
         }
     }
 

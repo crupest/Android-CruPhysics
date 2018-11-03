@@ -10,18 +10,17 @@ import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.utility.toDegrees
-import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
-import crupest.cruphysics.viewmodel.setWhenNull
+import crupest.cruphysics.viewmodel.CreateRectangleBodyViewModel
 import kotlin.math.*
 
 /**
  * Created by crupest on 2017/11/17.
- * View component [AddRectangleBodyWorldCanvas].
+ * View component [CreateRectangleBodyWorldCanvas].
  */
-class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
-    : AddBodyWorldCanvas(context, attrs) {
+class CreateRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
+    : CreateBodyWorldCanvas(context, attrs) {
 
-    private var viewModel: AddRectangleBodyViewModel? = null
+    private var viewModel: CreateRectangleBodyViewModel? = null
 
     override val controllers: Array<Controller> = arrayOf(
             Controller {
@@ -120,10 +119,11 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     }
 
     override fun onInitialize() {
-        viewModel!!.apply {
+        viewModel.apply {
+            checkNotNull(this) { "CreateRectangleBodyViewModel is not bound now." }
             if (centerX.value == null) {
-                viewCenterX = this@AddRectangleBodyWorldCanvas.width.toFloat() / 2.0f
-                viewCenterY = this@AddRectangleBodyWorldCanvas.height.toFloat() / 2.0f
+                viewCenterX = this@CreateRectangleBodyWorldCanvas.width.toFloat() / 2.0f
+                viewCenterY = this@CreateRectangleBodyWorldCanvas.height.toFloat() / 2.0f
                 centerX.value = worldCenterX
                 centerY.value = worldCenterY
                 width.value = worldWidth
@@ -154,9 +154,8 @@ class AddRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         repaint()
     }
 
-    fun bindViewModel(viewModel: AddRectangleBodyViewModel, lifecycleOwner: LifecycleOwner) {
-        if (this.viewModel != null)
-            throw IllegalStateException("A view model is already bound.")
+    fun bindViewModel(viewModel: CreateRectangleBodyViewModel, lifecycleOwner: LifecycleOwner) {
+        check(this.viewModel == null) { "CreateRectangleBodyViewModel is already bound." }
 
         this.viewModel = viewModel
 

@@ -8,29 +8,29 @@ import android.widget.EditText
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.R
-import crupest.cruphysics.component.AddRectangleBodyWorldCanvas
+import crupest.cruphysics.component.CreateRectangleBodyWorldCanvas
 import crupest.cruphysics.viewmodel.bindDoubleLiveData
-import crupest.cruphysics.viewmodel.AddRectangleBodyViewModel
+import crupest.cruphysics.viewmodel.CreateRectangleBodyViewModel
 
 
-class AddRectangleBodyCanvasFragment: AddBodyCanvasFragment() {
+class CreateRectangleBodyCanvasFragment: CreateBodyCanvasFragment() {
 
-    private lateinit var viewModel: AddRectangleBodyViewModel
+    private lateinit var viewModel: CreateRectangleBodyViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
 
-        viewModel = ViewModelProviders.of(parent).get(AddRectangleBodyViewModel::class.java)
+        viewModel = ViewModelProviders.of(parent).get(CreateRectangleBodyViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_rectangle_body_canvas, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_create_rectangle_body_canvas, container, false)
 
-        val canvas = rootView.findViewById<AddRectangleBodyWorldCanvas>(R.id.world_canvas)
+        val canvas = rootView.findViewById<CreateRectangleBodyWorldCanvas>(R.id.world_canvas)
         canvas.bindViewModel(mainViewModel, this.viewLifecycleOwner)
-        canvas.bindViewModel(addBodyViewModel, this.viewLifecycleOwner)
+        canvas.bindColorLiveData(propertyViewModel.bodyColor, this.viewLifecycleOwner)
         canvas.bindViewModel(viewModel, this.viewLifecycleOwner)
         fun bindEditText(id: Int, liveData: MutableLiveData<Double>, noLessThan0: Boolean = false) {
             rootView.findViewById<EditText>(id).bindDoubleLiveData(this.viewLifecycleOwner, liveData, noLessThan0 = noLessThan0)

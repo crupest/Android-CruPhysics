@@ -4,9 +4,9 @@
     android:id="@+id/world_canvas_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="crupest.cruphysics.fragment.AddRectangleBodyCanvasFragment">
+    tools:context="crupest.cruphysics.fragment.CreateRectangleBodyCanvasFragment">
 
-    <crupest.cruphysics.component.AddRectangleBodyWorldCanvas
+    <crupest.cruphysics.component.CreateRectangleBodyWorldCanvas
         android:id="@+id/world_canvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
