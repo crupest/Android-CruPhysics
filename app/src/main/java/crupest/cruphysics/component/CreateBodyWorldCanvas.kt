@@ -16,9 +16,9 @@ import crupest.cruphysics.utility.strokePaint
 
 /**
  * Created by crupest on 2017/11/4.
- * View component [AddBodyWorldCanvas].
+ * View component [CreateBodyWorldCanvas].
  */
-abstract class AddBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
+abstract class CreateBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
     : WorldCanvas(context, attrs) {
 
     protected class ControllerDraggedEventArgs(val x: Float, val y: Float)

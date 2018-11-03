@@ -8,11 +8,11 @@ import crupest.cruphysics.viewmodel.MainViewModel
 
 /**
  * Created by crupest on 2017/11/25.
- * Class [AddBodyCanvasFragment].
+ * Class [CreateBodyCanvasFragment].
  */
 
 
-abstract class AddBodyCanvasFragment : BaseFragment() {
+abstract class CreateBodyCanvasFragment : BaseFragment() {
     protected lateinit var mainViewModel: MainViewModel
     protected lateinit var propertyViewModel: BodyPropertyViewModel
 

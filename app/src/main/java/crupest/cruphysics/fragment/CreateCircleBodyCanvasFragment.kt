@@ -8,26 +8,26 @@ import android.widget.EditText
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import crupest.cruphysics.R
-import crupest.cruphysics.component.AddCircleBodyWorldCanvas
+import crupest.cruphysics.component.CreateCircleBodyWorldCanvas
 import crupest.cruphysics.viewmodel.bindDoubleLiveData
-import crupest.cruphysics.viewmodel.AddCircleBodyViewModel
+import crupest.cruphysics.viewmodel.CreateCircleBodyViewModel
 
-class AddCircleBodyCanvasFragment : AddBodyCanvasFragment() {
+class CreateCircleBodyCanvasFragment : CreateBodyCanvasFragment() {
 
-    private lateinit var viewModel: AddCircleBodyViewModel
+    private lateinit var viewModel: CreateCircleBodyViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val parent = parentFragment ?: throw IllegalStateException("Parent fragment is null.")
 
-        viewModel = ViewModelProviders.of(parent).get(AddCircleBodyViewModel::class.java)
+        viewModel = ViewModelProviders.of(parent).get(CreateCircleBodyViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_circle_body_canvas, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_create_circle_body_canvas, container, false)
 
-        val canvas = rootView.findViewById<AddCircleBodyWorldCanvas>(R.id.world_canvas)
+        val canvas = rootView.findViewById<CreateCircleBodyWorldCanvas>(R.id.world_canvas)
         canvas.bindViewModel(mainViewModel, this.viewLifecycleOwner)
         canvas.bindColorLiveData(propertyViewModel.bodyColor, this.viewLifecycleOwner)
         canvas.bindViewModel(viewModel, this.viewLifecycleOwner)

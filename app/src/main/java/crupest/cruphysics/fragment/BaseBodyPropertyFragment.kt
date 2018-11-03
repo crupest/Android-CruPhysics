@@ -34,7 +34,7 @@ abstract class BaseBodyPropertyFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_body_property, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_body_property, container, false)
 
         val typeSpinner: Spinner = rootView.findViewById(R.id.body_type_spinner)
         val adapter = ArrayAdapter(context!!, R.layout.item_body_type_spinner, R.id.content,

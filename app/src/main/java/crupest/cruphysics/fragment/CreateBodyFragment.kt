@@ -17,10 +17,10 @@ import org.dyn4j.geometry.Convex
 import org.dyn4j.geometry.Rectangle
 import org.dyn4j.geometry.Vector2
 
-class AddBodyFragment : NavigationFragment() {
+class CreateBodyFragment : NavigationFragment() {
 
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var viewModel: AddBodyViewModel
+    private lateinit var viewModel: CreateBodyViewModel
     private lateinit var propertyViewModel: BodyPropertyViewModel
 
     private val optionMenuRes: Observable<Int> = Observable(R.menu.next_menu)
@@ -28,17 +28,17 @@ class AddBodyFragment : NavigationFragment() {
     override fun determineOptionMenu(): IOptionMenuActivity.OptionMenuInfo? = dynamicOptionMenu(optionMenuRes) {
         addHandler(R.id.next) {
             val fragment = getCurrentFragment()
-            if (fragment is AddBodyShapeListFragment) {
+            if (fragment is CreateBodyShapeListFragment) {
                 val type = fragment.getCurrentShapeType()
                 viewModel.shapeType.value = type
                 when (type) {
-                    ShapeType.CIRCLE -> navigateTo(AddCircleBodyCanvasFragment())
-                    ShapeType.RECTANGLE -> navigateTo(AddRectangleBodyCanvasFragment())
+                    ShapeType.CIRCLE -> navigateTo(CreateCircleBodyCanvasFragment())
+                    ShapeType.RECTANGLE -> navigateTo(CreateRectangleBodyCanvasFragment())
                 }
                 return@addHandler
             }
 
-            if (fragment is AddBodyCanvasFragment) {
+            if (fragment is CreateBodyCanvasFragment) {
                 val error = fragment.validate()
                 if (error != null) {
                     showAlertDialog(context!!, error)
@@ -66,18 +66,18 @@ class AddBodyFragment : NavigationFragment() {
 
         val activity = context as FragmentActivity
         mainViewModel = ViewModelProviders.of(activity).get(MainViewModel::class.java)
-        viewModel = ViewModelProviders.of(this).get(AddBodyViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(CreateBodyViewModel::class.java)
         propertyViewModel = ViewModelProviders.of(this).get(BodyPropertyViewModel::class.java)
 
         if (savedInstanceState == null)
             propertyViewModel.initDefault()
     }
 
-    override fun onNavigateToFirstFragment(): BaseFragment = AddBodyShapeListFragment()
+    override fun onNavigateToFirstFragment(): BaseFragment = CreateBodyShapeListFragment()
 
     override fun onNavigate(newFragment: BaseFragment) {
         optionMenuRes.value = when (newFragment) {
-            is AddBodyShapeListFragment, is AddBodyCanvasFragment -> R.menu.next_menu
+            is CreateBodyShapeListFragment, is CreateBodyCanvasFragment -> R.menu.next_menu
             is BaseBodyPropertyFragment -> R.menu.check_menu
             else -> throw IllegalStateException("You can't reach here.")
         }
@@ -90,14 +90,14 @@ class AddBodyFragment : NavigationFragment() {
 
         when (viewModel.shapeType.value!!) {
             ShapeType.CIRCLE -> {
-                val shapeViewModel = ViewModelProviders.of(this).get(AddCircleBodyViewModel::class.java)
+                val shapeViewModel = ViewModelProviders.of(this).get(CreateCircleBodyViewModel::class.java)
                 position.x = shapeViewModel.centerX.value!!
                 position.y = shapeViewModel.centerY.value!!
                 angle = shapeViewModel.angle.value!!
                 shape = Circle(shapeViewModel.radius.value!!)
             }
             ShapeType.RECTANGLE -> {
-                val shapeViewModel = ViewModelProviders.of(this).get(AddRectangleBodyViewModel::class.java)
+                val shapeViewModel = ViewModelProviders.of(this).get(CreateRectangleBodyViewModel::class.java)
                 position.x = shapeViewModel.centerX.value!!
                 position.y = shapeViewModel.centerY.value!!
                 angle = shapeViewModel.angle.value!!
