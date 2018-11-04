@@ -8,20 +8,20 @@ import crupest.cruphysics.physics.view.BodyViewData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.drawRectangle
-import crupest.cruphysics.utility.fillPaint
+import crupest.cruphysics.utility.strokePaint
 import org.dyn4j.dynamics.Body
 
 class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegate {
     companion object {
-        private const val BLUR_RADIUS = 8.0f
+        private const val BORDER_WIDTH = 8.0f
     }
 
     private val bodyViewDataMap: MutableMap<Body, BodyViewData> = mutableMapOf()
 
-    private val blurPaint: Paint = fillPaint(Color.BLACK)
+    private val bodyBorderPaint = strokePaint(Color.BLACK)
 
     private val cameraObserver = { it: CameraData ->
-        blurPaint.maskFilter = BlurMaskFilter(BLUR_RADIUS / it.scale.toFloat(), BlurMaskFilter.Blur.NORMAL)
+        bodyBorderPaint.strokeWidth = BORDER_WIDTH / it.scale.toFloat()
     }
 
     init {
@@ -77,8 +77,8 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
                                 it.center.x.toFloat(),
                                 it.center.y.toFloat(),
                                 it.radius.toFloat(),
-                                blurPaint,
-                                bodyViewData.paint
+                                bodyViewData.paint,
+                                bodyBorderPaint
                         )
                     }
                     onRectangle {
@@ -89,8 +89,8 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
                                 (it.center.y + hh).toFloat(),
                                 (it.center.x + hw).toFloat(),
                                 (it.center.y - hh).toFloat(),
-                                blurPaint,
-                                bodyViewData.paint
+                                bodyViewData.paint,
+                                bodyBorderPaint
                         )
                     }
                 }
