@@ -19,14 +19,14 @@ class OptionMenuBuilder {
     }
 }
 
-fun staticOptionMenu(menuRes: Int, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
+inline fun staticOptionMenu(menuRes: Int, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
     val builder = OptionMenuBuilder()
     builder.block()
 
     return IOptionMenuActivity.OptionMenuInfo(Observable(menuRes), builder.handlers)
 }
 
-fun dynamicOptionMenu(menuRes: Observable<Int>, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
+inline fun dynamicOptionMenu(menuRes: Observable<Int>, block: OptionMenuBuilder.() -> Unit): IOptionMenuActivity.OptionMenuInfo {
     val builder = OptionMenuBuilder()
     builder.block()
 

@@ -47,6 +47,12 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
         bodyViewDataMap.clear()
     }
 
+    fun updateBody(body: Body) {
+        val viewData = bodyViewDataMap[body] ?: throw IllegalArgumentException("The body hasn't been registered.")
+        if (body.cruUserData.color != viewData.color)
+            viewData.color = body.cruUserData.color
+    }
+
     fun registerBodies(bodies: Iterable<Body>) {
         bodies.forEach {
             registerBody(it)

@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
 import crupest.cruphysics.component.MainWorldCanvas
 import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
+import crupest.cruphysics.component.popupMenu
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
 import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
@@ -129,9 +130,27 @@ class MainFragment : BaseFragment() {
 
         worldCanvas.bindViewModel(mainViewModel, this)
 
+        worldCanvas.singleLongTouchListener = {
+            val viewModel = mainViewModel
+
+            val body = worldCanvas.viewToWorld(it.x, it.y).run {
+                viewModel.bodyHitTest(x, y)
+            }
+
+            if (body != null) {
+                popupMenu(context!!) {
+                    addMenuItem("Delete") {
+                        viewModel.removeBody(body)
+                    }
+                    addMenuItem("Property") {
+                        getParentNavigator().navigateTo(EditBodyPropertyFragment.newInstance(body.id))
+                    }
+                }.show(worldCanvas, it.x.toInt(), it.y.toInt())
+            }
+        }
+
         rootView.findViewById<FloatingActionButton>(R.id.add_floating_button).setOnClickListener {
-            val activity = context as MainActivity
-            activity.navigateTo(CreateBodyFragment())
+            getParentNavigator().navigateTo(CreateBodyFragment())
         }
 
         return rootView

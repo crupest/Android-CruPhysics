@@ -16,7 +16,7 @@ import crupest.cruphysics.R
 @SuppressLint("InflateParams", "RtlHardcoded")
 class CruPopupMenu(context: Context,
                    menuItemAndHandler: List<Pair<String, () -> Unit>>,
-                   width: Int = 500) {
+                   width: Int) {
 
     private val popupWindow: PopupWindow
 
@@ -47,4 +47,22 @@ class CruPopupMenu(context: Context,
     fun show(view: View, x: Int, y: Int) {
         popupWindow.showAsDropDown(view, x, y, Gravity.LEFT or Gravity.TOP)
     }
+}
+
+class PopupMenuBuilder {
+    var width: Int = 500
+
+    private val menuItemAndHandler: MutableList<Pair<String, () -> Unit>> = mutableListOf()
+
+    fun addMenuItem(name: String, handler: () -> Unit) {
+        menuItemAndHandler.add(name to handler)
+    }
+
+    fun build(context: Context): CruPopupMenu = CruPopupMenu(context, menuItemAndHandler, width)
+}
+
+inline fun popupMenu(context: Context, block: PopupMenuBuilder.() -> Unit): CruPopupMenu {
+    val builder = PopupMenuBuilder()
+    builder.block()
+    return builder.build(context)
 }

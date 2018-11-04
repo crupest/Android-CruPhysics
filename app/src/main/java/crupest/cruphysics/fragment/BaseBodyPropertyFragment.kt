@@ -22,7 +22,8 @@ import me.priyesh.chroma.ColorSelectListener
 
 abstract class BaseBodyPropertyFragment : BaseFragment() {
 
-    private lateinit var viewModel: BodyPropertyViewModel
+    protected lateinit var viewModel: BodyPropertyViewModel
+        private set
 
     abstract fun onSetViewModel(): BodyPropertyViewModel
 
@@ -54,12 +55,25 @@ abstract class BaseBodyPropertyFragment : BaseFragment() {
 
         typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                fun show(id: Int) {
+                    this@BaseBodyPropertyFragment.view!!.findViewById<View>(id).visibility = View.VISIBLE
+                }
+
+                fun hide(id: Int) {
+                    this@BaseBodyPropertyFragment.view!!.findViewById<View>(id).visibility = View.GONE
+                }
+
+                val itemIdList = arrayOf(R.id.item_density, R.id.item_velocity_x, R.id.item_velocity_y, R.id.item_angular_velocity)
+
                 when (position) {
-                    0 -> BodyType.STATIC
-                    1 -> BodyType.DYNAMIC
-                    else -> null
-                }?.run {
-                    viewModel.bodyType.checkAndSetValue(this)
+                    0 -> {
+                        viewModel.bodyType.checkAndSetValue(BodyType.STATIC)
+                        itemIdList.forEach { hide(it) }
+                    }
+                    1 -> {
+                        viewModel.bodyType.checkAndSetValue(BodyType.DYNAMIC)
+                        itemIdList.forEach { show(it) }
+                    }
                 }
             }
 
@@ -104,5 +118,6 @@ abstract class BaseBodyPropertyFragment : BaseFragment() {
         return rootView
     }
 
-    fun validate(): String? = if (viewModel.density.value == 0.0) "Density can't be 0." else null
+    fun validate(): String? = if (viewModel.bodyType.value == BodyType.DYNAMIC && viewModel.density.value == 0.0)
+        "Density of dynamic body can't be 0." else null
 }
