@@ -5,6 +5,14 @@ import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.getValues
 
+fun CameraData.translateCreate(x: Double, y: Double): CameraData {
+    return this.copy(translation = Vector2Data(this.translation.x + x, this.translation.y + y))
+}
+
+fun CameraData.scaleCreate(scale: Double): CameraData {
+    return this.copy(scale = this.scale * scale)
+}
+
 
 fun Matrix.toData(centerX: Float, centerY: Float): CameraData {
     // unalign center

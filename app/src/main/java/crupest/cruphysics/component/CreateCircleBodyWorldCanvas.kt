@@ -8,7 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawCircle
-import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.viewmodel.CreateCircleBodyViewModel
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -122,15 +121,13 @@ class CreateCircleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         repaint()
     }
 
-    override fun onViewMatrixPostConcat(matrixPostConcat: Matrix) {
-        val newCenter = matrixPostConcat.mapPoint(viewCenterX, viewCenterY)
-        viewCenterX = newCenter.x
-        viewCenterY = newCenter.y
-
-        viewRadius = matrixPostConcat.mapRadius(viewRadius)
-
-        updateControllerPosition()
-        repaint()
+    override fun onCameraChanged(newMatrix: Matrix) {
+        viewModel!!.apply {
+            worldCenterX = centerX.value!!
+            worldCenterY = centerY.value!!
+            worldRadius = radius.value!!
+            worldAngle = angle.value!!
+        }
     }
 
     fun bindViewModel(viewModel: CreateCircleBodyViewModel, lifecycleOwner: LifecycleOwner) {

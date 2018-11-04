@@ -8,7 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import crupest.cruphysics.utility.distance
 import crupest.cruphysics.utility.drawRectangle
-import crupest.cruphysics.utility.mapPoint
 import crupest.cruphysics.utility.toDegrees
 import crupest.cruphysics.viewmodel.CreateRectangleBodyViewModel
 import kotlin.math.*
@@ -142,16 +141,14 @@ class CreateRectangleBodyWorldCanvas(context: Context?, attrs: AttributeSet?)
         repaint()
     }
 
-    override fun onViewMatrixPostConcat(matrixPostConcat: Matrix) {
-        matrixPostConcat.mapPoint(viewCenterX, viewCenterY).let {
-            viewCenterX = it.x
-            viewCenterY = it.y
+    override fun onCameraChanged(newMatrix: Matrix) {
+        viewModel!!.apply {
+            worldCenterX = centerX.value!!
+            worldCenterY = centerY.value!!
+            worldWidth = width.value!!
+            worldHeight = height.value!!
+            worldAngle = angle.value!!
         }
-        viewHalfWidth = matrixPostConcat.mapRadius(viewHalfWidth)
-        viewHalfHeight = matrixPostConcat.mapRadius(viewHalfHeight)
-
-        updateControllerPosition()
-        repaint()
     }
 
     fun bindViewModel(viewModel: CreateRectangleBodyViewModel, lifecycleOwner: LifecycleOwner) {

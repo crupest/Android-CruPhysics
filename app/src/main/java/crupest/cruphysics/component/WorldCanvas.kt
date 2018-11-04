@@ -2,7 +2,10 @@ package crupest.cruphysics.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.PointF
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.SurfaceHolder
@@ -17,7 +20,6 @@ import crupest.cruphysics.R
 import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.component.delegate.ScaleMarkDelegate
 import crupest.cruphysics.physics.fromData
-import crupest.cruphysics.physics.toData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.*
@@ -38,8 +40,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                 distance(p1.x, p1.y, p2.x, p2.y)
     }
 
-    protected var mainViewModel: MainViewModel? = null
-        private set
+    private var mainViewModel: MainViewModel? = null
 
     private lateinit var drawWorldDelegate: IDrawDelegate
     private val scaleMarkDelegate = ScaleMarkDelegate(ContextCompat.getColor(context!!, R.color.icons))
@@ -80,10 +81,11 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
     private fun setCamera(camera: CameraData) {
         camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
-        onCameraChangedCore(viewMatrix, false)
+        scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
+        if (init)
+            onCameraChanged(viewMatrix)
     }
 
-    private fun generateCameraData(): CameraData = viewMatrix.toData(width.toFloat() / 2.0f, height.toFloat() / 2.0f)
 
     fun repaint() {
         if (!surfaceCreated.get())
@@ -137,17 +139,12 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
             MotionEvent.ACTION_MOVE, MotionEvent.ACTION_OUTSIDE -> {
                 when (event.pointerCount) {
                     1 -> {
-                        val postMatrix = previousPointerPositionMap[event.getPointerId(0)]!!.run {
-                            Matrix().apply {
-                                postTranslate(
-                                        event.getX(0) - this@run.x,
-                                        event.getY(0) - this@run.y
-                                )
-                            }
+                        previousPointerPositionMap[event.getPointerId(0)]!!.let {
+                            mainViewModel!!.cameraPostTranslate(
+                                    (event.getX(0) - it.x).toDouble(),
+                                    (event.getY(0) - it.y).toDouble()
+                            )
                         }
-                        viewMatrix.postConcat(postMatrix)
-                        onViewMatrixChangedCore(postMatrix)
-                        repaint()
                     }
                     2 -> {
                         val oldPosition1 = previousPointerPositionMap[event.getPointerId(0)]!!
@@ -157,12 +154,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         val newPosition2 = PointF(event.getX(1), event.getY(1))
                         val newDistance = distance(newPosition1, newPosition2)
                         val scale = newDistance / oldDistance
-                        val matrix = Matrix().apply {
-                            postScale(scale, scale, width / 2.0f, height / 2.0f)
-                        }
-                        viewMatrix.postConcat(matrix)
-                        onViewMatrixChangedCore(matrix)
-                        repaint()
+                        mainViewModel!!.cameraPostScale(scale.toDouble())
                     }
                 }
                 for (index in 0 until event.pointerCount)
@@ -188,8 +180,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        viewMatrix.postTranslate(-oldw.toFloat() / 2.0f, -oldh.toFloat() / 2.0f)
-        viewMatrix.postTranslate(w.toFloat() / 2.0f, h.toFloat() / 2.0f)
+        setCamera(mainViewModel!!.camera.value!!)
 
         if (!init) {
             onInitialize()
@@ -197,27 +188,6 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         }
 
         onSizeChanged(w, h)
-    }
-
-
-    private fun onViewMatrixChangedCore(matrixPostConcat: Matrix) {
-        onViewMatrixPostConcat(matrixPostConcat)
-        onCameraChangedCore(viewMatrix)
-    }
-
-    /**
-     *  Called when user operates and a view matrix is post concat.
-     *  @param matrixPostConcat the matrix post-concat
-     */
-    protected open fun onViewMatrixPostConcat(matrixPostConcat: Matrix) {
-
-    }
-
-    private fun onCameraChangedCore(newMatrix: Matrix, updateViewModel: Boolean = true) {
-        onCameraChanged(newMatrix)
-        scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
-        if (updateViewModel)
-            mainViewModel?.updateLatestRecordCamera(generateCameraData())
     }
 
     protected open fun onCameraChanged(newMatrix: Matrix) {
@@ -237,18 +207,11 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
         mainViewModel = viewModel
 
-        setCamera(viewModel.camera.value!!)
-
         drawWorldDelegate = viewModel.drawWorldDelegate
 
-        viewModel.camera.observe(lifecycleOwner, Observer {
-            setCamera(it)
-            repaint()
-        })
+        viewModel.camera.observe(lifecycleOwner, Observer { setCamera(it) })
 
-        viewModel.registerWorldRepaintListener(lifecycleOwner) {
-            repaint()
-        }
+        viewModel.registerWorldRepaintListener(lifecycleOwner) { repaint() }
 
         repaint()
     }

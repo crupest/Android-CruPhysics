@@ -5,6 +5,8 @@ import androidx.lifecycle.*
 import crupest.cruphysics.component.delegate.DrawWorldDelegate
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
+import crupest.cruphysics.physics.scaleCreate
+import crupest.cruphysics.physics.translateCreate
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.fromData
@@ -69,7 +71,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun createNewRecordFromCurrent() {
         worldRepository.createRecord(Date(), world.toData(), camera.value!!, generateThumbnail())
-        raiseWorldHistoryScrollToTopEvent()
+        notifyWorldHistoryScrollToTop()
+    }
+
+    private fun updateLatestRecordCamera(cameraData: CameraData) {
+        cameraInternal.value = cameraData
+        if (!world.isEmpty)
+            worldRepository.updateLatestCamera(Date(), cameraData, generateThumbnail())
     }
 
     private fun <T : Function<Unit>> registerListener(lifecycleOwner: LifecycleOwner, listeners: MutableList<T>, listener: T) {
@@ -100,7 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun raiseWorldHistoryScrollToTopEvent() {
+    private fun notifyWorldHistoryScrollToTop() {
         worldHistoryScrollToTopListeners.forEach {
             it.invoke()
         }
@@ -115,6 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun createNewWorldAndResetCamera() {
         createNewWorld()
         cameraInternal.value = CameraData()
+        notifyRepaint()
     }
 
     fun runWorld(): Boolean =
@@ -151,16 +160,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         notifyRepaint()
     }
 
-    fun updateLatestRecordCamera(cameraData: CameraData) {
-        cameraInternal.value = cameraData
-        if (!world.isEmpty)
-            worldRepository.updateLatestCamera(Date(), cameraData, generateThumbnail())
-    }
 
     fun recoverFromRecordAndUpdateTimestamp(record: ProcessedWorldRecordForHistory) {
         recoverFrom(record.world, record.camera)
         worldRepository.updateTimestamp(record.timestamp, Date())
-        raiseWorldHistoryScrollToTopEvent()
+        notifyWorldHistoryScrollToTop()
+        notifyRepaint()
     }
 
     fun bodyHitTest(x: Double, y: Double): Body? =
@@ -171,6 +176,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateBody(body: Body) {
         drawWorldDelegate.updateBody(body)
+        notifyRepaint()
+    }
+
+    //camera
+    fun cameraPostTranslate(x: Double, y: Double) {
+        updateLatestRecordCamera(camera.value!!.translateCreate(x, y))
+        notifyRepaint()
+    }
+
+    fun cameraPostScale(scale: Double) {
+        updateLatestRecordCamera(camera.value!!.scaleCreate(scale))
         notifyRepaint()
     }
 }
