@@ -5,9 +5,8 @@ import androidx.lifecycle.*
 import crupest.cruphysics.component.delegate.DrawWorldDelegate
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
-import crupest.cruphysics.physics.scaleCreate
-import crupest.cruphysics.physics.translateCreate
 import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.fromData
 import crupest.cruphysics.serialization.toData
@@ -179,14 +178,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         notifyRepaint()
     }
 
+    private fun CameraData.translateCreate(x: Double, y: Double): CameraData {
+        return this.copy(translation = Vector2Data(this.translation.x + x / this.scale, this.translation.y - y / this.scale))
+    }
+
+    private fun CameraData.scaleCreate(scale: Double): CameraData {
+        return this.copy(scale = this.scale * scale)
+    }
+
     //camera
-    fun cameraPostTranslate(x: Double, y: Double) {
-        updateLatestRecordCamera(camera.value!!.translateCreate(x, y))
+    fun cameraPostTranslate(x: Float, y: Float) {
+        updateLatestRecordCamera(camera.value!!.translateCreate(x.toDouble(), y.toDouble()))
         notifyRepaint()
     }
 
-    fun cameraPostScale(scale: Double) {
-        updateLatestRecordCamera(camera.value!!.scaleCreate(scale))
+    fun cameraPostScale(scale: Float) {
+        updateLatestRecordCamera(camera.value!!.scaleCreate(scale.toDouble()))
         notifyRepaint()
     }
 }

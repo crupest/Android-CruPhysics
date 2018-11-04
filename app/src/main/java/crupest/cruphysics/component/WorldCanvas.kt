@@ -141,8 +141,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                     1 -> {
                         previousPointerPositionMap[event.getPointerId(0)]!!.let {
                             mainViewModel!!.cameraPostTranslate(
-                                    (event.getX(0) - it.x).toDouble(),
-                                    (event.getY(0) - it.y).toDouble()
+                                    event.getX(0) - it.x,
+                                    event.getY(0) - it.y
                             )
                         }
                     }
@@ -154,7 +154,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
                         val newPosition2 = PointF(event.getX(1), event.getY(1))
                         val newDistance = distance(newPosition1, newPosition2)
                         val scale = newDistance / oldDistance
-                        mainViewModel!!.cameraPostScale(scale.toDouble())
+                        mainViewModel!!.cameraPostScale(scale)
                     }
                 }
                 for (index in 0 until event.pointerCount)
