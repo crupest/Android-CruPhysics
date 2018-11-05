@@ -179,7 +179,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun CameraData.translateCreate(x: Double, y: Double): CameraData {
-        return this.copy(translation = Vector2Data(this.translation.x + x / this.scale, this.translation.y - y / this.scale))
+        return this.copy(translation = Vector2Data(this.translation.x + x / this.scale, this.translation.y + y / this.scale))
     }
 
     private fun CameraData.scaleCreate(scale: Double): CameraData {

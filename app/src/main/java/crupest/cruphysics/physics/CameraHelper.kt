@@ -6,6 +6,8 @@ import crupest.cruphysics.serialization.data.CameraData
 fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
     matrix.reset()
 
+    matrix.postScale(1.0f, -1.0f)
+
     //align center
     matrix.postTranslate(centerX, centerY)
 
@@ -16,7 +18,7 @@ fun CameraData.fromData(matrix: Matrix, centerX: Float, centerY: Float) {
 
     matrix.postScale(
             this.scale.toFloat(),
-            -this.scale.toFloat(),
+            this.scale.toFloat(),
             centerX,
             centerY
     )
