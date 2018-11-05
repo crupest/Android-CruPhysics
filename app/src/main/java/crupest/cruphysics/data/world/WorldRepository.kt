@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit
 
 class WorldRepository(context: Context) {
 
+    private class CameraUpdateInfo(val timestamp: Date, val camera: CameraData, val thumbnail: Bitmap)
+
     private val workingExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     private val dao: WorldRecordDao = WorldDatabase.getInstance(context).worldRecordDao()
@@ -30,6 +32,8 @@ class WorldRepository(context: Context) {
 
     private val recordForHistoryListProcessor: BehaviorProcessor<List<ProcessedWorldRecordForHistory>> = BehaviorProcessor.create()
 
+    private var latestCameraUpdateInfo: CameraUpdateInfo? = null
+
     private var currentId: Long = 0
 
     init {
@@ -37,14 +41,22 @@ class WorldRepository(context: Context) {
             val record = dao.getLatestRecord()
             if (record != null)
                 latestRecordMaybeSubject.onSuccess(
-                        ProcessedWorldRecordForLatest(record.world.fromJson(), record.camera.fromJson()))
+                        ProcessedWorldRecordForLatest(Date(record.timestamp), record.world.fromJson(), record.camera.fromJson()))
             else
                 latestRecordMaybeSubject.onComplete()
         }
 
         workingExecutor.submit {
-            val list = dao.getAllRecordForThumbnail().map {
+            val list = mutableListOf<ProcessedWorldRecordForHistory>()
+            dao.getAllRecordForThumbnail().mapTo(list) {
                 ProcessedWorldRecordForHistory(currentId++, Date(it.timestamp), it.world.fromJson(), it.camera.fromJson(), decompressThumbnail(it.thumbnail))
+            }
+            latestCameraUpdateInfo?.also {
+                val oldItem = list[0]
+                list[0] = list[0].copy(timestamp = it.timestamp, camera = it.camera, thumbnail = it.thumbnail)
+                workingExecutor.submit {
+                    dao.updateCamera(oldItem.timestamp.time, it.timestamp.time, it.camera.toJson(), compressThumbnail(it.thumbnail))
+                }
             }
             recordForHistoryListProcessor.onNext(list)
         }
@@ -110,7 +122,15 @@ class WorldRepository(context: Context) {
 
     fun updateLatestCamera(newTimestamp: Date, camera: CameraData, thumbnail: Bitmap) {
         val oldList = recordForHistoryListProcessor.value
-                ?: throw IllegalStateException("The history list hasn't been loaded.")
+
+        if (oldList == null) {
+            if (latestRecordMaybeSubject.hasComplete()) {
+                val latestRecord = latestRecordMaybeSubject.value
+                if (latestRecord != null)
+                    latestCameraUpdateInfo = CameraUpdateInfo(newTimestamp, camera, thumbnail)
+            }
+            return
+        }
 
         if (!oldList.isEmpty()) {
             val oldItem = oldList[0]

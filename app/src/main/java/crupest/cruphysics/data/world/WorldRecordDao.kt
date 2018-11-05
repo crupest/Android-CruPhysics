@@ -12,7 +12,7 @@ interface WorldRecordDao {
     @Query("SELECT timestamp, world, camera, thumbnail FROM world_record ORDER BY timestamp DESC")
     fun getAllRecordForThumbnail(): List<WorldRecordForHistory>
 
-    @Query("SELECT world, camera FROM world_record ORDER BY timestamp DESC LIMIT 1")
+    @Query("SELECT timestamp, world, camera FROM world_record ORDER BY timestamp DESC LIMIT 1")
     fun getLatestRecord(): WorldRecordForLatest?
 
     @Insert
