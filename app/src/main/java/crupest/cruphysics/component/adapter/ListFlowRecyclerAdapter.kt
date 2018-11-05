@@ -6,7 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 
-abstract class ListLiveDataRecyclerAdapter<TElement, ViewHolder>(
+abstract class ListFlowRecyclerAdapter<TElement, ViewHolder>(
         lifecycleOwner: LifecycleOwner,
         listFlow: Flowable<List<TElement>>,
         private val diffTool: DiffTool<TElement>

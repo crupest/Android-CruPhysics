@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
 import crupest.cruphysics.component.MainWorldCanvas
-import crupest.cruphysics.component.adapter.ListLiveDataRecyclerAdapter
+import crupest.cruphysics.component.adapter.ListFlowRecyclerAdapter
 import crupest.cruphysics.component.popupMenu
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
 import crupest.cruphysics.utility.postOnMainThread
@@ -44,7 +44,7 @@ class MainFragment : BaseFragment() {
 
 
     private inner class HistoryAdapter :
-            ListLiveDataRecyclerAdapter<ProcessedWorldRecordForHistory, HistoryAdapter.ViewHolder>(
+            ListFlowRecyclerAdapter<ProcessedWorldRecordForHistory, HistoryAdapter.ViewHolder>(
                     this.viewLifecycleOwner, mainViewModel.recordListForHistoryFlow, object : DiffTool<ProcessedWorldRecordForHistory> {
                 override fun areItemSame(oldOne: ProcessedWorldRecordForHistory,
                                          newOne: ProcessedWorldRecordForHistory): Boolean =
