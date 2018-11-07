@@ -1,10 +1,14 @@
 package crupest.cruphysics.viewmodel
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import androidx.core.graphics.applyCanvas
 import androidx.lifecycle.*
-import crupest.cruphysics.component.delegate.DrawWorldDelegate
+import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.data.world.WorldRepository
 import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
+import crupest.cruphysics.physics.fromData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.serialization.data.WorldData
@@ -19,8 +23,14 @@ import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
 import java.lang.IllegalArgumentException
 import java.util.*
+import kotlin.properties.Delegates
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        private const val THUMBNAIL_WIDTH = 1000
+        private const val THUMBNAIL_HEIGHT = 1000
+    }
 
     private val worldRepository: WorldRepository =
             WorldRepository(getApplication<Application>().applicationContext).apply {
@@ -36,45 +46,53 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val worldRepaintListeners: MutableList<() -> Unit> = mutableListOf()
     private val worldHistoryScrollToTopListeners: MutableList<() -> Unit> = mutableListOf()
+    private val cameraChangedListeners: MutableList<() -> Unit> = mutableListOf()
 
-    private val cameraInternal: MutableLiveData<CameraData> = mutableLiveDataWithDefault(CameraData())
+    internal var camera: CameraData by Delegates.observable(CameraData()) { _, _, it ->
+        notifyCameraChanged()
+        drawWorldDelegateInternal.setScale(it.scale)
+    }
+
+    private val drawWorldDelegateInternal: DrawWorldDelegate = DrawWorldDelegate()
     private val worldStateInternal: MutableLiveData<Boolean> = mutableLiveDataWithDefault(false)
 
 
     val recordListForHistoryFlow: Flowable<List<ProcessedWorldRecordForHistory>>
         get() = worldRepository.getRecordListFlow()
 
-    val drawWorldDelegate: DrawWorldDelegate = DrawWorldDelegate(cameraInternal)
-    val camera: LiveData<CameraData>
-        get() = cameraInternal
+    val drawWorldDelegate: IDrawDelegate
+        get() = drawWorldDelegateInternal
     val worldState: LiveData<Boolean>
         get() = worldStateInternal
 
 
     override fun onCleared() {
-        drawWorldDelegate.onClear()
+        drawWorldDelegateInternal.onClear()
         worldRepository.closeAndWait()
     }
 
-    private fun generateThumbnail() =
-            drawWorldDelegate.generateThumbnail(1000, 1000, camera.value!!.let {
-                it.copy(scale = it.scale * 0.5)
-            })
+    private fun generateThumbnail(): Bitmap {
+        val camera = this.camera.copy(scale = this.camera.scale * 0.5)
+        return Bitmap.createBitmap(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, Bitmap.Config.ARGB_8888).applyCanvas {
+            concat(camera.fromData(THUMBNAIL_WIDTH.toFloat() / 2.0f, THUMBNAIL_HEIGHT.toFloat() / 2.0f))
+            drawWorldDelegateInternal.draw(this)
+        }
+    }
 
     private fun recoverFrom(worldData: WorldData, cameraData: CameraData) {
         world.removeAllBodiesAndJoints()
         worldData.fromData(world)
-        drawWorldDelegate.clearAndRegister(world.bodies)
-        cameraInternal.value = cameraData
+        drawWorldDelegateInternal.clearAndRegister(world.bodies)
+        camera = cameraData
     }
 
     private fun createNewRecordFromCurrent() {
-        worldRepository.createRecord(Date(), world.toData(), camera.value!!, generateThumbnail())
+        worldRepository.createRecord(Date(), world.toData(), camera, generateThumbnail())
         notifyWorldHistoryScrollToTop()
     }
 
     private fun updateLatestRecordCamera(cameraData: CameraData) {
-        cameraInternal.value = cameraData
+        camera = cameraData
         if (!world.isEmpty)
             worldRepository.updateLatestCamera(Date(), cameraData, generateThumbnail())
     }
@@ -102,26 +120,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun notifyRepaint() {
-        worldRepaintListeners.forEach {
-            it.invoke()
-        }
+        worldRepaintListeners.forEach { it.invoke() }
     }
 
     private fun notifyWorldHistoryScrollToTop() {
-        worldHistoryScrollToTopListeners.forEach {
-            it.invoke()
-        }
+        worldHistoryScrollToTopListeners.forEach { it.invoke() }
+    }
+
+    private fun notifyCameraChanged() {
+        cameraChangedListeners.forEach { it.invoke() }
     }
 
     private fun createNewWorld() {
         pauseWorld()
         world.removeAllBodiesAndJoints()
-        drawWorldDelegate.unregisterAllBody()
+        drawWorldDelegateInternal.unregisterAllBody()
     }
 
     fun createNewWorldAndResetCamera() {
         createNewWorld()
-        cameraInternal.value = CameraData()
+        camera = CameraData()
         notifyRepaint()
     }
 
@@ -146,14 +164,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addBody(body: Body) {
         world.addBody(body)
-        drawWorldDelegate.registerBody(body)
+        drawWorldDelegateInternal.registerBody(body)
         createNewRecordFromCurrent()
         notifyRepaint()
     }
 
     fun removeBody(body: Body) {
         world.removeBody(body)
-        drawWorldDelegate.unregisterBody(body)
+        drawWorldDelegateInternal.unregisterBody(body)
         if (!world.isEmpty)
             createNewRecordFromCurrent()
         notifyRepaint()
@@ -174,7 +192,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             ?: throw IllegalArgumentException("No body has id as $id")
 
     fun updateBody(body: Body) {
-        drawWorldDelegate.updateBody(body)
+        drawWorldDelegateInternal.updateBody(body)
         notifyRepaint()
     }
 
@@ -187,13 +205,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //camera
+
+    fun registerCameraChangedListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
+        registerListener(lifecycleOwner, cameraChangedListeners, listener)
+    }
+
+    fun getCameraMatrix(matrix: Matrix, centerX: Float, centerY: Float) {
+        camera.fromData(matrix, centerX, centerY)
+    }
+
     fun cameraPostTranslate(x: Float, y: Float) {
-        updateLatestRecordCamera(camera.value!!.translateCreate(x.toDouble(), y.toDouble()))
+        updateLatestRecordCamera(camera.translateCreate(x.toDouble(), y.toDouble()))
         notifyRepaint()
     }
 
     fun cameraPostScale(scale: Float) {
-        updateLatestRecordCamera(camera.value!!.scaleCreate(scale.toDouble()))
+        updateLatestRecordCamera(camera.scaleCreate(scale.toDouble()))
         notifyRepaint()
     }
 }

@@ -15,12 +15,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.withMatrix
 import androidx.core.graphics.withTranslation
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import crupest.cruphysics.R
 import crupest.cruphysics.component.delegate.IDrawDelegate
 import crupest.cruphysics.component.delegate.ScaleMarkDelegate
-import crupest.cruphysics.physics.fromData
-import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.utility.*
 import crupest.cruphysics.viewmodel.MainViewModel
@@ -79,8 +76,8 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
         Vector2Data(it.x.toDouble(), it.y.toDouble())
     }
 
-    private fun setCamera(camera: CameraData) {
-        camera.fromData(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
+    private fun updateCamera() {
+        mainViewModel!!.getCameraMatrix(viewMatrix, width.toFloat() / 2.0f, height.toFloat() / 2.0f)
         scaleMarkDelegate.recalculate(this::viewToWorld, this::worldToView)
         if (init)
             onCameraChanged(viewMatrix)
@@ -180,7 +177,7 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        setCamera(mainViewModel!!.camera.value!!)
+        updateCamera()
 
         if (!init) {
             onInitialize()
@@ -209,7 +206,9 @@ open class WorldCanvas(context: Context?, attributeSet: AttributeSet?)
 
         drawWorldDelegate = viewModel.drawWorldDelegate
 
-        viewModel.camera.observe(lifecycleOwner, Observer { setCamera(it) })
+        viewModel.registerCameraChangedListener(lifecycleOwner) {
+            updateCamera()
+        }
 
         viewModel.registerWorldRepaintListener(lifecycleOwner) { repaint() }
 

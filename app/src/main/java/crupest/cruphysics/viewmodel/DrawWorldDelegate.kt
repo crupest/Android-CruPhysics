@@ -1,17 +1,19 @@
-package crupest.cruphysics.component.delegate
+package crupest.cruphysics.viewmodel
 
-import android.graphics.*
-import androidx.core.graphics.applyCanvas
-import androidx.lifecycle.LiveData
-import crupest.cruphysics.physics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import crupest.cruphysics.component.delegate.IDrawDelegate
+import crupest.cruphysics.physics.checkAndGetFixture
+import crupest.cruphysics.physics.cruUserData
+import crupest.cruphysics.physics.switchShape
 import crupest.cruphysics.physics.view.BodyViewData
-import crupest.cruphysics.serialization.data.CameraData
+import crupest.cruphysics.physics.withTransform
 import crupest.cruphysics.utility.drawCircle
 import crupest.cruphysics.utility.drawRectangle
 import crupest.cruphysics.utility.strokePaint
 import org.dyn4j.dynamics.Body
 
-class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegate {
+class DrawWorldDelegate : IDrawDelegate {
     companion object {
         private const val BORDER_WIDTH = 8.0f
     }
@@ -19,15 +21,6 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
     private val bodyViewDataMap: MutableMap<Body, BodyViewData> = mutableMapOf()
 
     private val bodyBorderPaint = strokePaint(Color.BLACK)
-
-    private val cameraObserver = { it: CameraData ->
-        bodyBorderPaint.strokeWidth = BORDER_WIDTH / it.scale.toFloat()
-    }
-
-    init {
-        camera.value?.also(cameraObserver)
-        camera.observeForever(cameraObserver)
-    }
 
     fun registerBody(body: Body) {
         if (body in bodyViewDataMap)
@@ -62,9 +55,8 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
         registerBodies(bodies)
     }
 
-    operator fun get(body: Body): BodyViewData {
-        return bodyViewDataMap[body]
-                ?: throw IllegalArgumentException("The body hasn't been registered.")
+    fun setScale(scale: Double) {
+        bodyBorderPaint.strokeWidth = BORDER_WIDTH / scale.toFloat()
     }
 
     override fun draw(canvas: Canvas) {
@@ -98,15 +90,7 @@ class DrawWorldDelegate(private val camera: LiveData<CameraData>) : IDrawDelegat
         }
     }
 
-    fun generateThumbnail(width: Int, height: Int, camera: CameraData): Bitmap =
-            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).applyCanvas {
-                concat(camera.fromData(
-                        width.toFloat() / 2.0f, height.toFloat() / 2.0f))
-                draw(this)
-            }
-
     fun onClear() {
         unregisterAllBody()
-        camera.removeObserver(cameraObserver)
     }
 }
