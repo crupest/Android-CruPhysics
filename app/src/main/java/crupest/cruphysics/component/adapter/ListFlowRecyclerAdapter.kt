@@ -1,36 +1,37 @@
 package crupest.cruphysics.component.adapter
 
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.RecyclerView
+import crupest.cruphysics.viewmodel.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 
-abstract class ListFlowRecyclerAdapter<TElement, ViewHolder>(
+abstract class ListObserverRecyclerAdapter<TElement, ViewHolder>(
         lifecycleOwner: LifecycleOwner,
-        listFlow: Flowable<List<TElement>>,
-        private val diffTool: DiffTool<TElement>
+        val list: List<TElement>,
+        listChangeFlow: Flowable<ListChange>
 ) : RecyclerView.Adapter<ViewHolder>() where ViewHolder : RecyclerView.ViewHolder {
 
-    interface DiffTool<TElement> {
-        fun areItemSame(oldOne: TElement, newOne: TElement): Boolean
-        fun areContentSame(oldOne: TElement, newOne: TElement): Boolean
-    }
-
     private var disposable: Disposable? = null
-    private var currentList: List<TElement> = listOf()
 
     init {
         lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
             @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
             fun subscribe() {
-                disposable = listFlow
-                        .onBackpressureLatest()
+                disposable = listChangeFlow
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
-                            val oldList = currentList
-                            currentList = it
-                            compareAndNotify(oldList, it)
+                            when (it) {
+                                is ListItemAdd -> notifyItemInserted(it.position)
+                                is ListItemRemove -> notifyItemRemoved(it.position)
+                                is ListItemMove -> notifyItemMoved(it.oldPosition, it.newPosition)
+                                is ListItemContentChange -> notifyItemChanged(it.position)
+                                is ListRangeAdd -> notifyItemRangeInserted(it.position, it.count)
+                            }
                         }
             }
 
@@ -42,10 +43,11 @@ abstract class ListFlowRecyclerAdapter<TElement, ViewHolder>(
         })
     }
 
-    override fun getItemCount(): Int = currentList.size
+    override fun getItemCount(): Int = list.size
 
-    protected fun getItem(position: Int): TElement = currentList[position]
+    protected fun getItem(position: Int): TElement = list[position]
 
+    /* precious code
     private data class Move(var oldPosition: Int, var newPosition: Int)
 
     private fun compareAndNotify(oldList: List<TElement>, newList: List<TElement>) {
@@ -104,4 +106,5 @@ abstract class ListFlowRecyclerAdapter<TElement, ViewHolder>(
             removedCount--
         }
     }
+    */
 }

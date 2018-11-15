@@ -17,9 +17,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import crupest.cruphysics.*
 import crupest.cruphysics.component.MainWorldCanvas
-import crupest.cruphysics.component.adapter.ListFlowRecyclerAdapter
+import crupest.cruphysics.component.adapter.ListObserverRecyclerAdapter
 import crupest.cruphysics.component.popupMenu
-import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
+import crupest.cruphysics.data.world.entity.ProcessedWorldRecordWithoutId
 import crupest.cruphysics.utility.postOnMainThread
 import crupest.cruphysics.viewmodel.MainViewModel
 import java.text.DateFormat
@@ -44,15 +44,8 @@ class MainFragment : BaseFragment() {
 
 
     private inner class HistoryAdapter :
-            ListFlowRecyclerAdapter<ProcessedWorldRecordForHistory, HistoryAdapter.ViewHolder>(
-                    this.viewLifecycleOwner, mainViewModel.recordListForHistoryFlow, object : DiffTool<ProcessedWorldRecordForHistory> {
-                override fun areItemSame(oldOne: ProcessedWorldRecordForHistory,
-                                         newOne: ProcessedWorldRecordForHistory): Boolean =
-                        oldOne.id == newOne.id
-
-                override fun areContentSame(oldOne: ProcessedWorldRecordForHistory, newOne: ProcessedWorldRecordForHistory): Boolean =
-                        oldOne.timestamp == newOne.timestamp
-            }) {
+            ListObserverRecyclerAdapter<ProcessedWorldRecordWithoutId, HistoryAdapter.ViewHolder>(
+                    this.viewLifecycleOwner, mainViewModel.recordList, mainViewModel.recordListChangeFlow) {
 
         inner class ViewHolder(val rootView: CardView) : RecyclerView.ViewHolder(rootView) {
             val timeTextView: TextView = itemView.findViewById(R.id.time)

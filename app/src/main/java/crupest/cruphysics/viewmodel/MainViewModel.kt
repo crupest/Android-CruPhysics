@@ -6,22 +6,27 @@ import android.graphics.Matrix
 import androidx.core.graphics.applyCanvas
 import androidx.lifecycle.*
 import crupest.cruphysics.component.delegate.IDrawDelegate
-import crupest.cruphysics.data.world.WorldRepository
-import crupest.cruphysics.data.world.processed.ProcessedWorldRecordForHistory
+import crupest.cruphysics.data.world.WorldDatabase
+import crupest.cruphysics.data.world.WorldRecordDao
+import crupest.cruphysics.data.world.entity.ProcessedWorldRecordWithoutId
+import crupest.cruphysics.data.world.entity.WorldRecordEntity
+import crupest.cruphysics.data.world.entity.process
 import crupest.cruphysics.physics.fromData
 import crupest.cruphysics.serialization.data.CameraData
 import crupest.cruphysics.serialization.data.Vector2Data
 import crupest.cruphysics.serialization.data.WorldData
 import crupest.cruphysics.serialization.fromData
 import crupest.cruphysics.serialization.toData
+import crupest.cruphysics.serialization.toJson
 import crupest.cruphysics.utility.ScheduleTask
+import crupest.cruphysics.utility.compressToPng
 import crupest.cruphysics.utility.setInterval
 import io.reactivex.Flowable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.processors.PublishProcessor
+import kotlinx.coroutines.*
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.World
 import org.dyn4j.geometry.Vector2
-import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -32,14 +37,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         private const val THUMBNAIL_HEIGHT = 1000
     }
 
-    private val worldRepository: WorldRepository =
-            WorldRepository(getApplication<Application>().applicationContext).apply {
-                getLatestRecord().observeOn(AndroidSchedulers.mainThread()).subscribe {
-                    recoverFrom(it.world, it.camera)
-                }
-            }
+    private val viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    val dao: WorldRecordDao = WorldDatabase.getInstance(application.applicationContext).worldRecordDao()
 
     private var task: ScheduleTask? = null
+
+    private val recordListInternal = mutableListOf<ProcessedWorldRecordWithoutId>()
+    private val recordListChangeProcessor: PublishProcessor<ListChange> = PublishProcessor.create()
 
 
     private val world: World = World()
@@ -48,7 +54,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val worldHistoryScrollToTopListeners: MutableList<() -> Unit> = mutableListOf()
     private val cameraChangedListeners: MutableList<() -> Unit> = mutableListOf()
 
-    internal var camera: CameraData by Delegates.observable(CameraData()) { _, _, it ->
+    private var camera: CameraData by Delegates.observable(CameraData()) { _, _, it ->
         notifyCameraChanged()
         drawWorldDelegateInternal.setScale(it.scale)
     }
@@ -56,19 +62,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val drawWorldDelegateInternal: DrawWorldDelegate = DrawWorldDelegate()
     private val worldStateInternal: MutableLiveData<Boolean> = mutableLiveDataWithDefault(false)
 
+    val recordList: List<ProcessedWorldRecordWithoutId> get() = recordListInternal
+    val recordListChangeFlow: Flowable<ListChange> get() = recordListChangeProcessor
 
-    val recordListForHistoryFlow: Flowable<List<ProcessedWorldRecordForHistory>>
-        get() = worldRepository.getRecordListFlow()
+    val drawWorldDelegate: IDrawDelegate get() = drawWorldDelegateInternal
+    val worldState: LiveData<Boolean> get() = worldStateInternal
 
-    val drawWorldDelegate: IDrawDelegate
-        get() = drawWorldDelegateInternal
-    val worldState: LiveData<Boolean>
-        get() = worldStateInternal
 
+    init {
+        uiScope.launch {
+            val latestRecordDeferred = async(Dispatchers.IO) {
+                dao.getLatestRecord()?.process()
+            }
+            val recordsDeferred = async(Dispatchers.IO) {
+                dao.getAllRecords().map { it.process() }
+            }
+
+            val latestRecord = latestRecordDeferred.await()
+            if (latestRecord != null) {
+                recoverFrom(latestRecord.world, latestRecord.camera)
+                recordListInternal.add(latestRecord)
+                recordListChangeProcessor.offer(ListItemAdd(0))
+            }
+
+            val records = recordsDeferred.await()
+            if (!records.isEmpty()) {
+                recordListInternal.addAll(records.subList(1, records.size))
+                recordListChangeProcessor.offer(ListRangeAdd(1, records.size))
+            }
+        }
+    }
 
     override fun onCleared() {
         drawWorldDelegateInternal.onClear()
-        worldRepository.closeAndWait()
     }
 
     private fun generateThumbnail(): Bitmap {
@@ -87,15 +113,52 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun createNewRecordFromCurrent() {
-        worldRepository.createRecord(Date(), world.toData(), camera, generateThumbnail())
-        notifyWorldHistoryScrollToTop()
+        uiScope.launch {
+            val timestamp = Date()
+            val worldData = world.toData()
+            val cameraData = camera.copy()
+            val thumbnail = generateThumbnail()
+            recordListInternal.add(0, ProcessedWorldRecordWithoutId(timestamp, worldData, cameraData, thumbnail))
+            recordListChangeProcessor.offer(ListItemAdd(0))
+            notifyWorldHistoryScrollToTop()
+
+            launch(Dispatchers.IO) {
+                dao.insert(WorldRecordEntity().apply {
+                    this.timestamp = timestamp.time
+                    this.world = worldData.toJson()
+                    this.camera = cameraData.toJson()
+                    this.thumbnail = thumbnail.compressToPng()
+                })
+            }
+        }
     }
 
-    private fun updateLatestRecordCamera(cameraData: CameraData) {
-        camera = cameraData
-        if (!world.isEmpty)
-            worldRepository.updateLatestCamera(Date(), cameraData, generateThumbnail())
+    private fun updateCurrentRecordCamera(cameraData: CameraData) {
+        uiScope.launch {
+
+            camera = cameraData
+
+            if (world.isEmpty)
+                return@launch
+
+            if (recordListInternal.isEmpty())
+                return@launch
+
+            val newTimestamp = Date()
+            val thumbnail = generateThumbnail()
+
+            val oldItem = recordListInternal[0]
+            recordListInternal.removeAt(0)
+            recordListInternal.add(0, oldItem.copy(timestamp = newTimestamp, camera = camera, thumbnail = thumbnail))
+
+            recordListChangeProcessor.offer(ListItemContentChange(0))
+
+            launch(Dispatchers.IO) {
+                dao.updateCamera(oldItem.timestamp.time, newTimestamp.time, camera.toJson(), thumbnail.compressToPng())
+            }
+        }
     }
+
 
     private fun <T : Function<Unit>> registerListener(lifecycleOwner: LifecycleOwner, listeners: MutableList<T>, listener: T) {
         lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
@@ -178,11 +241,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    fun recoverFromRecordAndUpdateTimestamp(record: ProcessedWorldRecordForHistory) {
-        recoverFrom(record.world, record.camera)
-        worldRepository.updateTimestamp(record.timestamp, Date())
-        notifyWorldHistoryScrollToTop()
-        notifyRepaint()
+    fun recoverFromRecordAndUpdateTimestamp(record: ProcessedWorldRecordWithoutId) {
+        uiScope.launch {
+            recoverFrom(record.world, record.camera)
+
+            val itemIndex = recordListInternal.indexOf(record)
+            if (itemIndex == -1)
+                throw IllegalStateException("Record not in list.")
+
+            val newTimestamp = Date()
+            recordListInternal.removeAt(itemIndex)
+            recordListInternal.add(0, record.copy(timestamp = newTimestamp))
+
+            recordListChangeProcessor.offer(ListItemMove(itemIndex, 0))
+            recordListChangeProcessor.offer(ListItemContentChange(0))
+
+            notifyWorldHistoryScrollToTop()
+            notifyRepaint()
+
+            launch(Dispatchers.IO) {
+                dao.updateTimestamp(record.timestamp.time, newTimestamp.time)
+            }
+        }
     }
 
     fun bodyHitTest(x: Double, y: Double): Body? =
@@ -204,7 +284,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return this.copy(scale = this.scale * scale)
     }
 
-    //camera
+//camera
 
     fun registerCameraChangedListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
         registerListener(lifecycleOwner, cameraChangedListeners, listener)
@@ -215,12 +295,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cameraPostTranslate(x: Float, y: Float) {
-        updateLatestRecordCamera(camera.translateCreate(x.toDouble(), y.toDouble()))
+        updateCurrentRecordCamera(camera.translateCreate(x.toDouble(), y.toDouble()))
         notifyRepaint()
     }
 
     fun cameraPostScale(scale: Float) {
-        updateLatestRecordCamera(camera.scaleCreate(scale.toDouble()))
+        updateCurrentRecordCamera(camera.scaleCreate(scale.toDouble()))
         notifyRepaint()
     }
 }
